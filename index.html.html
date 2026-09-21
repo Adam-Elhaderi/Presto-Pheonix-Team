@@ -180,6 +180,7 @@
 
         .btn-mini-break { background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); border-radius: 6px; padding: 4px 8px; font-size: 12px; cursor: pointer; color: var(--text-main); transition: all 0.2s; }
         .btn-mini-break:hover { background: var(--primary-glow); border-color: var(--primary); color: var(--primary); }
+        .btn-mini-break:disabled { opacity: 0.2; cursor: not-allowed; border-color: transparent; }
         
         .editable-name { display: inline-block; padding: 4px 8px; border-radius: 6px; border: 1px transparent solid; outline: none; transition: all 0.2s ease; }
         .editable-name[contenteditable="true"]:hover { background: rgba(255, 255, 255, 0.05); border-color: var(--border-color); cursor: pointer; }
@@ -285,7 +286,7 @@
                 📱 Copy Staff Link
             </button>
             <button id="reshuffleBtn" class="btn btn-success" onclick="window.reshuffleSchedule()" disabled style="opacity: 0.5; cursor: not-allowed;">
-                🔄 Reshuffle & Reset Today
+                🔄 Reshuffle Operations
             </button>
             <button id="authBtn" class="btn" onclick="window.toggleAuth()">
                 🔒 Unlock Controls
@@ -393,26 +394,27 @@
         { id: 19, timeStart: "01:00 AM", timeEnd: "01:30 AM", overlap: "1 Staff" }
     ];
 
+    // Added "assignedDayOff" field to permanently remember the employee's official schedule
     const defaultEmployees = [
-        { name: "Sanad Ghaith", shift: "Shift A", isLocked: false, dayOff: "Saturday" },
-        { name: "Mohammed Kharwat", shift: "Shift A", isLocked: false, dayOff: "Sunday" },
-        { name: "Abdullah Dandi", shift: "Shift A", isLocked: true, dayOff: "Monday" },
-        { name: "Abdullah Ali Al-Hamali", shift: "Shift A", isLocked: false, dayOff: "Tuesday" },
-        { name: "Baraa Nader", shift: "Shift A", isLocked: false, dayOff: "Sunday" },
-        { name: "Mohamed Hussein", shift: "Shift A", isLocked: false, dayOff: "Saturday" },
-        { name: "Adam Al-Hudhiri", shift: "Shift A", isLocked: false, dayOff: "Wednesday" },
-        { name: "Khalifa Abu Khabta", shift: "Shift A", isLocked: false, dayOff: "Wednesday" },
-        { name: "Khaled Al-Osta", shift: "Shift A", isLocked: false, dayOff: "Sunday" },
-        { name: "Basheer Al-Qanouni", shift: "Shift A", isLocked: false, dayOff: "Wednesday" },
-        { name: "Abdulmaez Masoud", shift: "Shift A", isLocked: false, dayOff: "Sunday" },
-        { name: "Mahmoud Farnana", shift: "Shift A", isLocked: false, dayOff: "Saturday" },
-        { name: "Elyas Salem", shift: "Shift B", isLocked: false, dayOff: "Tuesday" },
-        { name: "Hisham Al-Fleit", shift: "Shift B", isLocked: false, dayOff: "Monday" },
-        { name: "Abdullah Al-Suwaib", shift: "Shift A", isLocked: false, dayOff: "Monday" },
-        { name: "Mohammed Abu Kinda", shift: "Shift A", isLocked: false, dayOff: "Tuesday" },
-        { name: "Mohamed Al-Tayeb", shift: "Shift A", isLocked: false, dayOff: "Saturday" },
-        { name: "Ihab Al-Tarhouni", shift: "Shift A", isLocked: false, dayOff: "Saturday" },
-        { name: "Tawfik Al-Jarushi", shift: "Shift A", isLocked: false, dayOff: "Thursday" }
+        { name: "Sanad Ghaith", shift: "Shift A", isLocked: false, dayOff: "Saturday", assignedDayOff: "Saturday" },
+        { name: "Mohammed Kharwat", shift: "Shift A", isLocked: false, dayOff: "Sunday", assignedDayOff: "Sunday" },
+        { name: "Abdullah Dandi", shift: "Shift A", isLocked: true, dayOff: "Monday", assignedDayOff: "Monday" },
+        { name: "Abdullah Ali Al-Hamali", shift: "Shift A", isLocked: false, dayOff: "Tuesday", assignedDayOff: "Tuesday" },
+        { name: "Baraa Nader", shift: "Shift A", isLocked: false, dayOff: "Sunday", assignedDayOff: "Sunday" },
+        { name: "Mohamed Hussein", shift: "Shift A", isLocked: false, dayOff: "Saturday", assignedDayOff: "Saturday" },
+        { name: "Adam Al-Hudhiri", shift: "Shift A", isLocked: false, dayOff: "Wednesday", assignedDayOff: "Wednesday" },
+        { name: "Khalifa Abu Khabta", shift: "Shift A", isLocked: false, dayOff: "Wednesday", assignedDayOff: "Wednesday" },
+        { name: "Khaled Al-Osta", shift: "Shift A", isLocked: false, dayOff: "Sunday", assignedDayOff: "Sunday" },
+        { name: "Basheer Al-Qanouni", shift: "Shift A", isLocked: false, dayOff: "Wednesday", assignedDayOff: "Wednesday" },
+        { name: "Abdulmaez Masoud", shift: "Shift A", isLocked: false, dayOff: "Sunday", assignedDayOff: "Sunday" },
+        { name: "Mahmoud Farnana", shift: "Shift A", isLocked: false, dayOff: "Saturday", assignedDayOff: "Saturday" },
+        { name: "Elyas Salem", shift: "Shift B", isLocked: false, dayOff: "Tuesday", assignedDayOff: "Tuesday" },
+        { name: "Hisham Al-Fleit", shift: "Shift B", isLocked: false, dayOff: "Monday", assignedDayOff: "Monday" },
+        { name: "Abdullah Al-Suwaib", shift: "Shift A", isLocked: false, dayOff: "Monday", assignedDayOff: "Monday" },
+        { name: "Mohammed Abu Kinda", shift: "Shift A", isLocked: false, dayOff: "Tuesday", assignedDayOff: "Tuesday" },
+        { name: "Mohamed Al-Tayeb", shift: "Shift A", isLocked: false, dayOff: "Saturday", assignedDayOff: "Saturday" },
+        { name: "Ihab Al-Tarhouni", shift: "Shift A", isLocked: false, dayOff: "Saturday", assignedDayOff: "Saturday" },
+        { name: "Tawfik Al-Jarushi", shift: "Shift A", isLocked: false, dayOff: "Thursday", assignedDayOff: "Thursday" }
     ];
 
     const dayOffOptions = ["None", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Off Duty"];
@@ -420,9 +422,11 @@
     let currentBreaks = {};
     let timerInterval = null;
 
-    // --- HOLOGRAM CLOCK SCRIPT (REAL DEVICE SYSTEM & NETWORK TIME) ---
+    // --- HOLOGRAM CLOCK SCRIPT (REAL INTERNET / SYSTEM TIME) ---
     function updateHoloClock() {
-        const now = new Date();
+        // Enforce Africa/Cairo timezone for consistency across all devices
+        const cairoStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Cairo' });
+        const now = new Date(cairoStr);
         
         let hours = now.getHours();
         let minutes = now.getMinutes();
@@ -448,37 +452,75 @@
     setInterval(updateHoloClock, 1000);
     updateHoloClock(); 
 
+    // --- DAILY AUTO-RESET LOGIC (RESTAURANT BUSINESS DAY) ---
+    // Checks every 60 seconds if the business date has changed (Restarts at 4:00 AM, not Midnight!)
+    setInterval(() => {
+        if (isStaffView || currentEmployees.length === 0) return; // Only Admin view handles resets to avoid DB duplication
+        
+        const cairoStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Cairo' });
+        const now = new Date(cairoStr);
+        
+        // Subtract 4 hours from "now". 
+        // This means 12:00 AM to 3:59 AM still counts as "Yesterday" in the system!
+        const businessTime = new Date(now.getTime() - (4 * 3600 * 1000));
+        const businessDateStr = businessTime.toLocaleDateString('en-US'); // e.g. "10/24/2023"
+        const businessDayStr = businessTime.toLocaleString('en-US', { weekday: 'long' }); // e.g. "Tuesday"
+
+        onValue(ref(db, 'system/lastBusinessDate'), (snapshot) => {
+            const dbLastDate = snapshot.val();
+            if (dbLastDate !== businessDateStr) {
+                // It is a new BUSINESS day! (It just hit 4:00 AM)
+                set(ref(db, 'system/lastBusinessDate'), businessDateStr);
+                remove(ref(db, 'breaks')); // Wipe yesterday's breaks safely after shifts are done
+                
+                // Automatically set everyone to Present or Day Off based on their permanent schedule
+                let resetRoster = currentEmployees.map(emp => {
+                    let permOff = emp.assignedDayOff || "None";
+                    emp.dayOff = (permOff === businessDayStr) ? businessDayStr : "None";
+                    return emp;
+                });
+                
+                set(ref(db, 'roster'), resetRoster);
+                console.log("Automated Daily Attendance Reset Completed (4:00 AM Business Day Rollover)");
+            }
+        }, { onlyOnce: true });
+    }, 60000);
+
     // --- TIME PARSER & AUTO-TRIGGER LOGIC ---
     function parseToDate(timeStr) {
+        const cairoStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Cairo' });
         const [time, modifier] = timeStr.split(' ');
         let [hours, minutes] = time.split(':');
         hours = parseInt(hours, 10);
         if (hours === 12) hours = modifier === 'AM' ? 0 : 12;
         else if (modifier === 'PM') hours += 12;
         
-        let d = new Date();
+        let d = new Date(cairoStr);
         d.setHours(hours, parseInt(minutes, 10), 0, 0);
         
-        let now = new Date();
+        let now = new Date(cairoStr);
+        // Midnight crossover handlers
         if (now.getHours() < 12 && d.getHours() >= 12) d.setDate(d.getDate() - 1);
         if (now.getHours() >= 12 && d.getHours() < 12) d.setDate(d.getDate() + 1);
         return d;
     }
 
     function isOfficialBreakTime(index) {
+        const cairoStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Cairo' });
         const startDate = parseToDate(fixedSlots[index].timeStart);
         const endDate = parseToDate(fixedSlots[index].timeEnd);
         const graceStart = new Date(startDate.getTime() - 15 * 60000); 
-        const now = new Date();
+        const now = new Date(cairoStr);
         return now >= graceStart && now <= endDate;
     }
 
     setInterval(() => {
         if (!currentEmployees.length) return;
-        const now = new Date();
+        const cairoStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Cairo' });
+        const now = new Date(cairoStr);
         
         currentEmployees.forEach((emp, index) => {
-            if (emp.dayOff !== 'None') return;
+            if (emp.dayOff !== 'None') return; // NEVER auto-trigger breaks for absent people
             
             const safeKey = emp.name.replace(/[.#$[\]]/g, '');
             if (currentBreaks[safeKey]) return; 
@@ -546,12 +588,13 @@
 
             const editableAttr = isStaffView ? 'contenteditable="false"' : 'contenteditable="true"';
             const selectDisabled = isStaffView ? 'disabled' : '';
+            const breakDisabled = isOff ? 'disabled title="Employee is absent today"' : 'title="Request Break"';
 
             tr.innerHTML = `
                 <td class="col-id">${slot.id}</td>
                 <td class="col-name">
                     <span class="editable-name" ${editableAttr} onblur="window.updateName(${index}, this.innerText)">${emp.name}</span>
-                    <button class="btn-mini-break" onclick="window.startBreak('${emp.name.replace(/'/g, "\\'")}', ${index})" title="Request Break">☕ Break</button>
+                    <button class="btn-mini-break" onclick="window.startBreak('${emp.name.replace(/'/g, "\\'")}', ${index})" ${breakDisabled}>☕ Break</button>
                     ${emp.isLocked && !isStaffView ? '<span class="lock-badge">🔒 FIXED</span>' : ''}
                 </td>
                 <td class="col-dayoff">
@@ -642,7 +685,8 @@
 
     function updateTimers() {
         const timers = document.querySelectorAll('.break-timer');
-        const now = Date.now();
+        const cairoStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Cairo' });
+        const now = new Date(cairoStr).getTime();
         
         timers.forEach(timerEl => {
             const start = parseInt(timerEl.getAttribute('data-start'));
@@ -690,6 +734,7 @@
         }
 
         const isOfficial = isOfficialBreakTime(index);
+        const cairoStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Cairo' });
 
         if (isOfficial) {
             set(ref(db, 'breaks/' + safeKey), {
@@ -714,10 +759,11 @@
 
     window.approveBreak = function(key) {
         if (!requireAdmin()) return;
+        const cairoStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Cairo' });
         const breakData = currentBreaks[key];
         breakData.status = 'active';
         breakData.confirmed = true;
-        breakData.startTime = Date.now(); 
+        breakData.startTime = new Date(cairoStr).getTime(); 
         set(ref(db, 'breaks/' + key), breakData);
     };
 
@@ -797,7 +843,6 @@
         shufflePool.splice(dandiIndex, 0, dandi);
         currentEmployees = shufflePool;
         
-        remove(ref(db, 'breaks'));
         set(ref(db, 'roster'), currentEmployees);
     };
 
