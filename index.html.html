@@ -637,14 +637,16 @@
         shufflePool.splice(dandiIndex, 0, dandi);
         employees = shufflePool;
 
+        // AUTO-SAVE TO BROWSER MEMORY (PERSISTS ON CLOSE/REFRESH)
+        localStorage.setItem('presto_saved_roster', JSON.stringify(employees.map(e => e.name)));
+
         renderTable();
     }
 
-    // --- METHOD 1: BACKUP & SHARE VIA URL HASH ---
+    // --- SHARE VIA URL HASH ---
     function generateShareableLink() {
         if (!isUnlocked) return;
 
-        // Save ordered list of employee names
         const nameOrder = employees.map(e => e.name);
         const jsonString = JSON.stringify(nameOrder);
         const encodedState = btoa(encodeURIComponent(jsonString));
@@ -652,37 +654,54 @@
         const shareUrl = `${window.location.origin}${window.location.pathname}#state=${encodedState}`;
 
         navigator.clipboard.writeText(shareUrl).then(() => {
-            alert("Backup Link Generated & Copied to Clipboard!\n\nAnyone using this link will see this exact saved schedule.");
+            alert("Backup Link Generated & Copied to Clipboard!\n\nAnyone opening this link on any PC/phone will see this exact saved schedule.");
         }).catch(err => {
             prompt("Copy this URL backup link:", shareUrl);
         });
     }
 
+    // --- AUTO-LOAD FROM URL OR BROWSER MEMORY ---
     function loadStateFromURL() {
+        let savedNames = null;
+
+        // 1. Check if URL has a shareable link state (#state=...)
         const hash = window.location.hash;
-        if (!hash.includes("#state=")) return;
+        if (hash.includes("#state=")) {
+            try {
+                const encodedState = hash.replace("#state=", "");
+                const jsonString = decodeURIComponent(atob(encodedState));
+                savedNames = JSON.parse(jsonString);
+            } catch (e) {
+                console.error("Failed to parse URL hash state", e);
+            }
+        } 
 
-        try {
-            const encodedState = hash.replace("#state=", "");
-            const jsonString = decodeURIComponent(atob(encodedState));
-            const savedNames = JSON.parse(jsonString);
-
-            if (Array.isArray(savedNames) && savedNames.length === employees.length) {
-                const nameMap = new Map(employees.map(e => [e.name, e]));
-                const restoredEmployees = [];
-
-                savedNames.forEach(name => {
-                    if (nameMap.has(name)) {
-                        restoredEmployees.push(nameMap.get(name));
-                    }
-                });
-
-                if (restoredEmployees.length === employees.length) {
-                    employees = restoredEmployees;
+        // 2. Fall back to Local Browser Storage (Memory)
+        if (!savedNames) {
+            const localSaved = localStorage.getItem('presto_saved_roster');
+            if (localSaved) {
+                try {
+                    savedNames = JSON.parse(localSaved);
+                } catch (e) {
+                    console.error("Failed to parse LocalStorage state", e);
                 }
             }
-        } catch (e) {
-            console.error("Failed to parse schedule backup from URL hash", e);
+        }
+
+        // 3. Reconstruct Roster Order
+        if (savedNames && Array.isArray(savedNames) && savedNames.length === employees.length) {
+            const nameMap = new Map(employees.map(e => [e.name, e]));
+            const restoredEmployees = [];
+
+            savedNames.forEach(name => {
+                if (nameMap.has(name)) {
+                    restoredEmployees.push(nameMap.get(name));
+                }
+            });
+
+            if (restoredEmployees.length === employees.length) {
+                employees = restoredEmployees;
+            }
         }
     }
 
