@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Presto Eat — Digital Shift Break Operations</title>
+    <title>Presto Eat — Live Floor Operations</title>
     <!-- GOOGLE FONTS -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&family=Tajawal:wght@400;500;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     <style>
         :root { 
             --primary: #FF3B00; 
@@ -31,361 +31,182 @@
             --single-bg: rgba(52, 211, 153, 0.1);
             --single-border: rgba(52, 211, 153, 0.3);
             --single-text: #34D399;
+            --dayoff-bg: rgba(239, 68, 68, 0.12);
+            --dayoff-border: rgba(239, 68, 68, 0.35);
+            --dayoff-text: #F87171;
+            --warning-bg: rgba(245, 158, 11, 0.1);
+            --warning-border: rgba(245, 158, 11, 0.4);
+            --warning-text: #F59E0B;
+            --official-bg: rgba(16, 185, 129, 0.1);
+            --official-border: rgba(16, 185, 129, 0.4);
+            --pending-bg: rgba(239, 68, 68, 0.1);
+            --pending-border: rgba(239, 68, 68, 0.5);
+            --auto-bg: rgba(59, 130, 246, 0.1);
+            --auto-border: rgba(59, 130, 246, 0.5);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', system-ui, sans-serif; }
 
-        body { 
-            background-color: var(--bg-body); 
-            color: var(--text-main); 
-            min-height: 100vh;
-            padding: 30px 20px;
-            display: flex;
-            justify-content: center;
-        }
+        body { background-color: var(--bg-body); color: var(--text-main); min-height: 100vh; padding: 30px 20px; display: flex; justify-content: center; }
+        .workspace-wrapper { width: 100%; max-width: 1380px; display: flex; flex-direction: column; gap: 20px; }
 
-        .workspace-wrapper {
-            width: 100%;
-            max-width: 1280px;
+        /* --- HEADER --- */
+        .app-header { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); position: relative; overflow: hidden; flex-wrap: wrap; gap: 15px; }
+        .app-header::before { content: ''; position: absolute; top: 0; left: 0; width: 6px; height: 100%; background: var(--primary); }
+        .header-title-group h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px; }
+        .header-title-group p { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+        .brand-badge { background: rgba(255, 59, 0, 0.15); color: var(--primary); font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.8px; border: 1px solid rgba(255, 59, 0, 0.3); }
+        
+        .actions-group { display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn { background: var(--bg-card-hover); color: var(--text-main); border: 1px solid var(--border-color); padding: 9px 16px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn:hover { border-color: var(--text-muted); background: #475569; }
+        .btn-primary { background: var(--primary); border-color: var(--primary); color: #FFFFFF; }
+        .btn-primary:hover { background: var(--primary-hover); border-color: var(--primary-hover); box-shadow: 0 0 15px var(--primary-glow); }
+        .btn-success { background: #10B981; border-color: #10B981; color: #FFFFFF; }
+        .btn-success:hover { background: #059669; }
+        .btn-danger { background: #EF4444; border-color: #EF4444; color: #FFFFFF; }
+        .btn-danger:hover { background: #DC2626; }
+        .btn-staff { background: #3B82F6; border-color: #3B82F6; color: white; }
+        .btn-staff:hover { background: #2563EB; box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); }
+
+        /* --- VICTORIAN OSD CLOCK --- */
+        .victorian-clock-container {
             display: flex;
             flex-direction: column;
-            gap: 20px;
-        }
-
-        /* --- TOP NAV / HEADER --- */
-        .app-header {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 24px 30px;
-            display: flex;
-            justify-content: space-between;
             align-items: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            justify-content: center;
+            background: linear-gradient(135deg, #1f1610 0%, #0f0a05 100%);
+            border: 2px solid #b89947;
+            border-radius: 6px;
+            padding: 10px 24px;
+            box-shadow: 0 0 15px rgba(184, 153, 71, 0.15), inset 0 0 10px rgba(0,0,0,0.8);
             position: relative;
-            overflow: hidden;
+            min-width: 220px;
         }
-
-        .app-header::before {
+        .victorian-clock-container::before {
             content: '';
             position: absolute;
-            top: 0; left: 0; width: 6px; height: 100%;
-            background: var(--primary);
+            top: 3px; left: 3px; right: 3px; bottom: 3px;
+            border: 1px dashed rgba(184, 153, 71, 0.6);
+            border-radius: 3px;
+            pointer-events: none;
         }
-
-        .header-title-group h1 {
-            font-size: 24px;
+        .victorian-time {
+            font-family: 'Playfair Display', serif;
+            font-size: 26px;
             font-weight: 700;
-            letter-spacing: -0.5px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            color: #ebd197;
+            text-shadow: 2px 2px 4px #000;
+            letter-spacing: 2px;
+            line-height: 1;
         }
-
-        .header-title-group p {
-            font-size: 13px;
-            color: var(--text-muted);
-            margin-top: 4px;
-        }
-
-        .brand-badge {
-            background: rgba(255, 59, 0, 0.15);
-            color: var(--primary);
+        .victorian-date {
+            font-family: 'Playfair Display', serif;
             font-size: 11px;
-            font-weight: 700;
-            padding: 3px 10px;
-            border-radius: 20px;
+            color: #a38533;
             text-transform: uppercase;
-            letter-spacing: 0.8px;
-            border: 1px solid rgba(255, 59, 0, 0.3);
-        }
-
-        .actions-group {
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn {
-            background: var(--bg-card-hover);
-            color: var(--text-main);
-            border: 1px solid var(--border-color);
-            padding: 9px 16px;
-            border-radius: 8px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn:hover {
-            border-color: var(--text-muted);
-            background: #475569;
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            border-color: var(--primary);
-            color: #FFFFFF;
-        }
-
-        .btn-primary:hover {
-            background: var(--primary-hover);
-            border-color: var(--primary-hover);
-            box-shadow: 0 0 15px var(--primary-glow);
-        }
-
-        .btn-success {
-            background: #10B981;
-            border-color: #10B981;
-            color: #FFFFFF;
-        }
-
-        .btn-success:hover {
-            background: #059669;
+            letter-spacing: 2px;
+            margin-top: 6px;
+            font-style: italic;
         }
 
         /* --- METRICS GRID --- */
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-        }
+        .metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+        .metric-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 6px; }
+        .metric-label { font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--text-muted); letter-spacing: 0.5px; }
+        .metric-value { font-size: 20px; font-weight: 700; color: var(--text-main); }
+        .metric-sub { font-size: 11px; color: var(--primary); font-weight: 600; }
 
-        .metric-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 18px;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
+        /* --- ADMIN CLOUD BANNER --- */
+        .admin-controls { background: rgba(30, 41, 59, 0.7); border: 1px dashed var(--border-color); border-radius: 12px; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .admin-status { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; }
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; background: #EF4444; }
+        .status-dot.unlocked { background: #10B981; box-shadow: 0 0 10px #10B981; }
+        
+        .cloud-badge { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); color: #10B981; font-size: 12px; font-weight: 600; padding: 8px 16px; border-radius: 8px; display: flex; align-items: center; gap: 8px; }
+        .cloud-badge::before { content: ''; width: 8px; height: 8px; background: #10B981; border-radius: 50%; box-shadow: 0 0 8px #10B981; animation: pulse 2s infinite alternate; }
 
-        .metric-label {
-            font-size: 11px;
-            text-transform: uppercase;
-            font-weight: 700;
-            color: var(--text-muted);
-            letter-spacing: 0.5px;
-        }
+        /* --- BREAK TRACKER SECTION --- */
+        .tracker-section { display: none; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
+        .tracker-header { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 700; color: #FFFFFF; text-transform: uppercase; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 15px; }
+        .tracker-grid { display: flex; flex-wrap: wrap; gap: 12px; }
+        
+        .break-card { background: var(--bg-body); border: 1px solid var(--border-color); border-radius: 8px; padding: 14px; display: flex; align-items: center; justify-content: space-between; gap: 15px; min-width: 280px; flex-grow: 1; max-width: 400px; }
+        .break-card.card-official { border-color: var(--official-border); background: var(--official-bg); }
+        .break-card.card-unofficial { border-color: var(--warning-border); background: var(--warning-bg); }
+        .break-card.card-pending { border-color: var(--pending-border); background: var(--pending-bg); animation: pulseAlert 1.5s infinite alternate; }
+        .break-card.card-auto { border-color: var(--auto-border); background: var(--auto-bg); animation: pulseAlertBlue 2s infinite alternate; }
+        
+        .break-info { display: flex; flex-direction: column; gap: 4px; }
+        .break-name { font-size: 14px; font-weight: 700; color: var(--text-main); }
+        .break-type { font-size: 10px; font-weight: 800; text-transform: uppercase; opacity: 0.9; }
+        .break-timer { font-size: 22px; font-weight: 800; color: var(--text-main); font-variant-numeric: tabular-nums; }
+        .break-timer.overtime { color: #EF4444; animation: pulse 1s infinite alternate; }
+        
+        @keyframes pulse { from { opacity: 1; } to { opacity: 0.6; } }
+        @keyframes pulseAlert { from { box-shadow: 0 0 5px rgba(239, 68, 68, 0.2); } to { box-shadow: 0 0 15px rgba(239, 68, 68, 0.6); } }
+        @keyframes pulseAlertBlue { from { box-shadow: 0 0 5px rgba(59, 130, 246, 0.2); } to { box-shadow: 0 0 15px rgba(59, 130, 246, 0.6); } }
 
-        .metric-value {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--text-main);
-        }
+        /* --- CONTROLS & TABLE --- */
+        .controls-bar { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; gap: 15px; }
+        .search-input-wrapper { position: relative; flex-grow: 1; max-width: 380px; }
+        .search-input { width: 100%; background: var(--bg-body); border: 1px solid var(--border-color); border-radius: 8px; padding: 9px 14px; color: var(--text-main); font-size: 13px; outline: none; }
+        .search-input:focus { border-color: var(--primary); }
+        .filter-tabs { display: flex; background: var(--bg-body); padding: 4px; border-radius: 8px; border: 1px solid var(--border-color); gap: 4px; flex-wrap: wrap; }
+        .tab-btn { background: transparent; border: none; color: var(--text-muted); padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; }
+        .tab-btn.active { background: var(--bg-card-hover); color: var(--text-main); }
 
-        .metric-sub {
-            font-size: 11px;
-            color: var(--primary);
-            font-weight: 600;
-        }
+        .table-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        thead { background: rgba(15, 23, 42, 0.6); border-bottom: 1px solid var(--border-color); }
+        th { padding: 14px 18px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); }
+        tbody tr { border-bottom: 1px solid var(--border-color); transition: background-color 0.15s ease, opacity 0.2s ease; }
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { background: var(--bg-card-hover); }
+        tbody tr.row-off-duty { opacity: 0.55; background-color: rgba(15, 23, 42, 0.35); }
+        td { padding: 12px 18px; font-size: 13px; }
 
-        /* --- FILTER & SEARCH BAR --- */
-        .controls-bar {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 14px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 15px;
-        }
+        .col-id { width: 50px; text-align: center; color: var(--text-muted); font-weight: 600; }
+        .col-name { font-weight: 600; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
+        .col-dayoff { width: 170px; }
+        .col-shift { width: 250px; }
+        .col-time { width: 130px; font-weight: 700; color: var(--primary); }
+        .col-overlap { width: 130px; text-align: center; }
 
-        .search-input-wrapper {
-            position: relative;
-            flex-grow: 1;
-            max-width: 400px;
-        }
+        .btn-mini-break { background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); border-radius: 6px; padding: 4px 8px; font-size: 12px; cursor: pointer; color: var(--text-main); transition: all 0.2s; }
+        .btn-mini-break:hover { background: var(--primary-glow); border-color: var(--primary); color: var(--primary); }
+        
+        .editable-name { display: inline-block; padding: 4px 8px; border-radius: 6px; border: 1px transparent solid; outline: none; transition: all 0.2s ease; }
+        .editable-name[contenteditable="true"]:hover { background: rgba(255, 255, 255, 0.05); border-color: var(--border-color); cursor: pointer; }
+        .editable-name[contenteditable="true"]:focus { background: var(--bg-body); border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary-glow); color: #FFFFFF; }
+        
+        .dayoff-select { background: var(--bg-body); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 6px; padding: 5px 10px; font-size: 12px; font-weight: 600; outline: none; cursor: pointer; }
+        .dayoff-select:focus { border-color: var(--primary); }
+        .dayoff-select:disabled { cursor: not-allowed; opacity: 0.8; }
+        .dayoff-select.is-off { background: var(--dayoff-bg); border-color: var(--dayoff-border); color: var(--dayoff-text); }
 
-        .search-input {
-            width: 100%;
-            background: var(--bg-body);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 9px 14px 9px 36px;
-            color: var(--text-main);
-            font-size: 13px;
-            outline: none;
-        }
-
-        .search-input:focus {
-            border-color: var(--primary);
-        }
-
-        .filter-tabs {
-            display: flex;
-            background: var(--bg-body);
-            padding: 4px;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            gap: 4px;
-        }
-
-        .tab-btn {
-            background: transparent;
-            border: none;
-            color: var(--text-muted);
-            padding: 6px 14px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .tab-btn.active {
-            background: var(--bg-card-hover);
-            color: var(--text-main);
-        }
-
-        /* --- ADMIN PROTECTED BANNER --- */
-        .admin-controls {
-            background: rgba(30, 41, 59, 0.7);
-            border: 1px dashed var(--border-color);
-            border-radius: 12px;
-            padding: 12px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .admin-status {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 13px;
-            font-weight: 600;
-        }
-
-        .status-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: #EF4444;
-        }
-
-        .status-dot.unlocked {
-            background: #10B981;
-            box-shadow: 0 0 10px #10B981;
-        }
-
-        /* --- TABLE STYLE --- */
-        .table-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-        }
-
-        thead {
-            background: rgba(15, 23, 42, 0.6);
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        th {
-            padding: 14px 18px;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            color: var(--text-muted);
-        }
-
-        tbody tr {
-            border-bottom: 1px solid var(--border-color);
-            transition: background-color 0.15s ease;
-        }
-
-        tbody tr:last-child {
-            border-bottom: none;
-        }
-
-        tbody tr:hover {
-            background-color: var(--bg-card-hover);
-        }
-
-        td {
-            padding: 12px 18px;
-            font-size: 13px;
-        }
-
-        .col-id { width: 60px; text-align: center; color: var(--text-muted); font-weight: 600; }
-        .col-name { font-weight: 600; color: var(--text-main); }
-        .col-shift { width: 300px; }
-        .col-time { width: 150px; font-weight: 700; color: var(--primary); }
-        .col-overlap { width: 140px; text-align: center; }
-
-        .lock-badge {
-            background: rgba(239, 68, 68, 0.15);
-            color: #F87171;
-            font-size: 10px;
-            font-weight: 700;
-            padding: 2px 6px;
-            border-radius: 4px;
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            margin-left: 6px;
-        }
-
-        .status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 600;
-            border: 1px solid transparent;
-        }
-
+        .lock-badge { background: rgba(239, 68, 68, 0.15); color: #F87171; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; border: 1px solid transparent; }
         .badge-shift-a { background: var(--shift-a-bg); border-color: var(--shift-a-border); color: var(--shift-a-text); }
         .badge-shift-b { background: var(--shift-b-bg); border-color: var(--shift-b-border); color: var(--shift-b-text); }
         .badge-overlap { background: var(--overlap-bg); border-color: var(--overlap-border); color: var(--overlap-text); }
         .badge-single { background: var(--single-bg); border-color: var(--single-border); color: var(--single-text); }
-
+        
         /* --- RULES SECTION --- */
-        .rules-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .rules-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 12px;
-        }
-
+        .rules-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 16px; margin-top: 10px;}
+        .rules-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; }
         .rules-header h2 { font-size: 14px; font-weight: 700; text-transform: uppercase; color: var(--primary); }
         .rules-header span.ar-title { font-family: 'Cairo', sans-serif; font-size: 15px; font-weight: 700; color: #CBD5E1; }
-
-        .rules-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
-        .rule-item { background: var(--bg-body); border: 1px solid var(--border-color); border-radius: 8px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; }
-        .rule-item.featured { grid-column: span 2; border-left: 4px solid var(--primary); background: linear-gradient(90deg, rgba(255,59,0,0.05) 0%, var(--bg-body) 100%); }
+        .rule-item { background: var(--bg-body); border: 1px solid var(--border-color); border-radius: 8px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; border-left: 4px solid var(--primary); background: linear-gradient(90deg, rgba(255,59,0,0.05) 0%, var(--bg-body) 100%);}
         .rule-ar { direction: rtl; text-align: right; font-family: 'Cairo', 'Tajawal', sans-serif; font-size: 12.5px; font-weight: 600; color: #F1F5F9; line-height: 1.5; }
         .rule-en { direction: ltr; text-align: left; font-size: 11.5px; color: var(--text-muted); line-height: 1.4; }
 
         @media (max-width: 900px) {
             .metrics-grid { grid-template-columns: repeat(2, 1fr); }
-            .rules-grid { grid-template-columns: 1fr; }
-            .rule-item.featured { grid-column: span 1; }
-            .app-header, .controls-bar, .admin-controls { flex-direction: column; align-items: stretch; gap: 12px; }
+            .app-header { flex-direction: column; text-align: center; }
+            .victorian-clock-container { order: -1; margin-bottom: 10px; width: 100%; }
+            .controls-bar, .admin-controls { flex-direction: column; align-items: stretch; gap: 12px; }
+            .break-card { max-width: 100%; }
         }
     </style>
 </head>
@@ -393,37 +214,42 @@
 
 <div class="workspace-wrapper">
 
-    <!-- APP HEADER -->
     <header class="app-header">
         <div class="header-title-group">
             <h1>
                 Presto Eat Roster
-                <span class="brand-badge">Night Operations</span>
+                <span class="brand-badge" id="viewBadge">Admin Operations</span>
             </h1>
-            <p>Staggered Break Rotation Schedule — Active Floor Operations</p>
+            <p>Live Cloud Synchronized Roster & Smart Break Automation</p>
         </div>
-        <div class="actions-group">
-            <button class="btn" onclick="exportCSV()">Export CSV</button>
+
+        <!-- NEW VICTORIAN OSD CLOCK -->
+        <div class="victorian-clock-container">
+            <div class="victorian-time" id="osdTime">--:--:-- --</div>
+            <div class="victorian-date" id="osdDate">Loading Time...</div>
+        </div>
+
+        <div class="actions-group" id="headerActions">
+            <button class="btn" onclick="window.exportCSV()">Export CSV</button>
             <button class="btn btn-primary" onclick="window.print()">Print / Save PDF</button>
         </div>
     </header>
 
-    <!-- METRICS DASHBOARD -->
     <section class="metrics-grid">
         <div class="metric-card">
-            <span class="metric-label">Total Staff</span>
-            <span class="metric-value">19 Active</span>
-            <span class="metric-sub">17 Shift A | 2 Shift B</span>
+            <span class="metric-label">Staff Presence</span>
+            <span class="metric-value" id="metricStaffCount">...</span>
+            <span class="metric-sub" id="metricShiftBreakdown">Loading...</span>
         </div>
         <div class="metric-card">
-            <span class="metric-label">Break Duration</span>
-            <span class="metric-value">30 Mins</span>
-            <span class="metric-sub">15-Min Stagger Intervals</span>
+            <span class="metric-label">Off Duty / Day Off</span>
+            <span class="metric-value" id="metricOffCount">...</span>
+            <span class="metric-sub" id="metricOffSub">Loading...</span>
         </div>
         <div class="metric-card">
             <span class="metric-label">Min Floor Coverage</span>
-            <span class="metric-value">89.5%</span>
-            <span class="metric-sub">17 Active Floor Staff Min</span>
+            <span class="metric-value" id="metricCoveragePct">...</span>
+            <span class="metric-sub" id="metricActiveFloor">Loading...</span>
         </div>
         <div class="metric-card">
             <span class="metric-label">Max Overlap</span>
@@ -432,44 +258,56 @@
         </div>
     </section>
 
-    <!-- ADMIN RESHUFFLE CONTROL BAR -->
-    <div class="admin-controls">
+    <!-- ACTIVE CLOUD BREAK TRACKER -->
+    <section id="breakTrackerSection" class="tracker-section">
+        <div class="tracker-header">
+            ⚡ Live Active Break Queue
+        </div>
+        <div id="breakTrackerGrid" class="tracker-grid">
+            <!-- Dynamic cards generated here -->
+        </div>
+    </section>
+
+    <!-- ADMIN CONTROLS -->
+    <div class="admin-controls" id="adminControlsArea">
         <div class="admin-status">
             <span id="statusDot" class="status-dot"></span>
             <span id="statusText">Roster Controls: Locked (PIN Protected)</span>
         </div>
         <div class="actions-group">
-            <button id="shareBtn" class="btn" onclick="generateShareableLink()" disabled style="opacity: 0.5; cursor: not-allowed;">
-                🔗 Copy Backup Link
+            <div class="cloud-badge">🟢 Live Database Synced</div>
+            <button class="btn btn-staff" onclick="window.copyStaffLink()">
+                📱 Copy Staff Link
             </button>
-            <button id="reshuffleBtn" class="btn btn-success" onclick="reshuffleSchedule()" disabled style="opacity: 0.5; cursor: not-allowed;">
-                🔄 Reshuffle Unlocked Staff
+            <button id="reshuffleBtn" class="btn btn-success" onclick="window.reshuffleSchedule()" disabled style="opacity: 0.5; cursor: not-allowed;">
+                🔄 Reshuffle & Reset Today
             </button>
-            <button id="authBtn" class="btn" onclick="toggleAuth()">
+            <button id="authBtn" class="btn" onclick="window.toggleAuth()">
                 🔒 Unlock Controls
             </button>
         </div>
     </div>
 
-    <!-- FILTER & SEARCH -->
     <div class="controls-bar">
         <div class="search-input-wrapper">
-            <input type="text" id="searchInput" class="search-input" placeholder="Search employee by name..." onkeyup="filterTable()">
+            <input type="text" id="searchInput" class="search-input" placeholder="Search employee by name..." onkeyup="window.filterTable()">
         </div>
         <div class="filter-tabs">
-            <button class="tab-btn active" onclick="filterShift('all', this)">All Staff (19)</button>
-            <button class="tab-btn" onclick="filterShift('Shift A', this)">Shift A (17)</button>
-            <button class="tab-btn" onclick="filterShift('Shift B', this)">Shift B (2)</button>
+            <button class="tab-btn active" onclick="window.filterShift('all', this)">All Staff (<span id="countAll">0</span>)</button>
+            <button class="tab-btn" onclick="window.filterShift('present', this)">🟢 Present Only (<span id="countPresent">0</span>)</button>
+            <button class="tab-btn" onclick="window.filterShift('dayoff', this)">🔴 On Day Off (<span id="countDayOff">0</span>)</button>
+            <button class="tab-btn" onclick="window.filterShift('Shift A', this)">Shift A</button>
+            <button class="tab-btn" onclick="window.filterShift('Shift B', this)">Shift B</button>
         </div>
     </div>
 
-    <!-- SCHEDULE TABLE -->
     <main class="table-card">
         <table id="scheduleTable">
             <thead>
                 <tr>
                     <th class="col-id">#</th>
                     <th>Employee Name</th>
+                    <th class="col-dayoff">Attendance / Day Off</th>
                     <th class="col-shift">Shift Window</th>
                     <th class="col-time">Break Start</th>
                     <th class="col-time">Break End</th>
@@ -477,53 +315,61 @@
                 </tr>
             </thead>
             <tbody id="tableBody">
-                <!-- Dynamic Rows Rendered by JS -->
+                <tr><td colspan="7" style="text-align: center; padding: 30px;">Connecting to Live Cloud...</td></tr>
             </tbody>
         </table>
     </main>
 
-    <!-- RULES & REGULATIONS -->
     <section class="rules-card">
         <div class="rules-header">
             <h2>Operational Conduct & Policy Rules</h2>
             <span class="ar-title">تعليمات وإرشادات العمل الرسمية</span>
         </div>
-        <div class="rules-grid">
-            <div class="rule-item">
-                <div class="rule-ar">١. يُحظر التوقف بدون سبب مهني وجيه، أو إجراء المحادثات الجانبية والشخصية خلال أوقات العمل الرسمية.</div>
-                <div class="rule-en">Loitering without a valid professional reason and engaging in side or personal conversations during official working hours are strictly prohibited.</div>
-            </div>
-            <div class="rule-item">
-                <div class="rule-ar">٢. يُحظر استخدام الهاتف المحمول في أماكن العمل دون سبب مهني وجيه.</div>
-                <div class="rule-en">Using mobile phones in work areas without a valid professional reason is strictly prohibited.</div>
-            </div>
-            <div class="rule-item">
-                <div class="rule-ar">٣. يُحظر طلب استراحات إضافية غير مدرجة في الجدول خلال أوقات الذروة.</div>
-                <div class="rule-en">Requesting additional unscheduled breaks during peak hours is strictly prohibited.</div>
-            </div>
-            <div class="rule-item">
-                <div class="rule-ar">٤. يُحظر التنقل أو المغادرة دون الحصول على إذن مسبق من المشرف.</div>
-                <div class="rule-en">Moving around or leaving the work area without prior permission from the supervisor is strictly prohibited.</div>
-            </div>
-            <div class="rule-item featured">
-                <div class="rule-ar">٥. يجب على جميع الموظفين الالتزام التام بالمواعيد المحددة لاستراحتهم وفقاً للجدول المعتمد، ولا يُسمح تحت أي ظرف بالخروج في الاستراحة المخصصة لموظف آخر في حال غيابه إلا بعد الحصول على إذن المشرف المباشر.</div>
-                <div class="rule-en">All employees must strictly adhere to their designated break schedules as approved. Taking a break during another employee's assigned time—including during their absence—is strictly prohibited without prior authorization from the direct supervisor.</div>
-            </div>
+        <div class="rule-item featured">
+            <div class="rule-ar">٥. يجب على جميع الموظفين الالتزام التام بالمواعيد المحددة لاستراحتهم وفقاً للجدول المعتمد، ولا يُسمح تحت أي ظرف بالخروج في الاستراحة المخصصة لموظف آخر في حال غيابه إلا بعد الحصول على إذن المشرف المباشر.</div>
+            <div class="rule-en">All employees must strictly adhere to their designated break schedules as approved. Taking a break during another employee's assigned time—including during their absence—is strictly prohibited without prior authorization from the direct supervisor.</div>
         </div>
     </section>
 
 </div>
 
-<script>
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCmlKjghDehj9L5aw1dJGa1WLjPRT2o-Yc",
+        authDomain: "presto-phoenix-team.firebaseapp.com",
+        databaseURL: "https://presto-phoenix-team-default-rtdb.firebaseio.com",
+        projectId: "presto-phoenix-team",
+        storageBucket: "presto-phoenix-team.firebasestorage.app",
+        messagingSenderId: "828847025710",
+        appId: "1:828847025710:web:72f00f90f45fe20f1f79bf"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
     const SECRET_PIN = "2242";
     let isUnlocked = false;
     let activeShiftFilter = 'all';
 
-    // Roster Structure
+    // Staff View UI Toggle
+    const urlParams = new URLSearchParams(window.location.search);
+    const isStaffView = urlParams.get('view') === 'staff';
+
+    if (isStaffView) {
+        document.getElementById('adminControlsArea').style.display = 'none';
+        document.getElementById('headerActions').style.display = 'none';
+        document.getElementById('viewBadge').innerText = "Staff Dashboard";
+        document.getElementById('viewBadge').style.background = "rgba(59, 130, 246, 0.15)";
+        document.getElementById('viewBadge').style.color = "#3B82F6";
+        document.getElementById('viewBadge').style.borderColor = "rgba(59, 130, 246, 0.3)";
+    }
+
     const fixedSlots = [
         { id: 1, timeStart: "08:30 PM", timeEnd: "09:00 PM", overlap: "2 Staff" },
         { id: 2, timeStart: "08:45 PM", timeEnd: "09:15 PM", overlap: "2 Staff" },
-        { id: 3, timeStart: "09:00 PM", timeEnd: "09:30 PM", overlap: "2 Staff" }, // LOCKED DANDI
+        { id: 3, timeStart: "09:00 PM", timeEnd: "09:30 PM", overlap: "2 Staff" },
         { id: 4, timeStart: "09:15 PM", timeEnd: "09:45 PM", overlap: "2 Staff" },
         { id: 5, timeStart: "09:30 PM", timeEnd: "10:00 PM", overlap: "2 Staff" },
         { id: 6, timeStart: "09:45 PM", timeEnd: "10:15 PM", overlap: "2 Staff" },
@@ -542,42 +388,177 @@
         { id: 19, timeStart: "01:00 AM", timeEnd: "01:30 AM", overlap: "1 Staff" }
     ];
 
-    let employees = [
-        { name: "Sanad Ghaith", shift: "Shift A", isLocked: false },
-        { name: "Mohammed Kharwat", shift: "Shift A", isLocked: false },
-        { name: "Abdullah Dandi", shift: "Shift A", isLocked: true }, // LOCKED
-        { name: "Abdullah Ali Al-Hamali", shift: "Shift A", isLocked: false },
-        { name: "Baraa Nader", shift: "Shift A", isLocked: false },
-        { name: "Mohamed Hussein", shift: "Shift A", isLocked: false },
-        { name: "Adam Al-Hudhiri", shift: "Shift A", isLocked: false },
-        { name: "Khalifa Abu Khabta", shift: "Shift A", isLocked: false },
-        { name: "Khaled Al-Osta", shift: "Shift A", isLocked: false },
-        { name: "Basheer Al-Qanouni", shift: "Shift A", isLocked: false },
-        { name: "Abdulmaez Masoud", shift: "Shift A", isLocked: false },
-        { name: "Siraj Al-Ammari", shift: "Shift A", isLocked: false },
-        { name: "Elyas Salem", shift: "Shift B", isLocked: false },
-        { name: "Hisham Al-Fleit", shift: "Shift B", isLocked: false },
-        { name: "Abdullah Al-Suwaib", shift: "Shift A", isLocked: false },
-        { name: "Mohammed Abu Kinda", shift: "Shift A", isLocked: false },
-        { name: "Mohamed Al-Tayeb", shift: "Shift A", isLocked: false },
-        { name: "Ihab Al-Tarhouni", shift: "Shift A", isLocked: false },
-        { name: "Tawfik Al-Jarushi", shift: "Shift A", isLocked: false }
+    const defaultEmployees = [
+        { name: "Sanad Ghaith", shift: "Shift A", isLocked: false, dayOff: "Saturday" },
+        { name: "Mohammed Kharwat", shift: "Shift A", isLocked: false, dayOff: "Sunday" },
+        { name: "Abdullah Dandi", shift: "Shift A", isLocked: true, dayOff: "Monday" },
+        { name: "Abdullah Ali Al-Hamali", shift: "Shift A", isLocked: false, dayOff: "Tuesday" },
+        { name: "Baraa Nader", shift: "Shift A", isLocked: false, dayOff: "Sunday" },
+        { name: "Mohamed Hussein", shift: "Shift A", isLocked: false, dayOff: "Saturday" },
+        { name: "Adam Al-Hudhiri", shift: "Shift A", isLocked: false, dayOff: "Wednesday" },
+        { name: "Khalifa Abu Khabta", shift: "Shift A", isLocked: false, dayOff: "Wednesday" },
+        { name: "Khaled Al-Osta", shift: "Shift A", isLocked: false, dayOff: "Sunday" },
+        { name: "Basheer Al-Qanouni", shift: "Shift A", isLocked: false, dayOff: "Wednesday" },
+        { name: "Abdulmaez Masoud", shift: "Shift A", isLocked: false, dayOff: "Sunday" },
+        { name: "Mahmoud Farnana", shift: "Shift A", isLocked: false, dayOff: "Saturday" },
+        { name: "Elyas Salem", shift: "Shift B", isLocked: false, dayOff: "Tuesday" },
+        { name: "Hisham Al-Fleit", shift: "Shift B", isLocked: false, dayOff: "Monday" },
+        { name: "Abdullah Al-Suwaib", shift: "Shift A", isLocked: false, dayOff: "Monday" },
+        { name: "Mohammed Abu Kinda", shift: "Shift A", isLocked: false, dayOff: "Tuesday" },
+        { name: "Mohamed Al-Tayeb", shift: "Shift A", isLocked: false, dayOff: "Saturday" },
+        { name: "Ihab Al-Tarhouni", shift: "Shift A", isLocked: false, dayOff: "Saturday" },
+        { name: "Tawfik Al-Jarushi", shift: "Shift A", isLocked: false, dayOff: "Thursday" }
     ];
 
+    const dayOffOptions = ["None", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Off Duty"];
+    let currentEmployees = [];
+    let currentBreaks = {};
+    let timerInterval = null;
+
+    // --- VICTORIAN CLOCK SCRIPT (LOCKED TO CAIRO UTC+2 TIME) ---
+    function updateVictorianClock() {
+        // Enforce Africa/Cairo time regardless of where the device is currently located
+        const cairoStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Cairo' });
+        const now = new Date(cairoStr);
+        
+        let hours = now.getHours();
+        let minutes = now.getMinutes();
+        let seconds = now.getSeconds();
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        
+        hours = hours % 12;
+        hours = hours ? hours : 12; 
+        minutes = minutes < 10 ? '0' + minutes : minutes;
+        seconds = seconds < 10 ? '0' + seconds : seconds;
+        
+        const timeStr = hours + ':' + minutes + ':' + seconds + ' ' + ampm;
+        
+        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        const dateStr = days[now.getDay()] + ', ' + months[now.getMonth()] + ' ' + now.getDate() + ', ' + now.getFullYear();
+
+        const timeEl = document.getElementById('osdTime');
+        const dateEl = document.getElementById('osdDate');
+        if(timeEl) timeEl.innerText = timeStr;
+        if(dateEl) dateEl.innerText = dateStr;
+    }
+    setInterval(updateVictorianClock, 1000);
+    updateVictorianClock(); 
+
+    // --- TIME PARSER & AUTO-TRIGGER LOGIC ---
+    function parseToDate(timeStr) {
+        const cairoStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Cairo' });
+        const [time, modifier] = timeStr.split(' ');
+        let [hours, minutes] = time.split(':');
+        hours = parseInt(hours, 10);
+        if (hours === 12) hours = modifier === 'AM' ? 0 : 12;
+        else if (modifier === 'PM') hours += 12;
+        
+        let d = new Date(cairoStr);
+        d.setHours(hours, parseInt(minutes, 10), 0, 0);
+        
+        let now = new Date(cairoStr);
+        if (now.getHours() < 12 && d.getHours() >= 12) d.setDate(d.getDate() - 1);
+        if (now.getHours() >= 12 && d.getHours() < 12) d.setDate(d.getDate() + 1);
+        return d;
+    }
+
+    function isOfficialBreakTime(index) {
+        const cairoStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Cairo' });
+        const startDate = parseToDate(fixedSlots[index].timeStart);
+        const endDate = parseToDate(fixedSlots[index].timeEnd);
+        const graceStart = new Date(startDate.getTime() - 15 * 60000); 
+        const now = new Date(cairoStr);
+        return now >= graceStart && now <= endDate;
+    }
+
+    setInterval(() => {
+        if (!currentEmployees.length) return;
+        const cairoStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Cairo' });
+        const now = new Date(cairoStr);
+        
+        currentEmployees.forEach((emp, index) => {
+            if (emp.dayOff !== 'None') return;
+            
+            const safeKey = emp.name.replace(/[.#$[\]]/g, '');
+            if (currentBreaks[safeKey]) return; 
+            
+            const startDate = parseToDate(fixedSlots[index].timeStart);
+            const timeDiff = now.getTime() - startDate.getTime();
+            
+            if (timeDiff >= 0 && timeDiff < 2 * 3600 * 1000) {
+                set(ref(db, 'breaks/' + safeKey), {
+                    name: emp.name,
+                    startTime: startDate.getTime(), 
+                    limit: 30,
+                    type: "Scheduled (30m)",
+                    status: "auto_started",
+                    confirmed: false
+                });
+            }
+        });
+    }, 10000); 
+
+    function requireAdmin() {
+        if (isUnlocked) return true;
+        const pin = prompt("Enter Supervisor PIN to Approve/Deny:");
+        if (pin === SECRET_PIN) return true;
+        if (pin !== null) alert("Incorrect PIN. Action denied.");
+        return false;
+    }
+
+    // --- FIREBASE LISTENERS ---
+    onValue(ref(db, 'roster'), (snapshot) => {
+        const data = snapshot.val();
+        if (data) { currentEmployees = data; } 
+        else {
+            currentEmployees = [...defaultEmployees];
+            set(ref(db, 'roster'), currentEmployees);
+        }
+        renderTable();
+    });
+
+    onValue(ref(db, 'breaks'), (snapshot) => {
+        currentBreaks = snapshot.val() || {};
+        renderActiveBreaks();
+    });
+
+    // --- RENDERING ---
     function renderTable() {
+        if (!currentEmployees || currentEmployees.length === 0) return;
         const tbody = document.getElementById('tableBody');
         tbody.innerHTML = '';
 
-        employees.forEach((emp, index) => {
+        currentEmployees.forEach((emp, index) => {
             const slot = fixedSlots[index];
             const shiftClass = emp.shift === 'Shift A' ? 'badge-shift-a' : 'badge-shift-b';
             const shiftText = emp.shift === 'Shift A' ? 'Shift A (07:00 PM – 02:00 AM)' : 'Shift B (07:30 PM – 02:30 AM)';
             const overlapClass = slot.overlap === '2 Staff' ? 'badge-overlap' : 'badge-single';
+            const isOff = emp.dayOff !== 'None';
+
+            const selectOptionsHtml = dayOffOptions.map(opt => {
+                const label = opt === 'None' ? '🟢 Present / On Duty' : `🔴 Day Off: ${opt}`;
+                return `<option value="${opt}" ${emp.dayOff === opt ? 'selected' : ''}>${label}</option>`;
+            }).join('');
 
             const tr = document.createElement('tr');
+            if (isOff) tr.classList.add('row-off-duty');
+
+            const editableAttr = isStaffView ? 'contenteditable="false"' : 'contenteditable="true"';
+            const selectDisabled = isStaffView ? 'disabled' : '';
+
             tr.innerHTML = `
                 <td class="col-id">${slot.id}</td>
-                <td class="col-name">${emp.name} ${emp.isLocked ? '<span class="lock-badge">🔒 FIXED SLOT</span>' : ''}</td>
+                <td class="col-name">
+                    <span class="editable-name" ${editableAttr} onblur="window.updateName(${index}, this.innerText)">${emp.name}</span>
+                    <button class="btn-mini-break" onclick="window.startBreak('${emp.name.replace(/'/g, "\\'")}', ${index})" title="Request Break">☕ Break</button>
+                    ${emp.isLocked && !isStaffView ? '<span class="lock-badge">🔒 FIXED</span>' : ''}
+                </td>
+                <td class="col-dayoff">
+                    <select class="dayoff-select ${isOff ? 'is-off' : ''}" ${selectDisabled} onchange="window.updateDayOff(${index}, this.value)">
+                        ${selectOptionsHtml}
+                    </select>
+                </td>
                 <td class="col-shift"><span class="status-badge ${shiftClass}">${shiftText}</span></td>
                 <td class="col-time">${slot.timeStart}</td>
                 <td class="col-time">${slot.timeEnd}</td>
@@ -585,10 +566,203 @@
             `;
             tbody.appendChild(tr);
         });
-        filterTable();
+
+        updateAutomatedMetrics();
+        window.filterTable();
     }
 
-    function toggleAuth() {
+    function renderActiveBreaks() {
+        const section = document.getElementById('breakTrackerSection');
+        const grid = document.getElementById('breakTrackerGrid');
+        const breakKeys = Object.keys(currentBreaks);
+        
+        const visibleBreaks = breakKeys.filter(key => currentBreaks[key].status !== 'completed');
+
+        if (visibleBreaks.length === 0) {
+            section.style.display = 'none';
+            if (timerInterval) clearInterval(timerInterval);
+            return;
+        }
+
+        section.style.display = 'block';
+        grid.innerHTML = '';
+
+        visibleBreaks.forEach(key => {
+            const b = currentBreaks[key];
+            const card = document.createElement('div');
+            
+            if (b.status === 'pending') {
+                card.className = `break-card card-pending`;
+                let adminControls = '';
+                if (!isStaffView) {
+                    adminControls = `
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-success" onclick="window.approveBreak('${key}')">Approve</button>
+                        <button class="btn btn-danger" onclick="window.denyBreak('${key}')">Deny</button>
+                    </div>`;
+                }
+                card.innerHTML = `
+                    <div class="break-info">
+                        <span class="break-name">${b.name}</span>
+                        <span class="break-type" style="color: #EF4444;">🔴 PENDING ADMIN APPROVAL</span>
+                    </div>
+                    ${adminControls}
+                `;
+            } 
+            else if (b.status === 'auto_started' && !b.confirmed) {
+                card.className = `break-card card-auto`;
+                card.innerHTML = `
+                    <div class="break-info">
+                        <span class="break-name">${b.name}</span>
+                        <span class="break-type" style="color: #3B82F6;">🔵 SCHEDULED - AWAITING CONFIRMATION</span>
+                    </div>
+                    <span class="break-timer" data-start="${b.startTime}" data-limit="${b.limit}">00:00</span>
+                    <button class="btn btn-staff" onclick="window.confirmDeparture('${key}')">Confirm Departure</button>
+                `;
+            }
+            else {
+                const isOfficial = b.limit === 30;
+                card.className = `break-card ${isOfficial ? 'card-official' : 'card-unofficial'}`;
+                card.innerHTML = `
+                    <div class="break-info">
+                        <span class="break-name">${b.name}</span>
+                        <span class="break-type" style="color: ${isOfficial ? '#10B981' : '#F59E0B'}">${b.type} (ON BREAK)</span>
+                    </div>
+                    <span class="break-timer" data-start="${b.startTime}" data-limit="${b.limit}">00:00</span>
+                    <button class="btn btn-success" onclick="window.endBreak('${key}')">Return & Dismiss</button>
+                `;
+            }
+            grid.appendChild(card);
+        });
+
+        if (timerInterval) clearInterval(timerInterval);
+        updateTimers(); 
+        timerInterval = setInterval(updateTimers, 1000);
+    }
+
+    function updateTimers() {
+        const timers = document.querySelectorAll('.break-timer');
+        // Calculate based on Cairo time to match the start time correctly
+        const cairoStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Cairo' });
+        const now = new Date(cairoStr).getTime();
+        
+        timers.forEach(timerEl => {
+            const start = parseInt(timerEl.getAttribute('data-start'));
+            const limit = parseInt(timerEl.getAttribute('data-limit'));
+            
+            const diffSecs = Math.floor((now - start) / 1000);
+            const mins = Math.floor(diffSecs / 60);
+            const secs = diffSecs % 60;
+            
+            timerEl.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            
+            if (mins >= limit) timerEl.classList.add('overtime');
+            else timerEl.classList.remove('overtime');
+        });
+    }
+
+    function updateAutomatedMetrics() {
+        const total = currentEmployees.length;
+        const offCount = currentEmployees.filter(e => e.dayOff !== 'None').length;
+        const presentCount = total - offCount;
+        const shiftAActive = currentEmployees.filter(e => e.shift === 'Shift A' && e.dayOff === 'None').length;
+        const shiftBActive = currentEmployees.filter(e => e.shift === 'Shift B' && e.dayOff === 'None').length;
+
+        document.getElementById('metricStaffCount').innerText = `${presentCount} Present`;
+        document.getElementById('metricShiftBreakdown').innerText = `${shiftAActive} Shift A | ${shiftBActive} Shift B`;
+        document.getElementById('metricOffCount').innerText = `${offCount} Staff Off`;
+        document.getElementById('metricOffSub').innerText = offCount === 0 ? '100% Floor Attendance' : `${((presentCount / total) * 100).toFixed(1)}% Attendance Rate`;
+
+        const minFloorStaff = Math.max(0, presentCount - 2);
+        const coveragePct = presentCount > 0 ? ((minFloorStaff / presentCount) * 100).toFixed(1) : "0.0";
+        document.getElementById('metricCoveragePct').innerText = `${coveragePct}%`;
+        document.getElementById('metricActiveFloor').innerText = `${minFloorStaff} Active Floor Staff Min`;
+
+        document.getElementById('countAll').innerText = total;
+        document.getElementById('countPresent').innerText = presentCount;
+        document.getElementById('countDayOff').innerText = offCount;
+    }
+
+    // --- GLOBAL ACTIONS ---
+    window.startBreak = function(empName, index) {
+        const safeKey = empName.replace(/[.#$[\]]/g, '');
+        if (currentBreaks[safeKey] && currentBreaks[safeKey].status !== 'completed') {
+            alert(`${empName} already has an active or pending break request.`);
+            return;
+        }
+
+        const isOfficial = isOfficialBreakTime(index);
+        const cairoStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Cairo' });
+
+        if (isOfficial) {
+            set(ref(db, 'breaks/' + safeKey), {
+                name: empName,
+                startTime: parseToDate(fixedSlots[index].timeStart).getTime(), 
+                limit: 30,
+                type: "Scheduled (30m)",
+                status: "active",
+                confirmed: true
+            });
+        } else {
+            alert(`It is currently not the scheduled break time for ${empName}.\n\nA request for a 10-minute quick break has been sent to the Admin.`);
+            set(ref(db, 'breaks/' + safeKey), {
+                name: empName,
+                startTime: 0,
+                limit: 10,
+                type: "Unscheduled (10m)",
+                status: "pending"
+            });
+        }
+    };
+
+    window.approveBreak = function(key) {
+        if (!requireAdmin()) return;
+        const cairoStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Cairo' });
+        const breakData = currentBreaks[key];
+        breakData.status = 'active';
+        breakData.confirmed = true;
+        breakData.startTime = new Date(cairoStr).getTime(); 
+        set(ref(db, 'breaks/' + key), breakData);
+    };
+
+    window.denyBreak = function(key) {
+        if (!requireAdmin()) return;
+        remove(ref(db, 'breaks/' + key)); 
+    };
+
+    window.confirmDeparture = function(key) {
+        const breakData = currentBreaks[key];
+        if (breakData) {
+            breakData.status = 'active';
+            breakData.confirmed = true;
+            set(ref(db, 'breaks/' + key), breakData);
+        }
+    }
+
+    window.endBreak = function(key) {
+        const breakData = currentBreaks[key];
+        if (breakData) {
+            breakData.status = 'completed'; 
+            set(ref(db, 'breaks/' + key), breakData);
+        }
+    };
+
+    window.updateDayOff = function(index, newStatus) {
+        if (isStaffView) return; 
+        currentEmployees[index].dayOff = newStatus;
+        set(ref(db, 'roster'), currentEmployees);
+    };
+
+    window.updateName = function(index, newName) {
+        if (isStaffView) return; 
+        const cleanedName = newName.trim();
+        if (cleanedName && currentEmployees[index].name !== cleanedName) {
+            currentEmployees[index].name = cleanedName;
+            set(ref(db, 'roster'), currentEmployees);
+        }
+    };
+
+    window.toggleAuth = function() {
         if (!isUnlocked) {
             const pin = prompt("Enter Supervisor PIN to Unlock Reshuffle Controls:");
             if (pin === SECRET_PIN) {
@@ -597,12 +771,8 @@
                 document.getElementById('statusText').innerText = "Roster Controls: UNLOCKED (Supervisor Mode)";
                 document.getElementById('authBtn').innerText = "🔒 Lock Controls";
                 
-                ['reshuffleBtn', 'shareBtn'].forEach(id => {
-                    const btn = document.getElementById(id);
-                    btn.disabled = false;
-                    btn.style.opacity = "1";
-                    btn.style.cursor = "pointer";
-                });
+                const btn = document.getElementById('reshuffleBtn');
+                btn.disabled = false; btn.style.opacity = "1"; btn.style.cursor = "pointer";
             } else if (pin !== null) {
                 alert("Incorrect PIN. Access Denied.");
             }
@@ -612,148 +782,91 @@
             document.getElementById('statusText').innerText = "Roster Controls: Locked (PIN Protected)";
             document.getElementById('authBtn').innerText = "🔑 Unlock Controls";
             
-            ['reshuffleBtn', 'shareBtn'].forEach(id => {
-                const btn = document.getElementById(id);
-                btn.disabled = true;
-                btn.style.opacity = "0.5";
-                btn.style.cursor = "not-allowed";
-            });
+            const btn = document.getElementById('reshuffleBtn');
+            btn.disabled = true; btn.style.opacity = "0.5"; btn.style.cursor = "not-allowed";
         }
-    }
+    };
 
-    function reshuffleSchedule() {
-        if (!isUnlocked) return;
-
-        const dandiIndex = 2; // Fixed Row 3 (09:00 PM)
-        const dandi = employees[dandiIndex];
-
-        let shufflePool = employees.filter((_, idx) => idx !== dandiIndex);
-
+    window.reshuffleSchedule = function() {
+        if (!isUnlocked || isStaffView) return;
+        const dandiIndex = 2;
+        const dandi = currentEmployees[dandiIndex];
+        let shufflePool = currentEmployees.filter((_, idx) => idx !== dandiIndex);
+        
         for (let i = shufflePool.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [shufflePool[i], shufflePool[j]] = [shufflePool[j], shufflePool[i]];
         }
-
-        shufflePool.splice(dandiIndex, 0, dandi);
-        employees = shufflePool;
-
-        // AUTO-SAVE TO BROWSER MEMORY (PERSISTS ON CLOSE/REFRESH)
-        localStorage.setItem('presto_saved_roster', JSON.stringify(employees.map(e => e.name)));
-
-        renderTable();
-    }
-
-    // --- SHARE VIA URL HASH ---
-    function generateShareableLink() {
-        if (!isUnlocked) return;
-
-        const nameOrder = employees.map(e => e.name);
-        const jsonString = JSON.stringify(nameOrder);
-        const encodedState = btoa(encodeURIComponent(jsonString));
         
-        const shareUrl = `${window.location.origin}${window.location.pathname}#state=${encodedState}`;
+        shufflePool.splice(dandiIndex, 0, dandi);
+        currentEmployees = shufflePool;
+        
+        remove(ref(db, 'breaks'));
+        set(ref(db, 'roster'), currentEmployees);
+    };
 
-        navigator.clipboard.writeText(shareUrl).then(() => {
-            alert("Backup Link Generated & Copied to Clipboard!\n\nAnyone opening this link on any PC/phone will see this exact saved schedule.");
+    window.copyStaffLink = function() {
+        const staffUrl = window.location.origin + window.location.pathname + "?view=staff";
+        navigator.clipboard.writeText(staffUrl).then(() => {
+            alert("✅ Staff Link Copied to Clipboard!\n\nSend this link to your employees. They will be able to request/confirm breaks, but will NOT be able to reshuffle, change names, or approve breaks.");
         }).catch(err => {
-            prompt("Copy this URL backup link:", shareUrl);
+            prompt("Copy this URL manually:", staffUrl);
         });
-    }
+    };
 
-    // --- AUTO-LOAD FROM URL OR BROWSER MEMORY ---
-    function loadStateFromURL() {
-        let savedNames = null;
-
-        // 1. Check if URL has a shareable link state (#state=...)
-        const hash = window.location.hash;
-        if (hash.includes("#state=")) {
-            try {
-                const encodedState = hash.replace("#state=", "");
-                const jsonString = decodeURIComponent(atob(encodedState));
-                savedNames = JSON.parse(jsonString);
-            } catch (e) {
-                console.error("Failed to parse URL hash state", e);
-            }
-        } 
-
-        // 2. Fall back to Local Browser Storage (Memory)
-        if (!savedNames) {
-            const localSaved = localStorage.getItem('presto_saved_roster');
-            if (localSaved) {
-                try {
-                    savedNames = JSON.parse(localSaved);
-                } catch (e) {
-                    console.error("Failed to parse LocalStorage state", e);
-                }
-            }
-        }
-
-        // 3. Reconstruct Roster Order
-        if (savedNames && Array.isArray(savedNames) && savedNames.length === employees.length) {
-            const nameMap = new Map(employees.map(e => [e.name, e]));
-            const restoredEmployees = [];
-
-            savedNames.forEach(name => {
-                if (nameMap.has(name)) {
-                    restoredEmployees.push(nameMap.get(name));
-                }
-            });
-
-            if (restoredEmployees.length === employees.length) {
-                employees = restoredEmployees;
-            }
-        }
-    }
-
-    function filterTable() {
-        const input = document.getElementById('searchInput').value.toLowerCase();
+    window.filterTable = function() {
+        const inputEl = document.getElementById('searchInput');
+        if(!inputEl) return;
+        const input = inputEl.value.toLowerCase();
         const rows = document.querySelectorAll('#scheduleTable tbody tr');
 
-        rows.forEach(row => {
-            const name = row.querySelector('.col-name').textContent.toLowerCase();
+        rows.forEach((row, idx) => {
+            const nameEl = row.querySelector('.editable-name');
+            if(!nameEl) return;
+            const name = nameEl.textContent.toLowerCase();
             const shiftText = row.querySelector('.col-shift').textContent;
-            
+            const emp = currentEmployees[idx];
+            const isOff = emp && emp.dayOff !== 'None';
+
             const matchesSearch = name.includes(input);
-            const matchesShift = (activeShiftFilter === 'all') || shiftText.includes(activeShiftFilter);
+            let matchesShift = true;
+
+            if (activeShiftFilter === 'present') matchesShift = !isOff;
+            else if (activeShiftFilter === 'dayoff') matchesShift = isOff;
+            else if (activeShiftFilter !== 'all') matchesShift = shiftText.includes(activeShiftFilter);
 
             row.style.display = (matchesSearch && matchesShift) ? '' : 'none';
         });
-    }
+    };
 
-    function filterShift(shift, el) {
+    window.filterShift = function(shift, el) {
         activeShiftFilter = shift;
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
         el.classList.add('active');
-        filterTable();
-    }
+        window.filterTable();
+    };
 
-    function exportCSV() {
+    window.exportCSV = function() {
         let csv = [];
         const rows = document.querySelectorAll('table tr');
-        
         for (let i = 0; i < rows.length; i++) {
             let row = [], cols = rows[i].querySelectorAll('td, th');
             for (let j = 0; j < cols.length; j++) {
-                let text = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, ' ').trim();
+                let text = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, ' ').replace('☕ Break', '').replace('🔒 FIXED', '').trim();
                 row.push('"' + text + '"');
             }
             csv.push(row.join(','));
         }
-
         const csvFile = new Blob([csv.join('\n')], { type: 'text/csv' });
         const downloadLink = document.createElement('a');
-        downloadLink.download = 'Presto_Eat_Break_Schedule.csv';
+        downloadLink.download = 'Presto_Eat_Live_Schedule.csv';
         downloadLink.href = window.URL.createObjectURL(csvFile);
         downloadLink.style.display = 'none';
         document.body.appendChild(downloadLink);
         downloadLink.click();
         document.body.removeChild(downloadLink);
-    }
+    };
 
-    // Initial Load & Render Sequence
-    loadStateFromURL();
-    renderTable();
 </script>
-
 </body>
 </html>
