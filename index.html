@@ -41,8 +41,6 @@
             --official-border: rgba(16, 185, 129, 0.4);
             --pending-bg: rgba(239, 68, 68, 0.1);
             --pending-border: rgba(239, 68, 68, 0.5);
-            --auto-bg: rgba(59, 130, 246, 0.1);
-            --auto-border: rgba(59, 130, 246, 0.5);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', system-ui, sans-serif; }
@@ -581,22 +579,39 @@
 
         currentEmployees.forEach((emp, index) => {
             const isOffToday = emp.dayOff !== 'None';
-
-            // NEW: Hide absent employees from the Staff View completely
-            if (isStaffView && isOffToday) return;
-
             const slot = fixedSlots[index];
             const shiftClass = emp.shift === 'Shift A' ? 'badge-shift-a' : 'badge-shift-b';
             const shiftText = emp.shift === 'Shift A' ? 'Shift A (07:00 PM – 02:00 AM)' : 'Shift B (07:30 PM – 02:30 AM)';
             const overlapClass = slot.overlap === '2 Staff' ? 'badge-overlap' : 'badge-single';
-            
+
+            const tr = document.createElement('tr');
+
+            // NEW: Render an "Empty Slot" placeholder in Staff View for absent employees
+            if (isStaffView && isOffToday) {
+                tr.classList.add('row-off-duty');
+                tr.innerHTML = `
+                    <td class="col-id">${slot.id}</td>
+                    <td class="col-name" style="color: var(--text-muted);">
+                        <span style="border: 1px dashed #475569; padding: 4px 8px; border-radius: 6px;">⚠️ Vacant Break Slot</span>
+                    </td>
+                    <td class="col-dayoff">
+                        <span style="font-size: 11px; font-weight: 700; color: #F59E0B;">Requires Admin Auth</span>
+                    </td>
+                    <td class="col-shift"><span class="status-badge ${shiftClass}">${shiftText}</span></td>
+                    <td class="col-time" style="opacity: 0.6;">${slot.timeStart}</td>
+                    <td class="col-time" style="opacity: 0.6;">${slot.timeEnd}</td>
+                    <td class="col-overlap"><span class="status-badge ${overlapClass}">${slot.overlap}</span></td>
+                `;
+                tbody.appendChild(tr);
+                return; // Stop here, do not render the rest of the controls for this specific row
+            }
+
             const selectOptionsHtml = dayOffOptions.map(opt => {
                 const label = opt === 'None' ? 'No Permanent Day Off' : `Perm Off: ${opt}`;
                 const isSelected = emp.assignedDayOff === opt;
                 return `<option value="${opt}" ${isSelected ? 'selected' : ''}>${label}</option>`;
             }).join('');
 
-            const tr = document.createElement('tr');
             if (isOffToday) tr.classList.add('row-off-duty');
 
             const editableAttr = isStaffView ? 'contenteditable="false"' : 'contenteditable="true"';
@@ -915,6 +930,8 @@
                     .replace('🔒 FIXED', '')
                     .replace('🔴 Absent Today', 'Absent')
                     .replace('🟢 Present Today', 'Present')
+                    .replace('⚠️ Vacant Break Slot', 'Vacant Slot')
+                    .replace('Requires Admin Auth', '')
                     .trim();
                 row.push('"' + text + '"');
             }
