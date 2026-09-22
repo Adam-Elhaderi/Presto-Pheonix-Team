@@ -41,6 +41,8 @@
             --official-border: rgba(16, 185, 129, 0.4);
             --pending-bg: rgba(239, 68, 68, 0.1);
             --pending-border: rgba(239, 68, 68, 0.5);
+            --auto-bg: rgba(59, 130, 246, 0.1);
+            --auto-border: rgba(59, 130, 246, 0.5);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', system-ui, sans-serif; }
@@ -295,7 +297,7 @@
         <div class="search-input-wrapper">
             <input type="text" id="searchInput" class="search-input" placeholder="Search employee by name..." onkeyup="window.filterTable()">
         </div>
-        <div class="filter-tabs">
+        <div class="filter-tabs" id="filterTabs">
             <button class="tab-btn active" onclick="window.filterShift('all', this)">All Staff (<span id="countAll">0</span>)</button>
             <button class="tab-btn" onclick="window.filterShift('present', this)">🟢 Present Only (<span id="countPresent">0</span>)</button>
             <button class="tab-btn" onclick="window.filterShift('dayoff', this)">🔴 On Day Off (<span id="countDayOff">0</span>)</button>
@@ -330,28 +332,33 @@
         </div>
         
         <div class="rule-item">
-            <div class="rule-ar">١. مدة الاستراحة المجدولة هي ٣٠ دقيقة فقط. الاستراحات غير المجدولة تقتصر على ١٠ دقائق وتتطلب موافقة الإدارة.</div>
-            <div class="rule-en">1. Scheduled breaks are strictly 30 minutes. Unscheduled breaks are limited to 10 minutes and require management approval.</div>
+            <div class="rule-ar">١. يُحظر التوقف بدون سبب مهني وجيه، أو إجراء المحادثات الجانبية والشخصية خلال أوقات العمل الرسمية.</div>
+            <div class="rule-en">1. Loitering without a valid professional reason and engaging in side or personal conversations during official working hours are strictly prohibited.</div>
         </div>
 
         <div class="rule-item">
-            <div class="rule-ar">٢. يجب على الموظف تأكيد خروجه وعودته من الاستراحة باستخدام النظام الإلكتروني الداشبورد لضمان دقة التوقيت.</div>
-            <div class="rule-en">2. Employees must confirm their departure and return from breaks using the electronic dashboard to ensure accurate timing.</div>
+            <div class="rule-ar">٢. مدة الاستراحة المجدولة هي ٣٠ دقيقة فقط. الاستراحات غير المجدولة تقتصر على ١٠ دقائق وتتطلب موافقة الاشراف.</div>
+            <div class="rule-en">2. Scheduled breaks are strictly 30 minutes. Unscheduled breaks are limited to 10 minutes and require management approval.</div>
         </div>
 
         <div class="rule-item">
-            <div class="rule-ar">٣. الحد الأقصى للموظفين المسموح لهم بالخروج للاستراحة في نفس الوقت هو موظفين اثنين فقط للحفاظ على سير العمل.</div>
-            <div class="rule-en">3. A maximum of two employees are allowed on break at the same time to maintain proper floor operations.</div>
+            <div class="rule-ar">٣. يُحظر طلب استراحات إضافية غير مدرجة في الجدول خلال أوقات الذروة.</div>
+            <div class="rule-en">3. Requesting additional unscheduled breaks during peak hours is strictly prohibited.</div>
         </div>
 
         <div class="rule-item">
-            <div class="rule-ar">٤. التأخير في العودة من الاستراحة سيتم تسجيله تلقائياً في النظام بلون أحمر وسيؤثر على التقييم الإداري.</div>
-            <div class="rule-en">4. Late returns from breaks will be automatically recorded in the system in red and will affect administrative evaluations.</div>
+            <div class="rule-ar">٤. يجب على الموظف تأكيد خروجه وعودته من الاستراحة باستخدام النظام الإلكتروني الداشبورد لضمان دقة التوقيت.</div>
+            <div class="rule-en">4. Employees must confirm their departure and return from breaks using the electronic dashboard to ensure accurate timing.</div>
+        </div>
+
+        <div class="rule-item">
+            <div class="rule-ar">٥. يُحظر التنقل أو المغادرة دون الحصول على إذن مسبق من المشرف.</div>
+            <div class="rule-en">5. Moving around or leaving the work area without prior permission from the supervisor is strictly prohibited.</div>
         </div>
 
         <div class="rule-item featured">
-            <div class="rule-ar">٥. يجب على جميع الموظفين الالتزام التام بالمواعيد المحددة لاستراحتهم وفقاً للجدول المعتمد، ولا يُسمح تحت أي ظرف بالخروج في الاستراحة المخصصة لموظف آخر في حال غيابه إلا بعد الحصول على إذن المشرف المباشر.</div>
-            <div class="rule-en">5. All employees must strictly adhere to their designated break schedules as approved. Taking a break during another employee's assigned time—including during their absence—is strictly prohibited without prior authorization from the direct supervisor.</div>
+            <div class="rule-ar">٦. يجب على جميع الموظفين الالتزام التام بالمواعيد المحددة لاستراحتهم وفقاً للجدول المعتمد، ولا يُسمح تحت أي ظرف بالخروج في الاستراحة المخصصة لموظف آخر في حال غيابه إلا بعد الحصول على إذن المشرف المباشر.</div>
+            <div class="rule-en">6. All employees must strictly adhere to their designated break schedules as approved. Taking a break during another employee's assigned time—including during their absence—is strictly prohibited without prior authorization from the direct supervisor.</div>
         </div>
     </section>
 
@@ -384,6 +391,7 @@
     if (isStaffView) {
         document.getElementById('adminControlsArea').style.display = 'none';
         document.getElementById('headerActions').style.display = 'none';
+        document.getElementById('filterTabs').style.display = 'none'; // Hides filtering tabs for staff
         document.getElementById('viewBadge').innerText = "Staff Dashboard";
         document.getElementById('viewBadge').style.background = "rgba(59, 130, 246, 0.15)";
         document.getElementById('viewBadge').style.color = "#3B82F6";
@@ -412,6 +420,7 @@
         { id: 19, timeStart: "01:00 AM", timeEnd: "01:30 AM", overlap: "1 Staff" }
     ];
 
+    // Master list with explicitly declared "assignedDayOff" (Permanent DB storage)
     const defaultEmployees = [
         { name: "Sanad Ghaith", shift: "Shift A", isLocked: false, dayOff: "None", assignedDayOff: "Saturday" },
         { name: "Mohammed Kharwat", shift: "Shift A", isLocked: false, dayOff: "None", assignedDayOff: "Sunday" },
@@ -486,6 +495,7 @@
                 set(ref(db, 'system/lastBusinessDate'), businessDateStr);
                 remove(ref(db, 'breaks')); 
                 
+                // Automatically set everyone to Present or Absent based on their PERMANENT schedule
                 let resetRoster = currentEmployees.map(emp => {
                     let permOff = emp.assignedDayOff || "None";
                     emp.dayOff = (permOff === businessDayStr) ? businessDayStr : "None";
@@ -570,13 +580,16 @@
         tbody.innerHTML = '';
 
         currentEmployees.forEach((emp, index) => {
+            const isOffToday = emp.dayOff !== 'None';
+
+            // NEW: Hide absent employees from the Staff View completely
+            if (isStaffView && isOffToday) return;
+
             const slot = fixedSlots[index];
             const shiftClass = emp.shift === 'Shift A' ? 'badge-shift-a' : 'badge-shift-b';
             const shiftText = emp.shift === 'Shift A' ? 'Shift A (07:00 PM – 02:00 AM)' : 'Shift B (07:30 PM – 02:30 AM)';
             const overlapClass = slot.overlap === '2 Staff' ? 'badge-overlap' : 'badge-single';
             
-            const isOffToday = emp.dayOff !== 'None';
-
             const selectOptionsHtml = dayOffOptions.map(opt => {
                 const label = opt === 'None' ? 'No Permanent Day Off' : `Perm Off: ${opt}`;
                 const isSelected = emp.assignedDayOff === opt;
