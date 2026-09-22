@@ -134,7 +134,7 @@
         .tracker-header { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 700; color: #FFFFFF; text-transform: uppercase; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 15px; }
         .tracker-grid { display: flex; flex-wrap: wrap; gap: 12px; }
         
-        .break-card { background: var(--bg-body); border: 1px solid var(--border-color); border-radius: 8px; padding: 14px; display: flex; align-items: center; justify-content: space-between; gap: 15px; min-width: 280px; flex-grow: 1; max-width: 400px; }
+        .break-card { background: var(--bg-body); border: 1px solid var(--border-color); border-radius: 8px; padding: 14px; display: flex; align-items: center; justify-content: space-between; gap: 15px; min-width: 320px; flex-grow: 1; max-width: 450px; }
         .break-card.card-official { border-color: var(--official-border); background: var(--official-bg); }
         .break-card.card-unofficial { border-color: var(--warning-border); background: var(--warning-bg); }
         .break-card.card-pending { border-color: var(--pending-border); background: var(--pending-bg); animation: pulseAlert 1.5s infinite alternate; }
@@ -475,6 +475,19 @@
     setInterval(updateHoloClock, 1000);
     updateHoloClock(); 
 
+    // --- FORMAT TIMESTAMP TO AM/PM HELPER ---
+    function formatAMPM(timestamp) {
+        if (!timestamp) return '--:--';
+        const d = new Date(timestamp);
+        let hours = d.getHours();
+        let minutes = d.getMinutes();
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12; 
+        minutes = minutes < 10 ? '0' + minutes : minutes;
+        return hours + ':' + minutes + ' ' + ampm;
+    }
+
     // --- DAILY AUTO-RESET LOGIC (RESTAURANT BUSINESS DAY) ---
     setInterval(() => {
         if (isStaffView || currentEmployees.length === 0) return; 
@@ -653,6 +666,8 @@
             const b = currentBreaks[key];
             const card = document.createElement('div');
             
+            const startedText = b.startTime ? `Started: ${formatAMPM(b.startTime)}` : '';
+
             if (b.status === 'pending') {
                 card.className = `break-card card-pending`;
                 let adminControls = '';
@@ -671,6 +686,24 @@
                     ${adminControls}
                 `;
             } 
+            else if (b.status === 'return_pending') {
+                card.className = `break-card card-unofficial`; // Yellow warning border
+                let adminControls = isStaffView ? 
+                    `<button class="btn btn-staff" disabled>Pending Admin Approval...</button>` : 
+                    `<button class="btn btn-success" onclick="window.approveReturn('${key}')">Approve Return</button>`;
+                
+                card.innerHTML = `
+                    <div class="break-info">
+                        <span class="break-name">${b.name}</span>
+                        <span class="break-type" style="color: #F59E0B;">🟡 RETURN REQUESTED</span>
+                        <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">
+                            ${startedText}<br>Requested: ${formatAMPM(b.returnRequestedTime)}
+                        </div>
+                    </div>
+                    <span class="break-timer" data-start="${b.startTime}" data-limit="${b.limit}" data-end="${b.returnRequestedTime}">00:00</span>
+                    ${adminControls}
+                `;
+            }
             else {
                 const isOfficial = b.limit === 30;
                 card.className = `break-card ${isOfficial ? 'card-official' : 'card-unofficial'}`;
@@ -678,9 +711,12 @@
                     <div class="break-info">
                         <span class="break-name">${b.name}</span>
                         <span class="break-type" style="color: ${isOfficial ? '#10B981' : '#F59E0B'}">${b.type} (ON BREAK)</span>
+                        <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">
+                            ${startedText}
+                        </div>
                     </div>
                     <span class="break-timer" data-start="${b.startTime}" data-limit="${b.limit}">00:00</span>
-                    <button class="btn btn-success" onclick="window.endBreak('${key}')">Return & Dismiss</button>
+                    <button class="btn btn-primary" onclick="window.requestReturn('${key}')">Request Return</button>
                 `;
             }
             grid.appendChild(card);
@@ -700,7 +736,13 @@
             const start = parseInt(timerEl.getAttribute('data-start'));
             const limit = parseInt(timerEl.getAttribute('data-limit'));
             
-            const diffSecs = Math.floor((now - start) / 1000);
+            // If the employee requested to return, use THAT frozen time. Otherwise, use the live ticking clock.
+            const endStr = timerEl.getAttribute('data-end');
+            const end = (endStr && endStr !== "undefined") ? parseInt(endStr) : now;
+            
+            if (!start) return;
+
+            const diffSecs = Math.floor((end - start) / 1000);
             const mins = Math.floor(diffSecs / 60);
             const secs = diffSecs % 60;
             
@@ -778,10 +820,22 @@
         remove(ref(db, 'breaks/' + key)); 
     };
 
-    window.endBreak = function(key) {
+    // --- NEW: TWO-STEP RETURN LOGIC ---
+    window.requestReturn = function(key) {
+        const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
         const breakData = currentBreaks[key];
         if (breakData) {
-            breakData.status = 'completed'; 
+            breakData.status = 'return_pending'; 
+            breakData.returnRequestedTime = new Date(tzStr).getTime(); // FREEZE THE TIMER HERE
+            set(ref(db, 'breaks/' + key), breakData);
+        }
+    };
+
+    window.approveReturn = function(key) {
+        if (!requireAdmin()) return;
+        const breakData = currentBreaks[key];
+        if (breakData) {
+            breakData.status = 'completed'; // Permanently dismiss the break
             set(ref(db, 'breaks/' + key), breakData);
         }
     };
