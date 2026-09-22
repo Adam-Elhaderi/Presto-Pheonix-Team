@@ -41,8 +41,6 @@
             --official-border: rgba(16, 185, 129, 0.4);
             --pending-bg: rgba(239, 68, 68, 0.1);
             --pending-border: rgba(239, 68, 68, 0.5);
-            --auto-bg: rgba(59, 130, 246, 0.1);
-            --auto-border: rgba(59, 130, 246, 0.5);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', system-ui, sans-serif; }
@@ -140,7 +138,6 @@
         .break-card.card-official { border-color: var(--official-border); background: var(--official-bg); }
         .break-card.card-unofficial { border-color: var(--warning-border); background: var(--warning-bg); }
         .break-card.card-pending { border-color: var(--pending-border); background: var(--pending-bg); animation: pulseAlert 1.5s infinite alternate; }
-        .break-card.card-auto { border-color: var(--auto-border); background: var(--auto-bg); animation: pulseAlertBlue 2s infinite alternate; }
         
         .break-info { display: flex; flex-direction: column; gap: 4px; }
         .break-name { font-size: 14px; font-weight: 700; color: var(--text-main); }
@@ -150,7 +147,6 @@
         
         @keyframes pulse { from { opacity: 1; } to { opacity: 0.6; } }
         @keyframes pulseAlert { from { box-shadow: 0 0 5px rgba(239, 68, 68, 0.2); } to { box-shadow: 0 0 15px rgba(239, 68, 68, 0.6); } }
-        @keyframes pulseAlertBlue { from { box-shadow: 0 0 5px rgba(59, 130, 246, 0.2); } to { box-shadow: 0 0 15px rgba(59, 130, 246, 0.6); } }
 
         /* --- CONTROLS & TABLE --- */
         .controls-bar { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; gap: 15px; }
@@ -197,13 +193,15 @@
         .badge-overlap { background: var(--overlap-bg); border-color: var(--overlap-border); color: var(--overlap-text); }
         .badge-single { background: var(--single-bg); border-color: var(--single-border); color: var(--single-text); }
         
-        /* --- RULES SECTION --- */
-        .rules-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 16px; margin-top: 10px;}
-        .rules-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; }
+        /* --- FULL RULES SECTION --- */
+        .rules-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 12px; margin-top: 10px;}
+        .rules-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 8px;}
         .rules-header h2 { font-size: 14px; font-weight: 700; text-transform: uppercase; color: var(--primary); }
         .rules-header span.ar-title { font-family: 'Cairo', sans-serif; font-size: 15px; font-weight: 700; color: #CBD5E1; }
-        .rule-item { background: var(--bg-body); border: 1px solid var(--border-color); border-radius: 8px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; border-left: 4px solid var(--primary); background: linear-gradient(90deg, rgba(255,59,0,0.05) 0%, var(--bg-body) 100%);}
-        .rule-ar { direction: rtl; text-align: right; font-family: 'Cairo', 'Tajawal', sans-serif; font-size: 12.5px; font-weight: 600; color: #F1F5F9; line-height: 1.5; }
+        
+        .rule-item { background: var(--bg-body); border: 1px solid var(--border-color); border-radius: 8px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; border-left: 3px solid #475569; }
+        .rule-item.featured { border-left-color: var(--primary); background: linear-gradient(90deg, rgba(255,59,0,0.05) 0%, var(--bg-body) 100%); }
+        .rule-ar { direction: rtl; text-align: right; font-family: 'Cairo', 'Tajawal', sans-serif; font-size: 13px; font-weight: 600; color: #F1F5F9; line-height: 1.5; }
         .rule-en { direction: ltr; text-align: left; font-size: 11.5px; color: var(--text-muted); line-height: 1.4; }
 
         @media (max-width: 900px) {
@@ -330,9 +328,30 @@
             <h2>Operational Conduct & Policy Rules</h2>
             <span class="ar-title">تعليمات وإرشادات العمل الرسمية</span>
         </div>
+        
+        <div class="rule-item">
+            <div class="rule-ar">١. مدة الاستراحة المجدولة هي ٣٠ دقيقة فقط. الاستراحات غير المجدولة تقتصر على ١٠ دقائق وتتطلب موافقة الإدارة.</div>
+            <div class="rule-en">1. Scheduled breaks are strictly 30 minutes. Unscheduled breaks are limited to 10 minutes and require management approval.</div>
+        </div>
+
+        <div class="rule-item">
+            <div class="rule-ar">٢. يجب على الموظف تأكيد خروجه وعودته من الاستراحة باستخدام النظام الإلكتروني الداشبورد لضمان دقة التوقيت.</div>
+            <div class="rule-en">2. Employees must confirm their departure and return from breaks using the electronic dashboard to ensure accurate timing.</div>
+        </div>
+
+        <div class="rule-item">
+            <div class="rule-ar">٣. الحد الأقصى للموظفين المسموح لهم بالخروج للاستراحة في نفس الوقت هو موظفين اثنين فقط للحفاظ على سير العمل.</div>
+            <div class="rule-en">3. A maximum of two employees are allowed on break at the same time to maintain proper floor operations.</div>
+        </div>
+
+        <div class="rule-item">
+            <div class="rule-ar">٤. التأخير في العودة من الاستراحة سيتم تسجيله تلقائياً في النظام بلون أحمر وسيؤثر على التقييم الإداري.</div>
+            <div class="rule-en">4. Late returns from breaks will be automatically recorded in the system in red and will affect administrative evaluations.</div>
+        </div>
+
         <div class="rule-item featured">
             <div class="rule-ar">٥. يجب على جميع الموظفين الالتزام التام بالمواعيد المحددة لاستراحتهم وفقاً للجدول المعتمد، ولا يُسمح تحت أي ظرف بالخروج في الاستراحة المخصصة لموظف آخر في حال غيابه إلا بعد الحصول على إذن المشرف المباشر.</div>
-            <div class="rule-en">All employees must strictly adhere to their designated break schedules as approved. Taking a break during another employee's assigned time—including during their absence—is strictly prohibited without prior authorization from the direct supervisor.</div>
+            <div class="rule-en">5. All employees must strictly adhere to their designated break schedules as approved. Taking a break during another employee's assigned time—including during their absence—is strictly prohibited without prior authorization from the direct supervisor.</div>
         </div>
     </section>
 
@@ -393,7 +412,6 @@
         { id: 19, timeStart: "01:00 AM", timeEnd: "01:30 AM", overlap: "1 Staff" }
     ];
 
-    // Master list with explicitly declared "assignedDayOff" (Permanent DB storage)
     const defaultEmployees = [
         { name: "Sanad Ghaith", shift: "Shift A", isLocked: false, dayOff: "None", assignedDayOff: "Saturday" },
         { name: "Mohammed Kharwat", shift: "Shift A", isLocked: false, dayOff: "None", assignedDayOff: "Sunday" },
@@ -468,7 +486,6 @@
                 set(ref(db, 'system/lastBusinessDate'), businessDateStr);
                 remove(ref(db, 'breaks')); 
                 
-                // Automatically set everyone to Present or Absent based on their PERMANENT schedule
                 let resetRoster = currentEmployees.map(emp => {
                     let permOff = emp.assignedDayOff || "None";
                     emp.dayOff = (permOff === businessDayStr) ? businessDayStr : "None";
@@ -481,7 +498,7 @@
         }, { onlyOnce: true });
     }, 60000);
 
-    // --- TIME PARSER & AUTO-TRIGGER LOGIC ---
+    // --- TIME PARSER LOGIC ---
     function parseToDate(timeStr) {
         const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
         const [time, modifier] = timeStr.split(' ');
@@ -508,33 +525,6 @@
         return now >= graceStart && now <= endDate;
     }
 
-    setInterval(() => {
-        if (!currentEmployees.length) return;
-        const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
-        const now = new Date(tzStr);
-        
-        currentEmployees.forEach((emp, index) => {
-            if (emp.dayOff !== 'None') return; 
-            
-            const safeKey = emp.name.replace(/[.#$[\]]/g, '');
-            if (currentBreaks[safeKey]) return; 
-            
-            const startDate = parseToDate(fixedSlots[index].timeStart);
-            const timeDiff = now.getTime() - startDate.getTime();
-            
-            if (timeDiff >= 0 && timeDiff < 2 * 3600 * 1000) {
-                set(ref(db, 'breaks/' + safeKey), {
-                    name: emp.name,
-                    startTime: startDate.getTime(), 
-                    limit: 30,
-                    type: "Scheduled (30m)",
-                    status: "auto_started",
-                    confirmed: false
-                });
-            }
-        });
-    }, 10000); 
-
     function requireAdmin() {
         if (isUnlocked) return true;
         const pin = prompt("Enter Supervisor PIN to Approve/Deny:");
@@ -547,7 +537,6 @@
     onValue(ref(db, 'roster'), (snapshot) => {
         const data = snapshot.val();
         if (data) { 
-            // Migration safe check: Ensure existing DB entries get the assignedDayOff property
             currentEmployees = data.map((emp, i) => {
                 if (!emp.assignedDayOff) {
                     emp.assignedDayOff = defaultEmployees[i] ? defaultEmployees[i].assignedDayOff : "None";
@@ -556,7 +545,6 @@
             });
         } 
         else {
-            // First time load setup
             const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
             const businessTime = new Date(new Date(tzStr).getTime() - (4 * 3600 * 1000));
             const todayDayStr = businessTime.toLocaleString('en-US', { weekday: 'long' });
@@ -672,17 +660,6 @@
                     ${adminControls}
                 `;
             } 
-            else if (b.status === 'auto_started' && !b.confirmed) {
-                card.className = `break-card card-auto`;
-                card.innerHTML = `
-                    <div class="break-info">
-                        <span class="break-name">${b.name}</span>
-                        <span class="break-type" style="color: #3B82F6;">🔵 SCHEDULED - AWAITING CONFIRMATION</span>
-                    </div>
-                    <span class="break-timer" data-start="${b.startTime}" data-limit="${b.limit}">00:00</span>
-                    <button class="btn btn-staff" onclick="window.confirmDeparture('${key}')">Confirm Departure</button>
-                `;
-            }
             else {
                 const isOfficial = b.limit === 30;
                 card.className = `break-card ${isOfficial ? 'card-official' : 'card-unofficial'}`;
@@ -759,11 +736,10 @@
         if (isOfficial) {
             set(ref(db, 'breaks/' + safeKey), {
                 name: empName,
-                startTime: parseToDate(fixedSlots[index].timeStart).getTime(), 
+                startTime: new Date(tzStr).getTime(), 
                 limit: 30,
                 type: "Scheduled (30m)",
-                status: "active",
-                confirmed: true
+                status: "active"
             });
         } else {
             alert(`It is currently not the scheduled break time for ${empName}.\n\nA request for a 10-minute quick break has been sent to the Admin.`);
@@ -782,7 +758,6 @@
         const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
         const breakData = currentBreaks[key];
         breakData.status = 'active';
-        breakData.confirmed = true;
         breakData.startTime = new Date(tzStr).getTime(); 
         set(ref(db, 'breaks/' + key), breakData);
     };
@@ -792,15 +767,6 @@
         remove(ref(db, 'breaks/' + key)); 
     };
 
-    window.confirmDeparture = function(key) {
-        const breakData = currentBreaks[key];
-        if (breakData) {
-            breakData.status = 'active';
-            breakData.confirmed = true;
-            set(ref(db, 'breaks/' + key), breakData);
-        }
-    }
-
     window.endBreak = function(key) {
         const breakData = currentBreaks[key];
         if (breakData) {
@@ -809,12 +775,11 @@
         }
     };
 
-    // --- NEW: PERMANENT DAY OFF DROPDOWN ---
+    // --- PERMANENT DAY OFF DROPDOWN ---
     window.updatePermanentDayOff = function(index, newStatus) {
         if (isStaffView) return; 
         currentEmployees[index].assignedDayOff = newStatus;
         
-        // Instantly verify if this changes their status TODAY
         const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
         const businessTime = new Date(new Date(tzStr).getTime() - (4 * 3600 * 1000));
         const todayDayStr = businessTime.toLocaleString('en-US', { weekday: 'long' });
@@ -823,13 +788,13 @@
         set(ref(db, 'roster'), currentEmployees);
     };
 
-    // --- NEW: FORCED DAILY ABSENCE BUTTON ---
+    // --- FORCED DAILY ABSENCE BUTTON ---
     window.toggleForceAbsent = function(index) {
         if (isStaffView) return;
         if (currentEmployees[index].dayOff === "None") {
-            currentEmployees[index].dayOff = "Off Duty"; // Force absent today
+            currentEmployees[index].dayOff = "Off Duty"; 
         } else {
-            currentEmployees[index].dayOff = "None"; // Force present today
+            currentEmployees[index].dayOff = "None"; 
         }
         set(ref(db, 'roster'), currentEmployees);
     };
