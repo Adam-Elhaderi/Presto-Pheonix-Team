@@ -25,6 +25,12 @@
             --shift-b-bg: rgba(244, 63, 94, 0.1);
             --shift-b-border: rgba(244, 63, 94, 0.3);
             --shift-b-text: #FB7185;
+            --shift-custom-bg: rgba(168, 85, 247, 0.1);
+            --shift-custom-border: rgba(168, 85, 247, 0.3);
+            --shift-custom-text: #A855F7;
+            --team-bg: rgba(16, 185, 129, 0.1);
+            --team-border: rgba(16, 185, 129, 0.3);
+            --team-text: #10B981;
             --overlap-bg: rgba(251, 191, 36, 0.1);
             --overlap-border: rgba(251, 191, 36, 0.3);
             --overlap-text: #FBBF24;
@@ -134,19 +140,27 @@
         .tracker-header { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 700; color: #FFFFFF; text-transform: uppercase; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 15px; }
         .tracker-grid { display: flex; flex-wrap: wrap; gap: 12px; }
         
-        .break-card { background: var(--bg-body); border: 1px solid var(--border-color); border-radius: 8px; padding: 14px; display: flex; align-items: center; justify-content: space-between; gap: 15px; min-width: 320px; flex-grow: 1; max-width: 450px; }
+        .break-card { background: var(--bg-body); border: 1px solid var(--border-color); border-radius: 8px; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; gap: 15px; min-width: 380px; flex-grow: 1; max-width: 500px; box-shadow: inset 0 0 20px rgba(0,0,0,0.2); }
         .break-card.card-official { border-color: var(--official-border); background: var(--official-bg); }
         .break-card.card-unofficial { border-color: var(--warning-border); background: var(--warning-bg); }
         .break-card.card-pending { border-color: var(--pending-border); background: var(--pending-bg); animation: pulseAlert 1.5s infinite alternate; }
         
-        .break-info { display: flex; flex-direction: column; gap: 4px; }
-        .break-name { font-size: 14px; font-weight: 700; color: var(--text-main); }
+        .break-info { display: flex; flex-direction: column; gap: 4px; flex-grow: 1; }
+        .break-name { font-size: 15px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
+        .break-shift-badge { background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 600; letter-spacing: 0.5px; color: var(--text-muted); }
         .break-type { font-size: 10px; font-weight: 800; text-transform: uppercase; opacity: 0.9; }
-        .break-timer { font-size: 22px; font-weight: 800; color: var(--text-main); font-variant-numeric: tabular-nums; }
-        .break-timer.overtime { color: #EF4444; animation: pulse 1s infinite alternate; }
+        
+        .break-meta { display: flex; gap: 8px; font-size: 11px; color: var(--text-muted); margin-top: 6px; font-weight: 600; flex-wrap: wrap; }
+        .break-meta span { display: flex; align-items: center; gap: 4px; background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 4px; }
+        
+        .break-timer-group { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+        .break-timer { font-size: 26px; font-weight: 800; color: var(--text-main); font-variant-numeric: tabular-nums; line-height: 1; transition: color 0.3s; }
+        .break-timer.overtime { color: #EF4444; animation: pulseRed 1s infinite alternate; }
+        .break-load-warning { color: #EF4444 !important; animation: pulseRed 1s infinite alternate; }
         
         @keyframes pulse { from { opacity: 1; } to { opacity: 0.6; } }
         @keyframes pulseAlert { from { box-shadow: 0 0 5px rgba(239, 68, 68, 0.2); } to { box-shadow: 0 0 15px rgba(239, 68, 68, 0.6); } }
+        @keyframes pulseRed { from { opacity: 1; text-shadow: 0 0 5px rgba(239,68,68,0.3); } to { opacity: 0.7; text-shadow: 0 0 15px rgba(239,68,68,0.8); } }
 
         /* --- CONTROLS & TABLE --- */
         .controls-bar { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; gap: 15px; }
@@ -164,19 +178,21 @@
         tbody tr { border-bottom: 1px solid var(--border-color); transition: background-color 0.15s ease, opacity 0.2s ease; }
         tbody tr:last-child { border-bottom: none; }
         tbody tr:hover { background: var(--bg-card-hover); }
-        tbody tr.row-off-duty { opacity: 0.55; background-color: rgba(15, 23, 42, 0.35); }
+        tbody tr.row-off-duty { opacity: 0.45; background-color: rgba(15, 23, 42, 0.45); }
         td { padding: 12px 18px; font-size: 13px; }
 
-        .col-id { width: 50px; text-align: center; color: var(--text-muted); font-weight: 600; }
-        .col-name { font-weight: 600; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
-        .col-dayoff { width: 180px; }
-        .col-shift { width: 250px; }
-        .col-time { width: 130px; font-weight: 700; color: var(--primary); }
-        .col-overlap { width: 130px; text-align: center; }
+        .col-pc { width: 70px; text-align: center; color: var(--shift-a-text); font-weight: 700; }
+        .col-id { width: 40px; text-align: center; color: var(--text-muted); font-weight: 600; }
+        .col-name { font-weight: 600; color: var(--text-main); }
+        .col-quotas { width: 110px; text-align: center; }
+        .col-dayoff { width: 170px; }
+        .col-shift { width: 230px; }
+        .col-time { width: 110px; font-weight: 700; color: var(--primary); }
+        .col-overlap { width: 100px; text-align: center; }
 
         .btn-mini-break { background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); border-radius: 6px; padding: 6px 10px; font-size: 12px; font-weight: 600; cursor: pointer; color: var(--text-main); transition: all 0.2s; }
         .btn-mini-break:hover { background: var(--primary-glow); border-color: var(--primary); color: var(--primary); }
-        .btn-mini-break:disabled { opacity: 0.3; cursor: not-allowed; border-color: transparent; }
+        .btn-mini-break:disabled { opacity: 0.2; cursor: not-allowed; border-color: transparent; }
         
         .editable-name { display: inline-block; padding: 4px 8px; border-radius: 6px; border: 1px transparent solid; outline: none; transition: all 0.2s ease; }
         .editable-name[contenteditable="true"]:hover { background: rgba(255, 255, 255, 0.05); border-color: var(--border-color); cursor: pointer; }
@@ -187,12 +203,34 @@
         .dayoff-select:disabled { cursor: not-allowed; opacity: 0.8; border-color: transparent; }
 
         .lock-badge { background: rgba(239, 68, 68, 0.15); color: #F87171; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(239, 68, 68, 0.3); }
-        .status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; border: 1px solid transparent; }
+        .status-badge { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; border: 1px solid transparent; }
         .badge-shift-a { background: var(--shift-a-bg); border-color: var(--shift-a-border); color: var(--shift-a-text); }
         .badge-shift-b { background: var(--shift-b-bg); border-color: var(--shift-b-border); color: var(--shift-b-text); }
+        .badge-shift-custom { background: var(--shift-custom-bg); border-color: var(--shift-custom-border); color: var(--shift-custom-text); }
+        .badge-team { background: var(--team-bg); border-color: var(--team-border); color: var(--team-text); margin-top: 4px; }
         .badge-overlap { background: var(--overlap-bg); border-color: var(--overlap-border); color: var(--overlap-text); }
         .badge-single { background: var(--single-bg); border-color: var(--single-border); color: var(--single-text); }
         
+        /* --- EMPLOYEE MANAGER MODAL --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .modal-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; width: 95%; max-width: 650px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; }
+        .modal-header h2 { font-size: 18px; font-weight: 700; color: var(--text-main); margin: 0; }
+        .close-btn { background: transparent; border: none; color: var(--text-muted); font-size: 24px; cursor: pointer; transition: color 0.2s; }
+        .close-btn:hover { color: #EF4444; }
+        
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        .form-group label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700; }
+        .form-control { background: var(--bg-body); border: 1px solid var(--border-color); color: var(--text-main); padding: 10px; border-radius: 8px; font-size: 13px; outline: none; }
+        .form-control:focus { border-color: var(--primary); }
+        
+        .emp-list-container { margin-top: 25px; border-top: 1px solid var(--border-color); padding-top: 20px; }
+        .emp-list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: var(--bg-body); border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 8px; }
+        .emp-list-info { display: flex; flex-direction: column; gap: 4px; }
+        .emp-list-name { font-weight: 600; font-size: 14px; color: var(--text-main); }
+        .emp-list-meta { font-size: 11px; color: var(--text-muted); font-weight: 600; }
+
         /* --- FULL RULES SECTION --- */
         .rules-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 12px; margin-top: 10px;}
         .rules-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 8px;}
@@ -210,10 +248,82 @@
             .holo-clock-container { order: -1; margin-bottom: 10px; width: 100%; }
             .controls-bar, .admin-controls { flex-direction: column; align-items: stretch; gap: 12px; }
             .break-card { max-width: 100%; }
+            .form-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
+
+<!-- EMPLOYEE MANAGER MODAL -->
+<div id="employeeModal" class="modal-overlay">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h2>⚙️ Manage Roster & Shifts</h2>
+            <button class="close-btn" onclick="window.closeEmployeeManager()">×</button>
+        </div>
+        
+        <!-- Auto-Schedule Break Engine -->
+        <div style="background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.2); padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+            <h3 style="font-size: 13px; text-transform: uppercase; color: #10B981; margin-bottom: 10px; font-weight: 700;">⏱️ Auto-Schedule Shift Breaks</h3>
+            <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 15px; line-height: 1.4;">Select a shift and set when the very first break starts. The system will automatically stagger 30-minute breaks every 15 minutes for everyone assigned to that shift.</p>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Target Shift Name</label>
+                    <input type="text" id="autoShiftName" class="form-control" placeholder="e.g. Shift A" value="Shift A (07:00 PM - 02:00 AM)">
+                </div>
+                <div class="form-group">
+                    <label>First Break Starts At</label>
+                    <input type="time" id="autoShiftStart" class="form-control">
+                </div>
+            </div>
+            <button class="btn btn-success" style="width: 100%; margin-top: 5px;" onclick="window.autoAssignBreaks()">Auto-Assign Breaks for Shift</button>
+        </div>
+
+        <!-- Add New Employee Form -->
+        <div style="background: rgba(56, 189, 248, 0.05); border: 1px solid rgba(56, 189, 248, 0.2); padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+            <h3 style="font-size: 13px; text-transform: uppercase; color: #38BDF8; margin-bottom: 15px; font-weight: 700;">➕ Add New Employee</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Employee Name</label>
+                    <input type="text" id="newEmpName" class="form-control" placeholder="e.g. Ali Hassan">
+                </div>
+                <div class="form-group">
+                    <label>PC Number</label>
+                    <input type="text" id="newEmpPC" class="form-control" placeholder="e.g. PC-14">
+                </div>
+                <div class="form-group">
+                    <label>Team Name</label>
+                    <input type="text" id="newEmpTeam" class="form-control" placeholder="e.g. Phoenix Team" value="Main Team">
+                </div>
+                <div class="form-group">
+                    <label>Assigned Shift Window</label>
+                    <input type="text" id="newEmpShift" class="form-control" placeholder="e.g. Shift C (08:00 AM - 04:00 PM)" value="Shift A (07:00 PM - 02:00 AM)">
+                </div>
+                <div class="form-group">
+                    <label>Permanent Day Off</label>
+                    <select id="newEmpDayOff" class="form-control">
+                        <option value="None">None</option>
+                        <option value="Sunday">Sunday</option>
+                        <option value="Monday">Monday</option>
+                        <option value="Tuesday">Tuesday</option>
+                        <option value="Wednesday">Wednesday</option>
+                        <option value="Thursday">Thursday</option>
+                        <option value="Friday">Friday</option>
+                        <option value="Saturday">Saturday</option>
+                    </select>
+                </div>
+            </div>
+            <p style="font-size: 10px; color: var(--text-muted); margin-bottom: 10px;">*Break times will default to 12:00 AM. Use the <strong>Auto-Schedule</strong> tool above to automatically calculate breaks for new employees.</p>
+            <button class="btn btn-staff" style="width: 100%;" onclick="window.addEmployee()">Save New Employee to Cloud</button>
+        </div>
+
+        <!-- Remove Employees List -->
+        <div class="emp-list-container">
+            <h3 style="font-size: 13px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 15px; font-weight: 700;">🗑️ Current Roster (Lock / Delete)</h3>
+            <div id="modalEmpList"></div>
+        </div>
+    </div>
+</div>
 
 <div class="workspace-wrapper">
 
@@ -226,7 +336,6 @@
             <p>Live Cloud Synchronized Roster & Smart Break Automation</p>
         </div>
 
-        <!-- MODERN HOLOGRAM CLOCK -->
         <div class="holo-clock-container">
             <div class="holo-time" id="osdTime">--:--:-- --</div>
             <div class="holo-date" id="osdDate">Loading Time...</div>
@@ -250,14 +359,14 @@
             <span class="metric-sub" id="metricOffSub">Loading...</span>
         </div>
         <div class="metric-card">
-            <span class="metric-label">Min Floor Coverage</span>
-            <span class="metric-value" id="metricCoveragePct">...</span>
-            <span class="metric-sub" id="metricActiveFloor">Loading...</span>
+            <span class="metric-label">Live Floor Coverage</span>
+            <span class="metric-value" id="metricFloorStaff">...</span>
+            <span class="metric-sub" id="metricFloorSub" style="color: #10B981;">Loading...</span>
         </div>
         <div class="metric-card">
-            <span class="metric-label">Max Overlap</span>
-            <span class="metric-value">2 Staff</span>
-            <span class="metric-sub">Strict Capacity Cap</span>
+            <span class="metric-label">Active Break Load</span>
+            <span class="metric-value" id="metricBreakLoad">...</span>
+            <span class="metric-sub">Max 2 Concurrent Allowed</span>
         </div>
     </section>
 
@@ -279,21 +388,16 @@
         </div>
         <div class="actions-group">
             <div class="cloud-badge">🟢 Live Database Synced</div>
-            <button class="btn btn-staff" onclick="window.copyStaffLink()">
-                📱 Copy Staff Link
-            </button>
-            <button id="reshuffleBtn" class="btn btn-success" onclick="window.reshuffleSchedule()" disabled style="opacity: 0.5; cursor: not-allowed;">
-                🔄 Reshuffle Operations
-            </button>
-            <button id="authBtn" class="btn" onclick="window.toggleAuth()">
-                🔒 Unlock Controls
-            </button>
+            <button class="btn btn-staff" onclick="window.copyStaffLink()">📱 Copy Staff Link</button>
+            <button class="btn" style="background: rgba(56, 189, 248, 0.1); border-color: #38BDF8; color: #38BDF8;" onclick="window.openEmployeeManager()">⚙️ Manage Roster & Shifts</button>
+            <button id="reshuffleBtn" class="btn btn-success" onclick="window.reshuffleSchedule()" disabled style="opacity: 0.5; cursor: not-allowed;">🔄 Reshuffle Operations</button>
+            <button id="authBtn" class="btn" onclick="window.toggleAuth()">🔒 Unlock Controls</button>
         </div>
     </div>
 
     <div class="controls-bar">
         <div class="search-input-wrapper">
-            <input type="text" id="searchInput" class="search-input" placeholder="Search employee by name..." onkeyup="window.filterTable()">
+            <input type="text" id="searchInput" class="search-input" placeholder="Search employee by name, PC, team or shift..." onkeyup="window.filterTable()">
         </div>
         <div class="filter-tabs" id="filterTabs">
             <button class="tab-btn active" onclick="window.filterShift('all', this)">All Staff (<span id="countAll">0</span>)</button>
@@ -309,16 +413,18 @@
             <thead>
                 <tr>
                     <th class="col-id">#</th>
+                    <th class="col-pc">PC #</th>
                     <th>Employee Name</th>
+                    <th class="col-quotas">Daily Quotas</th>
                     <th class="col-dayoff">Attendance & Permanent Off</th>
-                    <th class="col-shift">Shift Window</th>
+                    <th class="col-shift">Shift & Team</th>
                     <th class="col-time">Break Start</th>
                     <th class="col-time">Break End</th>
                     <th class="col-overlap">Floor Overlap</th>
                 </tr>
             </thead>
             <tbody id="tableBody">
-                <tr><td colspan="7" style="text-align: center; padding: 30px;">Connecting to Live Cloud...</td></tr>
+                <tr><td colspan="9" style="text-align: center; padding: 30px;">Connecting to Live Cloud...</td></tr>
             </tbody>
         </table>
     </main>
@@ -333,27 +439,22 @@
             <div class="rule-ar">١. يُحظر التوقف بدون سبب مهني وجيه، أو إجراء المحادثات الجانبية والشخصية خلال أوقات العمل الرسمية.</div>
             <div class="rule-en">1. Loitering without a valid professional reason and engaging in side or personal conversations during official working hours are strictly prohibited.</div>
         </div>
-
         <div class="rule-item">
             <div class="rule-ar">٢. مدة الاستراحة المجدولة هي ٣٠ دقيقة فقط. الاستراحات غير المجدولة تقتصر على ١٠ دقائق وتتطلب موافقة الاشراف.</div>
             <div class="rule-en">2. Scheduled breaks are strictly 30 minutes. Unscheduled breaks are limited to 10 minutes and require management approval.</div>
         </div>
-
         <div class="rule-item">
             <div class="rule-ar">٣. يُحظر طلب استراحات إضافية غير مدرجة في الجدول خلال أوقات الذروة.</div>
             <div class="rule-en">3. Requesting additional unscheduled breaks during peak hours is strictly prohibited.</div>
         </div>
-
         <div class="rule-item">
             <div class="rule-ar">٤. يجب على الموظف تأكيد خروجه وعودته من الاستراحة باستخدام النظام الإلكتروني الداشبورد لضمان دقة التوقيت.</div>
             <div class="rule-en">4. Employees must confirm their departure and return from breaks using the electronic dashboard to ensure accurate timing.</div>
         </div>
-
         <div class="rule-item">
             <div class="rule-ar">٥. يُحظر التنقل أو المغادرة دون الحصول على إذن مسبق من المشرف.</div>
             <div class="rule-en">5. Moving around or leaving the work area without prior permission from the supervisor is strictly prohibited.</div>
         </div>
-
         <div class="rule-item featured">
             <div class="rule-ar">٦. يجب على جميع الموظفين الالتزام التام بالمواعيد المحددة لاستراحتهم وفقاً للجدول المعتمد، ولا يُسمح تحت أي ظرف بالخروج في الاستراحة المخصصة لموظف آخر في حال غيابه إلا بعد الحصول على إذن المشرف المباشر.</div>
             <div class="rule-en">6. All employees must strictly adhere to their designated break schedules as approved. Taking a break during another employee's assigned time—including during their absence—is strictly prohibited without prior authorization from the direct supervisor.</div>
@@ -389,7 +490,7 @@
     if (isStaffView) {
         document.getElementById('adminControlsArea').style.display = 'none';
         document.getElementById('headerActions').style.display = 'none';
-        document.getElementById('filterTabs').style.display = 'none'; // Hides filtering tabs for staff
+        document.getElementById('filterTabs').style.display = 'none'; 
         document.getElementById('viewBadge').innerText = "Staff Dashboard";
         document.getElementById('viewBadge').style.background = "rgba(59, 130, 246, 0.15)";
         document.getElementById('viewBadge').style.color = "#3B82F6";
@@ -397,48 +498,47 @@
     }
 
     const fixedSlots = [
-        { id: 1, timeStart: "08:30 PM", timeEnd: "09:00 PM", overlap: "2 Staff" },
-        { id: 2, timeStart: "08:45 PM", timeEnd: "09:15 PM", overlap: "2 Staff" },
-        { id: 3, timeStart: "09:00 PM", timeEnd: "09:30 PM", overlap: "2 Staff" },
-        { id: 4, timeStart: "09:15 PM", timeEnd: "09:45 PM", overlap: "2 Staff" },
-        { id: 5, timeStart: "09:30 PM", timeEnd: "10:00 PM", overlap: "2 Staff" },
-        { id: 6, timeStart: "09:45 PM", timeEnd: "10:15 PM", overlap: "2 Staff" },
-        { id: 7, timeStart: "10:00 PM", timeEnd: "10:30 PM", overlap: "2 Staff" },
-        { id: 8, timeStart: "10:15 PM", timeEnd: "10:45 PM", overlap: "2 Staff" },
-        { id: 9, timeStart: "10:30 PM", timeEnd: "11:00 PM", overlap: "2 Staff" },
-        { id: 10, timeStart: "10:45 PM", timeEnd: "11:15 PM", overlap: "2 Staff" },
-        { id: 11, timeStart: "11:00 PM", timeEnd: "11:30 PM", overlap: "2 Staff" },
-        { id: 12, timeStart: "11:15 PM", timeEnd: "11:45 PM", overlap: "2 Staff" },
-        { id: 13, timeStart: "11:30 PM", timeEnd: "12:00 AM", overlap: "2 Staff" },
-        { id: 14, timeStart: "11:45 PM", timeEnd: "12:15 AM", overlap: "2 Staff" },
-        { id: 15, timeStart: "12:00 AM", timeEnd: "12:30 AM", overlap: "2 Staff" },
-        { id: 16, timeStart: "12:15 AM", timeEnd: "12:45 AM", overlap: "2 Staff" },
-        { id: 17, timeStart: "12:30 AM", timeEnd: "01:00 AM", overlap: "2 Staff" },
-        { id: 18, timeStart: "12:45 AM", timeEnd: "01:15 AM", overlap: "2 Staff" },
-        { id: 19, timeStart: "01:00 AM", timeEnd: "01:30 AM", overlap: "1 Staff" }
+        { timeStart: "08:30 PM", timeEnd: "09:00 PM", overlap: "2 Staff" },
+        { timeStart: "08:45 PM", timeEnd: "09:15 PM", overlap: "2 Staff" },
+        { timeStart: "09:00 PM", timeEnd: "09:30 PM", overlap: "2 Staff" },
+        { timeStart: "09:15 PM", timeEnd: "09:45 PM", overlap: "2 Staff" },
+        { timeStart: "09:30 PM", timeEnd: "10:00 PM", overlap: "2 Staff" },
+        { timeStart: "09:45 PM", timeEnd: "10:15 PM", overlap: "2 Staff" },
+        { timeStart: "10:00 PM", timeEnd: "10:30 PM", overlap: "2 Staff" },
+        { timeStart: "10:15 PM", timeEnd: "10:45 PM", overlap: "2 Staff" },
+        { timeStart: "10:30 PM", timeEnd: "11:00 PM", overlap: "2 Staff" },
+        { timeStart: "10:45 PM", timeEnd: "11:15 PM", overlap: "2 Staff" },
+        { timeStart: "11:00 PM", timeEnd: "11:30 PM", overlap: "2 Staff" },
+        { timeStart: "11:15 PM", timeEnd: "11:45 PM", overlap: "2 Staff" },
+        { timeStart: "11:30 PM", timeEnd: "12:00 AM", overlap: "2 Staff" },
+        { timeStart: "11:45 PM", timeEnd: "12:15 AM", overlap: "2 Staff" },
+        { timeStart: "12:00 AM", timeEnd: "12:30 AM", overlap: "2 Staff" },
+        { timeStart: "12:15 AM", timeEnd: "12:45 AM", overlap: "2 Staff" },
+        { timeStart: "12:30 AM", timeEnd: "01:00 AM", overlap: "2 Staff" },
+        { timeStart: "12:45 AM", timeEnd: "01:15 AM", overlap: "2 Staff" },
+        { timeStart: "01:00 AM", timeEnd: "01:30 AM", overlap: "1 Staff" }
     ];
 
-    // Master list with explicitly declared "assignedDayOff" (Permanent DB storage)
     const defaultEmployees = [
-        { name: "Sanad Ghaith", shift: "Shift A", isLocked: false, dayOff: "None", assignedDayOff: "Saturday" },
-        { name: "Mohammed Kharwat", shift: "Shift A", isLocked: false, dayOff: "None", assignedDayOff: "Sunday" },
-        { name: "Abdullah Dandi", shift: "Shift A", isLocked: true, dayOff: "None", assignedDayOff: "Monday" },
-        { name: "Abdullah Ali Al-Hamali", shift: "Shift A", isLocked: false, dayOff: "None", assignedDayOff: "Tuesday" },
-        { name: "Baraa Nader", shift: "Shift A", isLocked: false, dayOff: "None", assignedDayOff: "Sunday" },
-        { name: "Mohamed Hussein", shift: "Shift A", isLocked: false, dayOff: "None", assignedDayOff: "Saturday" },
-        { name: "Adam Al-Hudhiri", shift: "Shift A", isLocked: false, dayOff: "None", assignedDayOff: "Wednesday" },
-        { name: "Khalifa Abu Khabta", shift: "Shift A", isLocked: false, dayOff: "None", assignedDayOff: "Wednesday" },
-        { name: "Khaled Al-Osta", shift: "Shift A", isLocked: false, dayOff: "None", assignedDayOff: "Sunday" },
-        { name: "Basheer Al-Qanouni", shift: "Shift A", isLocked: false, dayOff: "None", assignedDayOff: "Wednesday" },
-        { name: "Abdulmaez Masoud", shift: "Shift A", isLocked: false, dayOff: "None", assignedDayOff: "Sunday" },
-        { name: "Mahmoud Farnana", shift: "Shift A", isLocked: false, dayOff: "None", assignedDayOff: "Saturday" },
-        { name: "Elyas Salem", shift: "Shift B", isLocked: false, dayOff: "None", assignedDayOff: "Tuesday" },
-        { name: "Hisham Al-Fleit", shift: "Shift B", isLocked: false, dayOff: "None", assignedDayOff: "Monday" },
-        { name: "Abdullah Al-Suwaib", shift: "Shift A", isLocked: false, dayOff: "None", assignedDayOff: "Monday" },
-        { name: "Mohammed Abu Kinda", shift: "Shift A", isLocked: false, dayOff: "None", assignedDayOff: "Tuesday" },
-        { name: "Mohamed Al-Tayeb", shift: "Shift A", isLocked: false, dayOff: "None", assignedDayOff: "Saturday" },
-        { name: "Ihab Al-Tarhouni", shift: "Shift A", isLocked: false, dayOff: "None", assignedDayOff: "Saturday" },
-        { name: "Tawfik Al-Jarushi", shift: "Shift A", isLocked: false, dayOff: "None", assignedDayOff: "Thursday" }
+        { name: "Sanad Ghaith", shift: "Shift A (07:00 PM - 02:00 AM)", isLocked: false, dayOff: "None", assignedDayOff: "Saturday" },
+        { name: "Mohammed Kharwat", shift: "Shift A (07:00 PM - 02:00 AM)", isLocked: false, dayOff: "None", assignedDayOff: "Sunday" },
+        { name: "Abdullah Dandi", shift: "Shift A (07:00 PM - 02:00 AM)", isLocked: true, dayOff: "None", assignedDayOff: "Monday" },
+        { name: "Abdullah Ali Al-Hamali", shift: "Shift A (07:00 PM - 02:00 AM)", isLocked: false, dayOff: "None", assignedDayOff: "Tuesday" },
+        { name: "Baraa Nader", shift: "Shift A (07:00 PM - 02:00 AM)", isLocked: false, dayOff: "None", assignedDayOff: "Sunday" },
+        { name: "Mohamed Hussein", shift: "Shift A (07:00 PM - 02:00 AM)", isLocked: false, dayOff: "None", assignedDayOff: "Saturday" },
+        { name: "Adam Al-Hudhiri", shift: "Shift A (07:00 PM - 02:00 AM)", isLocked: false, dayOff: "None", assignedDayOff: "Wednesday" },
+        { name: "Khalifa Abu Khabta", shift: "Shift A (07:00 PM - 02:00 AM)", isLocked: false, dayOff: "None", assignedDayOff: "Wednesday" },
+        { name: "Khaled Al-Osta", shift: "Shift A (07:00 PM - 02:00 AM)", isLocked: false, dayOff: "None", assignedDayOff: "Sunday" },
+        { name: "Basheer Al-Qanouni", shift: "Shift A (07:00 PM - 02:00 AM)", isLocked: false, dayOff: "None", assignedDayOff: "Wednesday" },
+        { name: "Abdulmaez Masoud", shift: "Shift A (07:00 PM - 02:00 AM)", isLocked: false, dayOff: "None", assignedDayOff: "Sunday" },
+        { name: "Mahmoud Farnana", shift: "Shift A (07:00 PM - 02:00 AM)", isLocked: false, dayOff: "None", assignedDayOff: "Saturday" },
+        { name: "Elyas Salem", shift: "Shift B (07:30 PM - 02:30 AM)", isLocked: false, dayOff: "None", assignedDayOff: "Tuesday" },
+        { name: "Hisham Al-Fleit", shift: "Shift B (07:30 PM - 02:30 AM)", isLocked: false, dayOff: "None", assignedDayOff: "Monday" },
+        { name: "Abdullah Al-Suwaib", shift: "Shift A (07:00 PM - 02:00 AM)", isLocked: false, dayOff: "None", assignedDayOff: "Monday" },
+        { name: "Mohammed Abu Kinda", shift: "Shift A (07:00 PM - 02:00 AM)", isLocked: false, dayOff: "None", assignedDayOff: "Tuesday" },
+        { name: "Mohamed Al-Tayeb", shift: "Shift A (07:00 PM - 02:00 AM)", isLocked: false, dayOff: "None", assignedDayOff: "Saturday" },
+        { name: "Ihab Al-Tarhouni", shift: "Shift A (07:00 PM - 02:00 AM)", isLocked: false, dayOff: "None", assignedDayOff: "Saturday" },
+        { name: "Tawfik Al-Jarushi", shift: "Shift A (07:00 PM - 02:00 AM)", isLocked: false, dayOff: "None", assignedDayOff: "Thursday" }
     ];
 
     const dayOffOptions = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "None"];
@@ -446,23 +546,17 @@
     let currentBreaks = {};
     let timerInterval = null;
 
-    // --- HOLOGRAM CLOCK SCRIPT (LOCKED TO TRIPOLI UTC+2 TIME) ---
+    // --- HOLOGRAM CLOCK SCRIPT ---
     function updateHoloClock() {
         const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
         const now = new Date(tzStr);
-        
-        let hours = now.getHours();
-        let minutes = now.getMinutes();
-        let seconds = now.getSeconds();
+        let hours = now.getHours(), minutes = now.getMinutes(), seconds = now.getSeconds();
         const ampm = hours >= 12 ? 'PM' : 'AM';
-        
-        hours = hours % 12;
-        hours = hours ? hours : 12; 
+        hours = hours % 12; hours = hours ? hours : 12; 
         minutes = minutes < 10 ? '0' + minutes : minutes;
         seconds = seconds < 10 ? '0' + seconds : seconds;
         
         const timeStr = hours + ':' + minutes + ':' + seconds + ' ' + ampm;
-        
         const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
         const dateStr = days[now.getDay()] + ', ' + months[now.getMonth()] + ' ' + now.getDate() + ', ' + now.getFullYear();
@@ -475,27 +569,21 @@
     setInterval(updateHoloClock, 1000);
     updateHoloClock(); 
 
-    // --- FORMAT TIMESTAMP TO AM/PM HELPER ---
     function formatAMPM(timestamp) {
         if (!timestamp) return '--:--';
         const d = new Date(timestamp);
-        let hours = d.getHours();
-        let minutes = d.getMinutes();
+        let hours = d.getHours(), minutes = d.getMinutes();
         const ampm = hours >= 12 ? 'PM' : 'AM';
-        hours = hours % 12;
-        hours = hours ? hours : 12; 
+        hours = hours % 12; hours = hours ? hours : 12; 
         minutes = minutes < 10 ? '0' + minutes : minutes;
         return hours + ':' + minutes + ' ' + ampm;
     }
 
-    // --- DAILY AUTO-RESET LOGIC (RESTAURANT BUSINESS DAY) ---
+    // --- DAILY AUTO-RESET LOGIC ---
     setInterval(() => {
         if (isStaffView || currentEmployees.length === 0) return; 
-        
         const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
         const now = new Date(tzStr);
-        
-        // 4:00 AM Rollover logic
         const businessTime = new Date(now.getTime() - (4 * 3600 * 1000));
         const businessDateStr = businessTime.toLocaleDateString('en-US'); 
         const businessDayStr = businessTime.toLocaleString('en-US', { weekday: 'long' }); 
@@ -506,21 +594,22 @@
                 set(ref(db, 'system/lastBusinessDate'), businessDateStr);
                 remove(ref(db, 'breaks')); 
                 
-                // Automatically set everyone to Present or Absent based on their PERMANENT schedule
                 let resetRoster = currentEmployees.map(emp => {
                     let permOff = emp.assignedDayOff || "None";
                     emp.dayOff = (permOff === businessDayStr) ? businessDayStr : "None";
+                    // Reset Daily Break Quotas
+                    emp.quota30 = 0;
+                    emp.quota10 = 0;
                     return emp;
                 });
-                
                 set(ref(db, 'roster'), resetRoster);
-                console.log("Automated Daily Attendance Reset Completed (4:00 AM Business Day Rollover)");
             }
         }, { onlyOnce: true });
     }, 60000);
 
-    // --- TIME PARSER LOGIC ---
+    // --- TIME PARSER & LIVE SHIFT VALIDATOR ---
     function parseToDate(timeStr) {
+        if(!timeStr) return new Date();
         const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
         const [time, modifier] = timeStr.split(' ');
         let [hours, minutes] = time.split(':');
@@ -537,10 +626,35 @@
         return d;
     }
 
-    function isOfficialBreakTime(index) {
+    function convertTimeFormat(time24) {
+        if(!time24) return "12:00 AM";
+        let [h, m] = time24.split(':');
+        let hours = parseInt(h);
+        let ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12;
+        return `${hours.toString().padStart(2, '0')}:${m} ${ampm}`;
+    }
+
+    function isCurrentlyOnShift(shiftString) {
+        const regex = /([0-1]?[0-9]:[0-5][0-9]\s*(?:AM|PM|am|pm))/g;
+        const times = shiftString.match(regex);
+        if (!times || times.length < 2) return true;
+
         const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
-        const startDate = parseToDate(fixedSlots[index].timeStart);
-        const endDate = parseToDate(fixedSlots[index].timeEnd);
+        const now = new Date(tzStr).getTime();
+        
+        const tStart = parseToDate(times[0].toUpperCase()).getTime() - (30 * 60000);
+        const tEnd = parseToDate(times[1].toUpperCase()).getTime();
+        
+        return now >= tStart && now <= tEnd;
+    }
+
+    function isOfficialBreakTime(index) {
+        const emp = currentEmployees[index];
+        const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
+        const startDate = parseToDate(emp.timeStart);
+        const endDate = parseToDate(emp.timeEnd);
         const graceStart = new Date(startDate.getTime() - 15 * 60000); 
         const now = new Date(tzStr);
         return now >= graceStart && now <= endDate;
@@ -548,7 +662,7 @@
 
     function requireAdmin() {
         if (isUnlocked) return true;
-        const pin = prompt("Enter Supervisor PIN to Approve/Deny:");
+        const pin = prompt("Enter Supervisor PIN to Approve/Deny/Edit:");
         if (pin === SECRET_PIN) return true;
         if (pin !== null) alert("Incorrect PIN. Action denied.");
         return false;
@@ -559,9 +673,17 @@
         const data = snapshot.val();
         if (data) { 
             currentEmployees = data.map((emp, i) => {
-                if (!emp.assignedDayOff) {
-                    emp.assignedDayOff = defaultEmployees[i] ? defaultEmployees[i].assignedDayOff : "None";
-                }
+                if (!emp.assignedDayOff) emp.assignedDayOff = defaultEmployees[i] ? defaultEmployees[i].assignedDayOff : "None";
+                if (!emp.timeStart) emp.timeStart = fixedSlots[i] ? fixedSlots[i].timeStart : "12:00 AM";
+                if (!emp.timeEnd) emp.timeEnd = fixedSlots[i] ? fixedSlots[i].timeEnd : "12:30 AM";
+                if (!emp.overlap) emp.overlap = fixedSlots[i] ? fixedSlots[i].overlap : "1 Staff";
+                if (!emp.pcNumber) emp.pcNumber = "PC-" + (i+1).toString().padStart(2, '0');
+                if (!emp.teamName) emp.teamName = defaultEmployees[i] ? defaultEmployees[i].teamName : "Main Team";
+                if (typeof emp.isLocked === 'undefined') emp.isLocked = defaultEmployees[i] ? defaultEmployees[i].isLocked : false;
+                if (typeof emp.quota30 === 'undefined') emp.quota30 = 0;
+                if (typeof emp.quota10 === 'undefined') emp.quota10 = 0;
+                if (emp.shift === 'Shift A') emp.shift = 'Shift A (07:00 PM - 02:00 AM)';
+                if (emp.shift === 'Shift B') emp.shift = 'Shift B (07:30 PM - 02:30 AM)';
                 return emp;
             });
         } 
@@ -570,8 +692,15 @@
             const businessTime = new Date(new Date(tzStr).getTime() - (4 * 3600 * 1000));
             const todayDayStr = businessTime.toLocaleString('en-US', { weekday: 'long' });
             
-            currentEmployees = defaultEmployees.map(emp => {
+            currentEmployees = defaultEmployees.map((emp, i) => {
                 emp.dayOff = (emp.assignedDayOff === todayDayStr) ? todayDayStr : "None";
+                emp.timeStart = fixedSlots[i] ? fixedSlots[i].timeStart : "12:00 AM";
+                emp.timeEnd = fixedSlots[i] ? fixedSlots[i].timeEnd : "12:30 AM";
+                emp.overlap = fixedSlots[i] ? fixedSlots[i].overlap : "1 Staff";
+                emp.pcNumber = "PC-" + (i+1).toString().padStart(2, '0');
+                emp.teamName = "Main Team";
+                emp.quota30 = 0;
+                emp.quota10 = 0;
                 return emp;
             });
             set(ref(db, 'roster'), currentEmployees);
@@ -592,14 +721,20 @@
 
         currentEmployees.forEach((emp, index) => {
             const isOffToday = emp.dayOff !== 'None';
+            const isOffShift = !isCurrentlyOnShift(emp.shift);
 
-            // NEW: Purely hide absent employees from the Staff View to keep the roster clean
-            if (isStaffView && isOffToday) return;
+            if (isStaffView && (isOffToday || isOffShift)) return;
 
-            const slot = fixedSlots[index];
-            const shiftClass = emp.shift === 'Shift A' ? 'badge-shift-a' : 'badge-shift-b';
-            const shiftText = emp.shift === 'Shift A' ? 'Shift A (07:00 PM – 02:00 AM)' : 'Shift B (07:30 PM – 02:30 AM)';
-            const overlapClass = slot.overlap === '2 Staff' ? 'badge-overlap' : 'badge-single';
+            let shiftClass = 'badge-shift-custom';
+            if (emp.shift.includes('Shift A')) shiftClass = 'badge-shift-a';
+            else if (emp.shift.includes('Shift B')) shiftClass = 'badge-shift-b';
+
+            let shiftBadgeHtml = `<span class="status-badge ${shiftClass}">${emp.shift}</span>`;
+            if (isOffShift && !isOffToday) {
+                shiftBadgeHtml += ` <br><span style="font-size:10px; color:#EF4444; font-weight:700;">(OFF SHIFT)</span>`;
+            }
+
+            const overlapClass = emp.overlap === '2 Staff' ? 'badge-overlap' : 'badge-single';
             
             const selectOptionsHtml = dayOffOptions.map(opt => {
                 const label = opt === 'None' ? 'No Permanent Day Off' : `Perm Off: ${opt}`;
@@ -608,21 +743,50 @@
             }).join('');
 
             const tr = document.createElement('tr');
-            if (isOffToday) tr.classList.add('row-off-duty');
+            if (isOffToday || isOffShift) tr.classList.add('row-off-duty');
 
             const editableAttr = isStaffView ? 'contenteditable="false"' : 'contenteditable="true"';
             const selectDisabled = isStaffView ? 'disabled' : '';
-            const breakDisabled = isOffToday ? 'disabled title="Employee is absent today"' : 'title="Request Break"';
+            const breakDisabled = (isOffToday || isOffShift) ? 'disabled title="Employee is absent or off shift"' : 'title="Request Break"';
 
             const presentBtnStyle = isOffToday ? 'color: #F87171; border-color: #F87171;' : 'color: #10B981; border-color: #10B981;';
             const presentBtnText = isOffToday ? '🔴 Absent Today' : '🟢 Present Today';
 
+            // Quota Badge Styling
+            const q30Maxed = (emp.quota30 >= 1);
+            const q10Maxed = (emp.quota10 >= 3);
+            const q30Bg = q30Maxed ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)';
+            const q30Color = q30Maxed ? '#EF4444' : '#10B981';
+            const q30Border = q30Maxed ? 'rgba(239, 68, 68, 0.3)' : 'rgba(16, 185, 129, 0.3)';
+            
+            const q10Bg = q10Maxed ? 'rgba(239, 68, 68, 0.1)' : 'rgba(56, 189, 248, 0.1)';
+            const q10Color = q10Maxed ? '#EF4444' : '#38BDF8';
+            const q10Border = q10Maxed ? 'rgba(239, 68, 68, 0.3)' : 'rgba(56, 189, 248, 0.3)';
+
             tr.innerHTML = `
-                <td class="col-id">${slot.id}</td>
+                <td class="col-id">${index + 1}</td>
+                <td class="col-pc">
+                    <span class="editable-name" ${editableAttr} onblur="window.updatePC(${index}, this.innerText)">${emp.pcNumber}</span>
+                </td>
                 <td class="col-name">
-                    <span class="editable-name" ${editableAttr} onblur="window.updateName(${index}, this.innerText)">${emp.name}</span>
-                    <button class="btn-mini-break" onclick="window.startBreak('${emp.name.replace(/'/g, "\\'")}', ${index})" ${breakDisabled}>☕ Break</button>
-                    ${emp.isLocked && !isStaffView ? '<span class="lock-badge">🔒 FIXED</span>' : ''}
+                    <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 6px;">
+                        <span class="editable-name" ${editableAttr} onblur="window.updateName(${index}, this.innerText)">${emp.name}</span>
+                        <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                            <button class="btn-mini-break" onclick="window.startBreak('${emp.name.replace(/'/g, "\\'")}', ${index}, 'standard')" ${breakDisabled}>☕ Break</button>
+                            <button class="btn-mini-break" style="color: #38BDF8; border-color: rgba(56, 189, 248, 0.3);" onclick="window.startBreak('${emp.name.replace(/'/g, "\\'")}', ${index}, 'prayer')" ${breakDisabled}>🕌 Prayer</button>
+                            ${!isStaffView ? `<button class="btn-mini-break" style="${emp.isLocked ? 'border-color: #F59E0B; color: #F59E0B;' : 'opacity: 0.6;'}" onclick="window.toggleLock(${index})" title="Prevent from Reshuffling">${emp.isLocked ? '🔒 Locked' : '🔓 Unlock'}</button>` : (emp.isLocked ? '<span class="lock-badge">🔒 FIXED</span>' : '')}
+                        </div>
+                    </div>
+                </td>
+                <td class="col-quotas">
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <span style="background: ${q30Bg}; color: ${q30Color}; border: 1px solid ${q30Border}; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; cursor: ${isStaffView ? 'default' : 'pointer'};" ${!isStaffView ? `onclick="window.resetQuota(${index}, '30')"` : ''} title="Official 30-Min Breaks">
+                            30 Min: ${emp.quota30} / 1
+                        </span>
+                        <span style="background: ${q10Bg}; color: ${q10Color}; border: 1px solid ${q10Border}; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; cursor: ${isStaffView ? 'default' : 'pointer'};" ${!isStaffView ? `onclick="window.resetQuota(${index}, '10')"` : ''} title="Quick 10-Min Breaks">
+                            10 Min: ${emp.quota10} / 3
+                        </span>
+                    </div>
                 </td>
                 <td class="col-dayoff">
                     <div style="display: flex; flex-direction: column; gap: 6px;">
@@ -634,10 +798,14 @@
                         </button>
                     </div>
                 </td>
-                <td class="col-shift"><span class="status-badge ${shiftClass}">${shiftText}</span></td>
-                <td class="col-time">${slot.timeStart}</td>
-                <td class="col-time">${slot.timeEnd}</td>
-                <td class="col-overlap"><span class="status-badge ${overlapClass}">${slot.overlap}</span></td>
+                <td class="col-shift">
+                    ${shiftBadgeHtml}
+                    <br>
+                    <span class="status-badge badge-team editable-name" ${editableAttr} onblur="window.updateTeam(${index}, this.innerText)">${emp.teamName || 'No Team'}</span>
+                </td>
+                <td class="col-time">${emp.timeStart}</td>
+                <td class="col-time">${emp.timeEnd}</td>
+                <td class="col-overlap"><span class="status-badge ${overlapClass}">${emp.overlap}</span></td>
             `;
             tbody.appendChild(tr);
         });
@@ -666,7 +834,16 @@
             const b = currentBreaks[key];
             const card = document.createElement('div');
             
-            const startedText = b.startTime ? `Started: ${formatAMPM(b.startTime)}` : '';
+            const empMatch = currentEmployees.find(e => e.name === b.name);
+            const shiftBadge = empMatch ? `<span class="break-shift-badge">${empMatch.shift.split(' ')[0]} ${empMatch.shift.split(' ')[1] || ''}</span>` : '';
+            const pcBadge = empMatch && empMatch.pcNumber ? `<span class="break-shift-badge" style="background: rgba(251, 191, 36, 0.2); color: #FBBF24;">${empMatch.pcNumber}</span>` : '';
+            const teamBadge = empMatch && empMatch.teamName && empMatch.teamName !== 'No Team' ? `<span class="break-shift-badge" style="background: rgba(16, 185, 129, 0.15); color: #10B981;">${empMatch.teamName}</span>` : '';
+            
+            const isPrayer = b.type === 'Prayer';
+            const startedText = b.startTime ? `▶ Start: ${formatAMPM(b.startTime)}` : '▶ Start: --:--';
+            
+            const endTimeMs = b.endTime || (b.startTime && b.limit > 0 ? b.startTime + (b.limit * 60000) : 0);
+            const endText = isPrayer ? `⏱️ Open Return` : (endTimeMs ? `🎯 Due: ${formatAMPM(endTimeMs)}` : '🎯 Due: --:--');
 
             if (b.status === 'pending') {
                 card.className = `break-card card-pending`;
@@ -680,28 +857,33 @@
                 }
                 card.innerHTML = `
                     <div class="break-info">
-                        <span class="break-name">${b.name}</span>
-                        <span class="break-type" style="color: #EF4444;">🔴 PENDING ADMIN APPROVAL</span>
+                        <span class="break-name">${b.name} ${pcBadge} ${teamBadge} ${shiftBadge}</span>
+                        <span class="break-type" style="color: #EF4444;">🔴 PENDING ADMIN APPROVAL ${b.limit > 0 ? `(${b.limit}m)` : ''}</span>
+                        <div style="font-size:11px; color:#EF4444; margin-top:4px; font-weight:700;">Type: ${b.type}</div>
                     </div>
                     ${adminControls}
                 `;
             } 
             else if (b.status === 'return_pending') {
-                card.className = `break-card card-unofficial`; // Yellow warning border
+                card.className = `break-card card-unofficial`; 
                 let adminControls = isStaffView ? 
-                    `<button class="btn btn-staff" disabled>Pending Admin Approval...</button>` : 
+                    `<button class="btn btn-staff" disabled>Pending Admin Auth...</button>` : 
                     `<button class="btn btn-success" onclick="window.approveReturn('${key}')">Approve Return</button>`;
                 
                 card.innerHTML = `
                     <div class="break-info">
-                        <span class="break-name">${b.name}</span>
+                        <span class="break-name">${b.name} ${pcBadge} ${teamBadge} ${shiftBadge}</span>
                         <span class="break-type" style="color: #F59E0B;">🟡 RETURN REQUESTED</span>
-                        <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">
-                            ${startedText}<br>Requested: ${formatAMPM(b.returnRequestedTime)}
+                        <div class="break-meta">
+                            <span>${startedText}</span>
+                            <span>${endText}</span>
+                            <span style="color: #F59E0B;">🛑 Req: ${formatAMPM(b.returnRequestedTime)}</span>
                         </div>
                     </div>
-                    <span class="break-timer" data-start="${b.startTime}" data-limit="${b.limit}" data-end="${b.returnRequestedTime}">00:00</span>
-                    ${adminControls}
+                    <div class="break-timer-group">
+                        <span class="break-timer" data-start="${b.startTime}" data-endtime="${endTimeMs}" data-end="${b.returnRequestedTime}"></span>
+                        ${adminControls}
+                    </div>
                 `;
             }
             else {
@@ -709,14 +891,17 @@
                 card.className = `break-card ${isOfficial ? 'card-official' : 'card-unofficial'}`;
                 card.innerHTML = `
                     <div class="break-info">
-                        <span class="break-name">${b.name}</span>
-                        <span class="break-type" style="color: ${isOfficial ? '#10B981' : '#F59E0B'}">${b.type} (ON BREAK)</span>
-                        <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">
-                            ${startedText}
+                        <span class="break-name">${b.name} ${pcBadge} ${teamBadge} ${shiftBadge}</span>
+                        <span class="break-type" style="color: ${isOfficial ? '#10B981' : '#38BDF8'}">${b.type} (ON BREAK)</span>
+                        <div class="break-meta">
+                            <span>${startedText}</span>
+                            <span>${endText}</span>
                         </div>
                     </div>
-                    <span class="break-timer" data-start="${b.startTime}" data-limit="${b.limit}">00:00</span>
-                    <button class="btn btn-primary" onclick="window.requestReturn('${key}')">Request Return</button>
+                    <div class="break-timer-group">
+                        <span class="break-timer" data-start="${b.startTime}" data-endtime="${endTimeMs}"></span>
+                        <button class="btn btn-primary" onclick="window.requestReturn('${key}')">Request Return</button>
+                    </div>
                 `;
             }
             grid.appendChild(card);
@@ -725,6 +910,7 @@
         if (timerInterval) clearInterval(timerInterval);
         updateTimers(); 
         timerInterval = setInterval(updateTimers, 1000);
+        updateAutomatedMetrics(); 
     }
 
     function updateTimers() {
@@ -733,68 +919,163 @@
         const now = new Date(tzStr).getTime();
         
         timers.forEach(timerEl => {
-            const start = parseInt(timerEl.getAttribute('data-start'));
-            const limit = parseInt(timerEl.getAttribute('data-limit'));
+            const startStr = timerEl.getAttribute('data-start');
+            const endTargetStr = timerEl.getAttribute('data-endtime');
+            const frozenStr = timerEl.getAttribute('data-end');
+
+            const start = startStr ? parseInt(startStr) : 0;
+            const endTarget = endTargetStr ? parseInt(endTargetStr) : 0;
             
-            // If the employee requested to return, use THAT frozen time. Otherwise, use the live ticking clock.
-            const endStr = timerEl.getAttribute('data-end');
-            const end = (endStr && endStr !== "undefined") ? parseInt(endStr) : now;
+            const currentOrFrozen = (frozenStr && frozenStr !== "undefined") ? parseInt(frozenStr) : now;
             
             if (!start) return;
 
-            const diffSecs = Math.floor((end - start) / 1000);
-            const mins = Math.floor(diffSecs / 60);
-            const secs = diffSecs % 60;
+            // If endTarget is 0, this is a STOPWATCH (Prayer Break)
+            if (endTarget === 0) {
+                let elapsedSecs = Math.floor((currentOrFrozen - start) / 1000);
+                const mins = Math.floor(elapsedSecs / 60);
+                const secs = elapsedSecs % 60;
+                timerEl.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                
+                if (mins >= 10) timerEl.classList.add('overtime');
+                else timerEl.classList.remove('overtime');
+                return;
+            }
+
+            // Normal Countdown
+            let remainingSecs = Math.floor((endTarget - currentOrFrozen) / 1000);
+            let isOvertime = remainingSecs < 0;
+            let absSecs = Math.abs(remainingSecs);
+
+            const mins = Math.floor(absSecs / 60);
+            const secs = absSecs % 60;
             
-            timerEl.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            const sign = isOvertime ? "-" : "";
+            timerEl.innerText = `${sign}${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
             
-            if (mins >= limit) timerEl.classList.add('overtime');
+            if (isOvertime) timerEl.classList.add('overtime');
             else timerEl.classList.remove('overtime');
         });
     }
 
+    // --- LIVE KPI LOGIC ---
     function updateAutomatedMetrics() {
+        let presentCount = 0;
+        let shiftAActive = 0;
+        let shiftBActive = 0;
+        let otherActive = 0;
+        let offCount = 0;
+
+        currentEmployees.forEach(e => {
+            if (e.dayOff !== 'None') {
+                offCount++;
+                return; 
+            }
+            if (!isCurrentlyOnShift(e.shift)) return; 
+
+            presentCount++;
+            if (e.shift.includes('Shift A')) shiftAActive++;
+            else if (e.shift.includes('Shift B')) shiftBActive++;
+            else otherActive++;
+        });
+
+        const activeBreaksCount = Object.values(currentBreaks).filter(b => b.status === 'active' || b.status === 'return_pending').length;
+        const liveFloorStaff = Math.max(0, presentCount - activeBreaksCount);
         const total = currentEmployees.length;
-        const offCount = currentEmployees.filter(e => e.dayOff !== 'None').length;
-        const presentCount = total - offCount;
-        const shiftAActive = currentEmployees.filter(e => e.shift === 'Shift A' && e.dayOff === 'None').length;
-        const shiftBActive = currentEmployees.filter(e => e.shift === 'Shift B' && e.dayOff === 'None').length;
 
         document.getElementById('metricStaffCount').innerText = `${presentCount} Present`;
-        document.getElementById('metricShiftBreakdown').innerText = `${shiftAActive} Shift A | ${shiftBActive} Shift B`;
+        let shiftStr = `${shiftAActive} Shift A | ${shiftBActive} Shift B`;
+        if (otherActive > 0) shiftStr += ` | ${otherActive} Custom`;
+        document.getElementById('metricShiftBreakdown').innerText = shiftStr;
+        
         document.getElementById('metricOffCount').innerText = `${offCount} Staff Off`;
-        document.getElementById('metricOffSub').innerText = offCount === 0 ? '100% Floor Attendance' : `${((presentCount / total) * 100).toFixed(1)}% Attendance Rate`;
+        document.getElementById('metricOffSub').innerText = offCount === 0 ? '100% Floor Attendance' : `${((presentCount / (total - offCount || 1)) * 100).toFixed(1)}% Shift Fill`;
 
-        const minFloorStaff = Math.max(0, presentCount - 2);
-        const coveragePct = presentCount > 0 ? ((minFloorStaff / presentCount) * 100).toFixed(1) : "0.0";
-        document.getElementById('metricCoveragePct').innerText = `${coveragePct}%`;
-        document.getElementById('metricActiveFloor').innerText = `${minFloorStaff} Active Floor Staff Min`;
+        document.getElementById('metricFloorStaff').innerText = `${liveFloorStaff} Active`;
+        document.getElementById('metricFloorSub').innerText = `${activeBreaksCount} Currently on Break`;
+
+        const loadEl = document.getElementById('metricBreakLoad');
+        loadEl.innerText = `${activeBreaksCount} / 2 Slots`;
+        if (activeBreaksCount >= 2) loadEl.classList.add('break-load-warning');
+        else loadEl.classList.remove('break-load-warning');
 
         document.getElementById('countAll').innerText = total;
         document.getElementById('countPresent').innerText = presentCount;
         document.getElementById('countDayOff').innerText = offCount;
     }
 
+    // --- ADMIN QUOTA ADJUSTMENT ---
+    window.resetQuota = function(index, type) {
+        if(isStaffView) return;
+        if(!isUnlocked && !requireAdmin()) return;
+        
+        const emp = currentEmployees[index];
+        if (type === '30') {
+            let newVal = prompt(`Set total 30-Min breaks taken for ${emp.name} (Max 1):`, emp.quota30 || 0);
+            if (newVal !== null && !isNaN(newVal)) {
+                emp.quota30 = parseInt(newVal);
+                set(ref(db, 'roster'), currentEmployees);
+            }
+        } else {
+            let newVal = prompt(`Set total 10-Min breaks taken for ${emp.name} (Max 3):`, emp.quota10 || 0);
+            if (newVal !== null && !isNaN(newVal)) {
+                emp.quota10 = parseInt(newVal);
+                set(ref(db, 'roster'), currentEmployees);
+            }
+        }
+    };
+
     // --- GLOBAL ACTIONS ---
-    window.startBreak = function(empName, index) {
+    window.startBreak = function(empName, index, requestedType = 'standard') {
         const safeKey = empName.replace(/[.#$[\]]/g, '');
         if (currentBreaks[safeKey] && currentBreaks[safeKey].status !== 'completed') {
             alert(`${empName} already has an active or pending break request.`);
             return;
         }
 
-        const isOfficial = isOfficialBreakTime(index);
+        const emp = currentEmployees[index];
+        const q30 = emp.quota30 || 0;
+        const q10 = emp.quota10 || 0;
         const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
 
+        if (requestedType === 'prayer') {
+            alert(`A request for a Prayer break has been sent to the Admin.`);
+            set(ref(db, 'breaks/' + safeKey), {
+                name: empName,
+                startTime: 0,
+                limit: 0, 
+                type: "Prayer",
+                status: "pending"
+            });
+            return;
+        }
+
+        const isOfficial = isOfficialBreakTime(index);
+
         if (isOfficial) {
+            if (q30 >= 1) {
+                alert(`🚨 STOP: ${empName} has already used their 1 official 30-minute break for today!`);
+                return;
+            }
+
+            emp.quota30 = q30 + 1;
+            set(ref(db, 'roster'), currentEmployees);
+
+            const endTimeMs = parseToDate(emp.timeEnd).getTime();
             set(ref(db, 'breaks/' + safeKey), {
                 name: empName,
                 startTime: new Date(tzStr).getTime(), 
-                limit: 30,
-                type: "Scheduled (30m)",
+                endTime: endTimeMs, 
+                limit: 30, 
+                type: "Scheduled Slot",
                 status: "active"
             });
         } else {
+            if (q10 >= 3) {
+                alert(`🚨 STOP: ${empName} has already used all 3 of their 10-minute quick breaks today!`);
+                return;
+            }
+
             alert(`It is currently not the scheduled break time for ${empName}.\n\nA request for a 10-minute quick break has been sent to the Admin.`);
             set(ref(db, 'breaks/' + safeKey), {
                 name: empName,
@@ -809,9 +1090,27 @@
     window.approveBreak = function(key) {
         if (!requireAdmin()) return;
         const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
+        const nowMs = new Date(tzStr).getTime();
+        
         const breakData = currentBreaks[key];
         breakData.status = 'active';
-        breakData.startTime = new Date(tzStr).getTime(); 
+        breakData.startTime = nowMs; 
+        
+        if (breakData.limit > 0) {
+            breakData.endTime = nowMs + (breakData.limit * 60000); 
+        } else {
+            breakData.endTime = 0; 
+        }
+        
+        // Consume the 10-min quota only upon Admin Approval
+        if (breakData.limit === 10) {
+            const empIndex = currentEmployees.findIndex(e => e.name === breakData.name);
+            if (empIndex > -1) {
+                currentEmployees[empIndex].quota10 = (currentEmployees[empIndex].quota10 || 0) + 1;
+                set(ref(db, 'roster'), currentEmployees);
+            }
+        }
+        
         set(ref(db, 'breaks/' + key), breakData);
     };
 
@@ -820,13 +1119,12 @@
         remove(ref(db, 'breaks/' + key)); 
     };
 
-    // --- NEW: TWO-STEP RETURN LOGIC ---
     window.requestReturn = function(key) {
         const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
         const breakData = currentBreaks[key];
         if (breakData) {
             breakData.status = 'return_pending'; 
-            breakData.returnRequestedTime = new Date(tzStr).getTime(); // FREEZE THE TIMER HERE
+            breakData.returnRequestedTime = new Date(tzStr).getTime(); 
             set(ref(db, 'breaks/' + key), breakData);
         }
     };
@@ -835,32 +1133,156 @@
         if (!requireAdmin()) return;
         const breakData = currentBreaks[key];
         if (breakData) {
-            breakData.status = 'completed'; // Permanently dismiss the break
+            breakData.status = 'completed'; 
             set(ref(db, 'breaks/' + key), breakData);
         }
     };
 
-    // --- PERMANENT DAY OFF DROPDOWN ---
-    window.updatePermanentDayOff = function(index, newStatus) {
-        if (isStaffView) return; 
-        currentEmployees[index].assignedDayOff = newStatus;
+    // --- EMPLOYEE MANAGEMENT & MODAL ---
+    window.openEmployeeManager = function() {
+        if (!requireAdmin()) return;
+        document.getElementById('employeeModal').style.display = 'flex';
+        renderModalList();
+    };
+
+    window.closeEmployeeManager = function() {
+        document.getElementById('employeeModal').style.display = 'none';
+    };
+
+    window.autoAssignBreaks = function() {
+        const shiftName = document.getElementById('autoShiftName').value.trim();
+        const startRaw = document.getElementById('autoShiftStart').value;
+        
+        if (!shiftName || !startRaw) {
+            alert("Please fill in both the Shift Name and the First Break Start Time to calculate.");
+            return;
+        }
+
+        const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
+        let startTimeMs = parseToDate(convertTimeFormat(startRaw)).getTime();
+
+        let shiftStaff = currentEmployees.filter(e => e.shift.includes(shiftName));
+        if(shiftStaff.length === 0) {
+            alert("No employees found assigned to a shift containing: " + shiftName);
+            return;
+        }
+
+        let currentIndex = 0;
+        currentEmployees.forEach(emp => {
+            if (emp.shift.includes(shiftName)) {
+                let empStartMs = startTimeMs + (currentIndex * 15 * 60000);
+                let empEndMs = empStartMs + (30 * 60000);
+
+                emp.timeStart = formatAMPM(empStartMs);
+                emp.timeEnd = formatAMPM(empEndMs);
+                emp.overlap = "2 Staff"; 
+
+                currentIndex++;
+            }
+        });
+
+        set(ref(db, 'roster'), currentEmployees);
+        alert(`Successfully generated sequential breaks for ${currentIndex} employees in ${shiftName}!`);
+        renderModalList();
+    };
+
+    window.addEmployee = function() {
+        const name = document.getElementById('newEmpName').value.trim();
+        const pc = document.getElementById('newEmpPC').value.trim() || "PC-XX";
+        const team = document.getElementById('newEmpTeam').value.trim() || "Main Team";
+        const shift = document.getElementById('newEmpShift').value.trim() || "Custom Shift";
+        const pOff = document.getElementById('newEmpDayOff').value;
+
+        if (!name) { alert("Please enter an employee name."); return; }
         
         const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
         const businessTime = new Date(new Date(tzStr).getTime() - (4 * 3600 * 1000));
         const todayDayStr = businessTime.toLocaleString('en-US', { weekday: 'long' });
+
+        const newEmp = {
+            name: name,
+            pcNumber: pc,
+            teamName: team,
+            shift: shift,
+            assignedDayOff: pOff,
+            dayOff: (pOff === todayDayStr) ? todayDayStr : "None",
+            timeStart: "12:00 AM", 
+            timeEnd: "12:30 AM",
+            overlap: "1 Staff",
+            isLocked: false,
+            quota30: 0,
+            quota10: 0
+        };
+
+        currentEmployees.push(newEmp);
+        set(ref(db, 'roster'), currentEmployees);
         
+        document.getElementById('newEmpName').value = '';
+        alert(`Employee ${name} Added! \nTip: Use the Auto-Schedule tool above to generate their break time.`);
+        renderModalList();
+    };
+
+    window.deleteEmployee = function(index) {
+        if(confirm(`Are you sure you want to completely remove ${currentEmployees[index].name} from the database?`)) {
+            currentEmployees.splice(index, 1);
+            set(ref(db, 'roster'), currentEmployees);
+            renderModalList();
+        }
+    };
+
+    // DYNAMIC LOCK/UNLOCK FOR ANY EMPLOYEE
+    window.toggleLock = function(index) {
+        if (isStaffView) return;
+        currentEmployees[index].isLocked = !currentEmployees[index].isLocked;
+        set(ref(db, 'roster'), currentEmployees);
+    };
+
+    function renderModalList() {
+        const listDiv = document.getElementById('modalEmpList');
+        listDiv.innerHTML = '';
+        currentEmployees.forEach((emp, index) => {
+            listDiv.innerHTML += `
+                <div class="emp-list-item">
+                    <div class="emp-list-info">
+                        <span class="emp-list-name">${emp.pcNumber} | ${emp.name}</span>
+                        <span class="emp-list-meta">${emp.shift} | ${emp.teamName} | Break: ${emp.timeStart} - ${emp.timeEnd}</span>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-staff" style="padding: 6px 12px; font-size: 11px;" onclick="window.toggleLock(${index})">${emp.isLocked ? '🔒 Locked' : '🔓 Unlock'}</button>
+                        <button class="btn btn-danger" style="padding: 6px 12px; font-size: 11px;" onclick="window.deleteEmployee(${index})">Remove</button>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    // TABLE INLINE EDITS
+    window.updatePC = function(index, newVal) {
+        if (isStaffView) return; 
+        currentEmployees[index].pcNumber = newVal.trim() || "PC-XX";
+        set(ref(db, 'roster'), currentEmployees);
+    };
+
+    window.updateTeam = function(index, newVal) {
+        if (isStaffView) return; 
+        currentEmployees[index].teamName = newVal.trim() || "No Team";
+        set(ref(db, 'roster'), currentEmployees);
+    };
+
+    window.updatePermanentDayOff = function(index, newStatus) {
+        if (isStaffView) return; 
+        currentEmployees[index].assignedDayOff = newStatus;
+        const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
+        const businessTime = new Date(new Date(tzStr).getTime() - (4 * 3600 * 1000));
+        const todayDayStr = businessTime.toLocaleString('en-US', { weekday: 'long' });
         currentEmployees[index].dayOff = (newStatus === todayDayStr) ? newStatus : "None";
         set(ref(db, 'roster'), currentEmployees);
     };
 
-    // --- FORCED DAILY ABSENCE BUTTON ---
     window.toggleForceAbsent = function(index) {
         if (isStaffView) return;
-        if (currentEmployees[index].dayOff === "None") {
-            currentEmployees[index].dayOff = "Off Duty"; 
-        } else {
-            currentEmployees[index].dayOff = "None"; 
-        }
+        if (currentEmployees[index].dayOff === "None") currentEmployees[index].dayOff = "Off Duty"; 
+        else currentEmployees[index].dayOff = "None"; 
         set(ref(db, 'roster'), currentEmployees);
     };
 
@@ -884,9 +1306,7 @@
                 
                 const btn = document.getElementById('reshuffleBtn');
                 btn.disabled = false; btn.style.opacity = "1"; btn.style.cursor = "pointer";
-            } else if (pin !== null) {
-                alert("Incorrect PIN. Access Denied.");
-            }
+            } else if (pin !== null) alert("Incorrect PIN. Access Denied.");
         } else {
             isUnlocked = false;
             document.getElementById('statusDot').classList.remove('unlocked');
@@ -900,25 +1320,43 @@
 
     window.reshuffleSchedule = function() {
         if (!isUnlocked || isStaffView) return;
-        const dandiIndex = 2;
-        const dandi = currentEmployees[dandiIndex];
-        let shufflePool = currentEmployees.filter((_, idx) => idx !== dandiIndex);
         
-        for (let i = shufflePool.length - 1; i > 0; i--) {
+        let lockedMap = {};
+        let unlockedEmployees = [];
+        
+        currentEmployees.forEach((emp, idx) => {
+            if (emp.isLocked) {
+                lockedMap[idx] = emp;
+            } else {
+                unlockedEmployees.push(emp);
+            }
+        });
+        
+        for (let i = unlockedEmployees.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
-            [shufflePool[i], shufflePool[j]] = [shufflePool[j], shufflePool[i]];
+            [unlockedEmployees[i], unlockedEmployees[j]] = [unlockedEmployees[j], unlockedEmployees[i]];
         }
         
-        shufflePool.splice(dandiIndex, 0, dandi);
-        currentEmployees = shufflePool;
+        let newRoster = [];
+        let unlockedIndex = 0;
         
+        for (let i = 0; i < currentEmployees.length; i++) {
+            if (lockedMap[i]) {
+                newRoster.push(lockedMap[i]);
+            } else {
+                newRoster.push(unlockedEmployees[unlockedIndex]);
+                unlockedIndex++;
+            }
+        }
+        
+        currentEmployees = newRoster;
         set(ref(db, 'roster'), currentEmployees);
     };
 
     window.copyStaffLink = function() {
         const staffUrl = window.location.origin + window.location.pathname + "?view=staff";
         navigator.clipboard.writeText(staffUrl).then(() => {
-            alert("✅ Staff Link Copied to Clipboard!\n\nSend this link to your employees. They will be able to request/confirm breaks, but will NOT be able to reshuffle, change names, or approve breaks.");
+            alert("✅ Staff Link Copied to Clipboard!");
         }).catch(err => {
             prompt("Copy this URL manually:", staffUrl);
         });
@@ -931,14 +1369,14 @@
         const rows = document.querySelectorAll('#scheduleTable tbody tr');
 
         rows.forEach((row, idx) => {
-            const nameEl = row.querySelector('.editable-name');
+            const nameEl = row.querySelector('.col-name .editable-name');
             if(!nameEl) return;
-            const name = nameEl.textContent.toLowerCase();
-            const shiftText = row.querySelector('.col-shift').textContent;
             const emp = currentEmployees[idx];
+            const searchText = (emp.name + " " + (emp.pcNumber || "") + " " + emp.shift + " " + (emp.teamName || "")).toLowerCase();
+            const shiftText = row.querySelector('.col-shift').textContent;
             const isOff = emp && emp.dayOff !== 'None';
 
-            const matchesSearch = name.includes(input);
+            const matchesSearch = searchText.includes(input);
             let matchesShift = true;
 
             if (activeShiftFilter === 'present') matchesShift = !isOff;
@@ -964,7 +1402,10 @@
             for (let j = 0; j < cols.length; j++) {
                 let text = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, ' ')
                     .replace('☕ Break', '')
+                    .replace('🕌 Prayer', '')
                     .replace('🔒 FIXED', '')
+                    .replace('🔒 Locked', '')
+                    .replace('🔓 Unlock', '')
                     .replace('🔴 Absent Today', 'Absent')
                     .replace('🟢 Present Today', 'Present')
                     .trim();
