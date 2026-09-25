@@ -642,8 +642,9 @@
         }, { onlyOnce: true });
     }, 60000);
 
-    // --- TIME PARSER & LIVE SHIFT VALIDATOR ---
-    function parseToDate(timeStr) {
+    // --- REBUILT BULLETPROOF TIME PARSER ---
+    // Safely reads "08:00 AM" and converts it exactly to TODAY'S date.
+    function parseTimeToday(timeStr) {
         if(!timeStr) return new Date();
         const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
         const [time, modifier] = timeStr.split(' ');
@@ -654,10 +655,6 @@
         
         let d = new Date(tzStr);
         d.setHours(hours, parseInt(minutes, 10), 0, 0);
-        
-        let now = new Date(tzStr);
-        if (now.getHours() < 12 && d.getHours() >= 12) d.setDate(d.getDate() - 1);
-        if (now.getHours() >= 12 && d.getHours() < 12) d.setDate(d.getDate() + 1);
         return d;
     }
 
@@ -679,8 +676,22 @@
         const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
         const now = new Date(tzStr).getTime();
         
-        const tStart = parseToDate(times[0].toUpperCase()).getTime() - (30 * 60000);
-        const tEnd = parseToDate(times[1].toUpperCase()).getTime();
+        let tStart = parseTimeToday(times[0]).getTime();
+        let tEnd = parseTimeToday(times[1]).getTime();
+        
+        // Handle Overnight Shifts (e.g. 7 PM to 2 AM)
+        if (tStart > tEnd) {
+            if (new Date(tzStr).getHours() < 12) {
+                // If it is currently morning (e.g. 1 AM), the shift started yesterday
+                tStart -= 24 * 3600 * 1000; 
+            } else {
+                // If it is currently evening (e.g. 10 PM), the shift ends tomorrow
+                tEnd += 24 * 3600 * 1000; 
+            }
+        }
+        
+        // 30 minute arrival grace period
+        tStart -= (30 * 60000); 
         
         return now >= tStart && now <= tEnd;
     }
@@ -688,11 +699,22 @@
     function isOfficialBreakTime(index) {
         const emp = currentEmployees[index];
         const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
-        const startDate = parseToDate(emp.timeStart);
-        const endDate = parseToDate(emp.timeEnd);
-        const graceStart = new Date(startDate.getTime() - 15 * 60000); 
-        const now = new Date(tzStr);
-        return now >= graceStart && now <= endDate;
+        const now = new Date(tzStr).getTime();
+
+        let bStart = parseTimeToday(emp.timeStart).getTime();
+        let bEnd = parseTimeToday(emp.timeEnd).getTime();
+
+        // Handle overnight break crossing midnight
+        if (bStart > bEnd) {
+            if (new Date(tzStr).getHours() < 12) {
+                bStart -= 24 * 3600 * 1000; 
+            } else {
+                bEnd += 24 * 3600 * 1000; 
+            }
+        }
+        
+        bStart -= (15 * 60000); 
+        return now >= bStart && now <= bEnd;
     }
 
     function requireAdmin() {
@@ -718,7 +740,6 @@
                 if (typeof emp.quota30 === 'undefined') emp.quota30 = 0;
                 if (typeof emp.quota10 === 'undefined') emp.quota10 = 0;
                 
-                // Legacy standardization mapping
                 if (emp.shift === 'Shift A') emp.shift = 'Shift A (07:00 PM - 02:00 AM)';
                 if (emp.shift === 'Shift B') emp.shift = 'Shift B (07:30 PM - 02:30 AM)';
                 if (emp.shift === 'Shift C (08:00 AM - 04:00 PM)') emp.shift = 'Shift C (08:00 AM - 03:00 PM)';
@@ -1119,7 +1140,15 @@
             emp.quota30 = q30 + 1;
             set(ref(db, 'roster'), currentEmployees);
 
-            const endTimeMs = parseToDate(emp.timeEnd).getTime();
+            let bStart = parseTimeToday(emp.timeStart).getTime();
+            let bEnd = parseTimeToday(emp.timeEnd).getTime();
+            if (bStart > bEnd) {
+                if (new Date(tzStr).getHours() >= 12) {
+                    bEnd += 24 * 3600 * 1000; 
+                }
+            }
+            const endTimeMs = bEnd;
+
             set(ref(db, 'breaks/' + safeKey), {
                 name: empName,
                 startTime: new Date(tzStr).getTime(), 
@@ -1216,7 +1245,7 @@
         }
 
         const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
-        let startTimeMs = parseToDate(convertTimeFormat(startRaw)).getTime();
+        let startTimeMs = parseTimeToday(convertTimeFormat(startRaw)).getTime();
 
         const baseShiftSearch = shiftName.split(' (')[0];
         let shiftStaff = currentEmployees.filter(e => e.shift.includes(baseShiftSearch));
