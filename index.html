@@ -545,6 +545,9 @@
         appId: "1:828847025710:web:72f00f90f45fe20f1f79bf"
     };
 
+    // --- FACTION ROUTER (CHANGE THIS FOR NEW TEAMS) ---
+    const FACTION_ID = "Phoenix_Team"; 
+
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     const SECRET_PIN = "2242";
@@ -663,11 +666,11 @@
         const businessDateStr = businessTime.toLocaleDateString('en-US'); 
         const businessDayStr = businessTime.toLocaleString('en-US', { weekday: 'long' }); 
 
-        onValue(ref(db, 'system/lastBusinessDate'), (snapshot) => {
+        onValue(ref(db, `${FACTION_ID}/system/lastBusinessDate`), (snapshot) => {
             const dbLastDate = snapshot.val();
             if (dbLastDate !== businessDateStr) {
-                set(ref(db, 'system/lastBusinessDate'), businessDateStr);
-                remove(ref(db, 'breaks')); 
+                set(ref(db, `${FACTION_ID}/system/lastBusinessDate`), businessDateStr);
+                remove(ref(db, `${FACTION_ID}/breaks`)); 
                 
                 let resetRoster = currentEmployees.map(emp => {
                     let permOff = emp.assignedDayOff || "None";
@@ -676,7 +679,7 @@
                     emp.quota10 = 0;
                     return emp;
                 });
-                set(ref(db, 'roster'), resetRoster);
+                set(ref(db, `${FACTION_ID}/roster`), resetRoster);
             }
         }, { onlyOnce: true });
     }, 60000);
@@ -768,7 +771,7 @@
     }
 
     // --- FIREBASE LISTENERS ---
-    onValue(ref(db, 'roster'), (snapshot) => {
+    onValue(ref(db, `${FACTION_ID}/roster`), (snapshot) => {
         const data = snapshot.val();
         if (data) { 
             let dataArray = Array.isArray(data) ? data : Object.values(data);
@@ -809,12 +812,12 @@
                 emp.quota10 = 0;
                 return emp;
             });
-            set(ref(db, 'roster'), currentEmployees);
+            set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
         }
         renderTable();
     });
 
-    onValue(ref(db, 'breaks'), (snapshot) => {
+    onValue(ref(db, `${FACTION_ID}/breaks`), (snapshot) => {
         currentBreaks = snapshot.val() || {};
         renderActiveBreaks();
     });
@@ -1139,13 +1142,13 @@
             let newVal = prompt(`Set total 30-Min breaks taken for ${emp.name} (Max 1):`, emp.quota30 || 0);
             if (newVal !== null && !isNaN(newVal)) {
                 emp.quota30 = parseInt(newVal);
-                set(ref(db, 'roster'), currentEmployees);
+                set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
             }
         } else {
             let newVal = prompt(`Set total 10-Min breaks taken for ${emp.name} (Max 3):`, emp.quota10 || 0);
             if (newVal !== null && !isNaN(newVal)) {
                 emp.quota10 = parseInt(newVal);
-                set(ref(db, 'roster'), currentEmployees);
+                set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
             }
         }
     };
@@ -1173,7 +1176,7 @@
                 return;
             }
             alert(`A request for a Prayer break has been sent to the Admin.`);
-            set(ref(db, 'breaks/' + safeKey), {
+            set(ref(db, `${FACTION_ID}/breaks/` + safeKey), {
                 name: empName,
                 startTime: 0,
                 limit: 0, 
@@ -1192,7 +1195,7 @@
             }
 
             emp.quota30 = q30 + 1;
-            set(ref(db, 'roster'), currentEmployees);
+            set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
 
             let bStart = parseTimeToday(emp.timeStart).getTime();
             let bEnd = parseTimeToday(emp.timeEnd).getTime();
@@ -1203,7 +1206,7 @@
             }
             const endTimeMs = bEnd;
 
-            set(ref(db, 'breaks/' + safeKey), {
+            set(ref(db, `${FACTION_ID}/breaks/` + safeKey), {
                 name: empName,
                 startTime: new Date(tzStr).getTime(), 
                 endTime: endTimeMs, 
@@ -1223,7 +1226,7 @@
             }
 
             alert(`It is currently not the scheduled break time for ${empName}.\n\nA request for a 10-minute quick break has been sent to the Admin.`);
-            set(ref(db, 'breaks/' + safeKey), {
+            set(ref(db, `${FACTION_ID}/breaks/` + safeKey), {
                 name: empName,
                 startTime: 0,
                 limit: 10,
@@ -1252,16 +1255,16 @@
             const empIndex = currentEmployees.findIndex(e => e.name === breakData.name);
             if (empIndex > -1) {
                 currentEmployees[empIndex].quota10 = (currentEmployees[empIndex].quota10 || 0) + 1;
-                set(ref(db, 'roster'), currentEmployees);
+                set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
             }
         }
         
-        set(ref(db, 'breaks/' + key), breakData);
+        set(ref(db, `${FACTION_ID}/breaks/` + key), breakData);
     };
 
     window.denyBreak = function(key) {
         if (!requireAdmin()) return;
-        remove(ref(db, 'breaks/' + key)); 
+        remove(ref(db, `${FACTION_ID}/breaks/` + key)); 
     };
 
     window.requestReturn = function(key) {
@@ -1270,7 +1273,7 @@
         if (breakData) {
             breakData.status = 'return_pending'; 
             breakData.returnRequestedTime = new Date(tzStr).getTime(); 
-            set(ref(db, 'breaks/' + key), breakData);
+            set(ref(db, `${FACTION_ID}/breaks/` + key), breakData);
         }
     };
 
@@ -1278,6 +1281,7 @@
         if (!requireAdmin()) return;
         const breakData = currentBreaks[key];
         if (breakData) {
+            const adminNote = prompt("Optional: Enter a note for this return (or leave blank):") || "";
             const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
             const businessDate = new Date(new Date(tzStr).getTime() - (4 * 3600 * 1000)).toISOString().split('T')[0];
 
@@ -1296,7 +1300,7 @@
                 variance = `Took ${varianceMins} min total`;
             }
 
-            const historyRef = ref(db, `history/${businessDate}`);
+            const historyRef = ref(db, `${FACTION_ID}/history/${businessDate}`);
             push(historyRef, {
                 name: breakData.name,
                 type: breakData.type,
@@ -1304,11 +1308,12 @@
                 expectedEnd: breakData.endTime > 0 ? formatAMPM(breakData.endTime) : "Open Return",
                 actualReturn: formatAMPM(breakData.returnRequestedTime),
                 variance: variance,
+                adminNote: adminNote.replace(/"/g, "'"), 
                 timestamp: new Date(tzStr).getTime()
             });
 
             breakData.status = 'completed'; 
-            set(ref(db, 'breaks/' + key), breakData);
+            set(ref(db, `${FACTION_ID}/breaks/` + key), breakData);
         }
     };
 
@@ -1320,7 +1325,7 @@
         contentDiv.innerHTML = '<p style="text-align: center; color: var(--primary);">Fetching historical data...</p>';
 
         try {
-            const snapshot = await get(ref(db, 'history'));
+            const snapshot = await get(ref(db, `${FACTION_ID}/history`));
             if (!snapshot.exists()) {
                 contentDiv.innerHTML = '<p style="text-align: center; color: var(--text-muted);">No break history has been recorded yet.</p>';
                 return;
@@ -1453,7 +1458,7 @@
             }
         });
 
-        set(ref(db, 'roster'), currentEmployees);
+        set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
         alert(`Successfully generated sequential breaks for ${currentIndex} employees in ${baseShiftSearch}!`);
         renderModalList();
     };
@@ -1524,7 +1529,7 @@
 
         try {
             currentEmployees.push(newEmp);
-            set(ref(db, 'roster'), currentEmployees).then(() => {
+            set(ref(db, `${FACTION_ID}/roster`), currentEmployees).then(() => {
                 document.getElementById('newEmpName').value = '';
                 document.getElementById('newEmpPC').value = '';
                 document.getElementById('newEmpStart').value = '';
@@ -1542,7 +1547,7 @@
     window.deleteEmployee = function(index) {
         if(confirm(`Are you sure you want to completely remove ${currentEmployees[index].name} from the database?`)) {
             currentEmployees.splice(index, 1);
-            set(ref(db, 'roster'), currentEmployees);
+            set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
             renderModalList();
         }
     };
@@ -1550,7 +1555,7 @@
     window.toggleLock = function(index) {
         if (isStaffView) return;
         currentEmployees[index].isLocked = !currentEmployees[index].isLocked;
-        set(ref(db, 'roster'), currentEmployees);
+        set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
     };
 
     function renderModalList() {
@@ -1576,19 +1581,19 @@
     window.updateShift = function(index, newVal) {
         if (isStaffView) return; 
         currentEmployees[index].shift = newVal;
-        set(ref(db, 'roster'), currentEmployees);
+        set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
     };
 
     window.updatePC = function(index, newVal) {
         if (isStaffView) return; 
         currentEmployees[index].pcNumber = newVal.trim() || "PC-XX";
-        set(ref(db, 'roster'), currentEmployees);
+        set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
     };
 
     window.updateTeam = function(index, newVal) {
         if (isStaffView) return; 
         currentEmployees[index].teamName = newVal.trim() || "No Team";
-        set(ref(db, 'roster'), currentEmployees);
+        set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
     };
 
     window.updatePermanentDayOff = function(index, newStatus) {
@@ -1598,14 +1603,14 @@
         const businessTime = new Date(new Date(tzStr).getTime() - (4 * 3600 * 1000));
         const todayDayStr = businessTime.toLocaleString('en-US', { weekday: 'long' });
         currentEmployees[index].dayOff = (newStatus === todayDayStr) ? newStatus : "None";
-        set(ref(db, 'roster'), currentEmployees);
+        set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
     };
 
     window.toggleForceAbsent = function(index) {
         if (isStaffView) return;
         if (currentEmployees[index].dayOff === "None") currentEmployees[index].dayOff = "Off Duty"; 
         else currentEmployees[index].dayOff = "None"; 
-        set(ref(db, 'roster'), currentEmployees);
+        set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
     };
 
     window.updateName = function(index, newName) {
@@ -1613,7 +1618,7 @@
         const cleanedName = newName.trim();
         if (cleanedName && currentEmployees[index].name !== cleanedName) {
             currentEmployees[index].name = cleanedName;
-            set(ref(db, 'roster'), currentEmployees);
+            set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
         }
     };
 
@@ -1673,7 +1678,7 @@
         }
         
         currentEmployees = newRoster;
-        set(ref(db, 'roster'), currentEmployees);
+        set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
     };
 
     window.copyStaffLink = function() {
@@ -1725,14 +1730,14 @@
         if (!empName) return;
 
         try {
-            const snapshot = await get(ref(db, 'history'));
+            const snapshot = await get(ref(db, `${FACTION_ID}/history`));
             if (!snapshot.exists()) {
                 alert("No history found in database.");
                 return;
             }
 
             const allHistory = snapshot.val();
-            let csv = ["Date,Employee Name,Break Type,Start Time,Expected Return,Actual Return,Variance Log"];
+            let csv = ["Date,Employee Name,Break Type,Start Time,Expected Return,Actual Return,Variance Log,Admin Notes"];
             let matchCount = 0;
             
             const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
@@ -1747,7 +1752,7 @@
                     const dailyRecords = allHistory[dateStr];
                     Object.values(dailyRecords).forEach(log => {
                         if (log.name.toLowerCase().includes(empName.toLowerCase().trim())) {
-                            csv.push(`"${dateStr}","${log.name}","${log.type}","${log.startTime}","${log.expectedEnd}","${log.actualReturn}","${log.variance}"`);
+                            csv.push(`"${dateStr}","${log.name}","${log.type}","${log.startTime}","${log.expectedEnd}","${log.actualReturn}","${log.variance}","${log.adminNote || ''}"`);
                             matchCount++;
                         }
                     });
@@ -1781,17 +1786,17 @@
         const businessDate = new Date(new Date(tzStr).getTime() - (4 * 3600 * 1000)).toISOString().split('T')[0];
 
         try {
-            const snapshot = await get(ref(db, `history/${businessDate}`));
+            const snapshot = await get(ref(db, `${FACTION_ID}/history/${businessDate}`));
             if (!snapshot.exists()) {
                 alert("No break history logged for today yet!");
                 return;
             }
             
             const data = snapshot.val();
-            let csv = ["Employee Name,Break Type,Start Time,Expected Return,Actual Return,Variance Log"];
+            let csv = ["Employee Name,Break Type,Start Time,Expected Return,Actual Return,Variance Log,Admin Notes"];
             
             Object.values(data).forEach(log => {
-                csv.push(`"${log.name}","${log.type}","${log.startTime}","${log.expectedEnd}","${log.actualReturn}","${log.variance}"`);
+                csv.push(`"${log.name}","${log.type}","${log.startTime}","${log.expectedEnd}","${log.actualReturn}","${log.variance}","${log.adminNote || ''}"`);
             });
             
             const csvFile = new Blob([csv.join('\n')], { type: 'text/csv' });
@@ -1829,7 +1834,7 @@
         }
         const csvFile = new Blob([csv.join('\n')], { type: 'text/csv' });
         const downloadLink = document.createElement('a');
-        downloadLink.download = 'Presto_Eat_Live_Schedule.csv';
+        downloadLink.download = `Presto_Eat_Live_Schedule_${FACTION_ID}.csv`;
         downloadLink.href = window.URL.createObjectURL(csvFile);
         downloadLink.style.display = 'none';
         document.body.appendChild(downloadLink);
