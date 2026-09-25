@@ -740,13 +740,16 @@
             dataArray = dataArray.filter(e => e !== null && e !== undefined);
             
             currentEmployees = dataArray.map((emp, i) => {
-                if (!emp.assignedDayOff) emp.assignedDayOff = defaultEmployees[i] ? defaultEmployees[i].assignedDayOff : "None";
-                if (!emp.timeStart) emp.timeStart = fixedSlots[i] ? fixedSlots[i].timeStart : "12:00 AM";
-                if (!emp.timeEnd) emp.timeEnd = fixedSlots[i] ? fixedSlots[i].timeEnd : "12:30 AM";
+                if (!emp.assignedDayOff) emp.assignedDayOff = (defaultEmployees[i] && defaultEmployees[i].assignedDayOff) || "None";
+                if (!emp.timeStart) emp.timeStart = (fixedSlots[i] && fixedSlots[i].timeStart) || "12:00 AM";
+                if (!emp.timeEnd) emp.timeEnd = (fixedSlots[i] && fixedSlots[i].timeEnd) || "12:30 AM";
                 if (!emp.overlap) emp.overlap = "1 Staff";
                 if (!emp.pcNumber) emp.pcNumber = "PC-" + (i+1).toString().padStart(2, '0');
-                if (!emp.teamName) emp.teamName = defaultEmployees[i] ? defaultEmployees[i].teamName : "Main Team";
-                if (typeof emp.isLocked === 'undefined') emp.isLocked = defaultEmployees[i] ? defaultEmployees[i].isLocked : false;
+                
+                // BULLETPROOF FALLBACK TO PREVENT UNDEFINED ERROR
+                if (!emp.teamName) emp.teamName = "Main Team";
+                
+                if (typeof emp.isLocked === 'undefined') emp.isLocked = (defaultEmployees[i] && typeof defaultEmployees[i].isLocked !== 'undefined') ? defaultEmployees[i].isLocked : false;
                 if (typeof emp.quota30 === 'undefined') emp.quota30 = 0;
                 if (typeof emp.quota10 === 'undefined') emp.quota10 = 0;
                 
@@ -1021,7 +1024,7 @@
                 const secs = elapsedSecs % 60;
                 timerEl.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
                 
-                if (mins >= 15) timerEl.classList.add('overtime');
+                if (mins >= 10) timerEl.classList.add('overtime');
                 else timerEl.classList.remove('overtime');
                 return;
             }
@@ -1122,7 +1125,6 @@
             return;
         }
 
-        // Live capacity check 
         const activeBreaksList = Object.values(currentBreaks).filter(b => b.status !== 'completed');
         const currentPrayers = activeBreaksList.filter(b => b.type === 'Prayer').length;
         const current10Mins = activeBreaksList.filter(b => b.type === 'Unscheduled (10m)').length;
