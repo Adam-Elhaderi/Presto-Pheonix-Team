@@ -1279,42 +1279,46 @@
 
     window.approveReturn = function(key) {
         if (!requireAdmin()) return;
-        const breakData = currentBreaks[key];
-        if (breakData) {
-            const adminNote = prompt("Optional: Enter a note for this return (or leave blank):") || "";
-            const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
-            const businessDate = new Date(new Date(tzStr).getTime() - (4 * 3600 * 1000)).toISOString().split('T')[0];
+        
+        // Timeout to bypass modern browser popup blockers on consecutive prompts
+        setTimeout(() => {
+            const breakData = currentBreaks[key];
+            if (breakData) {
+                const adminNote = prompt("Optional: Enter a note for this return (or leave blank):") || "";
+                const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
+                const businessDate = new Date(new Date(tzStr).getTime() - (4 * 3600 * 1000)).toISOString().split('T')[0];
 
-            let variance = "N/A";
-            let varianceMins = 0;
+                let variance = "N/A";
+                let varianceMins = 0;
 
-            if (breakData.endTime > 0) {
-                const diffMs = breakData.returnRequestedTime - breakData.endTime;
-                varianceMins = Math.round(diffMs / 60000);
+                if (breakData.endTime > 0) {
+                    const diffMs = breakData.returnRequestedTime - breakData.endTime;
+                    varianceMins = Math.round(diffMs / 60000);
 
-                if (varianceMins > 0) variance = `LATE by ${varianceMins} min`;
-                else if (varianceMins < 0) variance = `EARLY by ${Math.abs(varianceMins)} min`;
-                else variance = "EXACT ON TIME";
-            } else {
-                varianceMins = Math.round((breakData.returnRequestedTime - breakData.startTime) / 60000);
-                variance = `Took ${varianceMins} min total`;
+                    if (varianceMins > 0) variance = `LATE by ${varianceMins} min`;
+                    else if (varianceMins < 0) variance = `EARLY by ${Math.abs(varianceMins)} min`;
+                    else variance = "EXACT ON TIME";
+                } else {
+                    varianceMins = Math.round((breakData.returnRequestedTime - breakData.startTime) / 60000);
+                    variance = `Took ${varianceMins} min total`;
+                }
+
+                const historyRef = ref(db, `${FACTION_ID}/history/${businessDate}`);
+                push(historyRef, {
+                    name: breakData.name,
+                    type: breakData.type,
+                    startTime: formatAMPM(breakData.startTime),
+                    expectedEnd: breakData.endTime > 0 ? formatAMPM(breakData.endTime) : "Open Return",
+                    actualReturn: formatAMPM(breakData.returnRequestedTime),
+                    variance: variance,
+                    adminNote: adminNote.replace(/"/g, "'"), 
+                    timestamp: new Date(tzStr).getTime()
+                });
+
+                breakData.status = 'completed'; 
+                set(ref(db, `${FACTION_ID}/breaks/` + key), breakData);
             }
-
-            const historyRef = ref(db, `${FACTION_ID}/history/${businessDate}`);
-            push(historyRef, {
-                name: breakData.name,
-                type: breakData.type,
-                startTime: formatAMPM(breakData.startTime),
-                expectedEnd: breakData.endTime > 0 ? formatAMPM(breakData.endTime) : "Open Return",
-                actualReturn: formatAMPM(breakData.returnRequestedTime),
-                variance: variance,
-                adminNote: adminNote.replace(/"/g, "'"), 
-                timestamp: new Date(tzStr).getTime()
-            });
-
-            breakData.status = 'completed'; 
-            set(ref(db, `${FACTION_ID}/breaks/` + key), breakData);
-        }
+        }, 100);
     };
 
     // --- LEADERBOARD & ANALYTICS ---
