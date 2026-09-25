@@ -339,8 +339,16 @@
                         <option value="Saturday">Saturday</option>
                     </select>
                 </div>
+                <div class="form-group">
+                    <label>Break Start Time</label>
+                    <input type="time" id="newEmpStart" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Break End Time</label>
+                    <input type="time" id="newEmpEnd" class="form-control">
+                </div>
             </div>
-            <p style="font-size: 10px; color: var(--text-muted); margin-bottom: 10px;">*Break times will default to 12:00 AM. Use the <strong>Auto-Schedule</strong> tool above to automatically calculate breaks for new employees.</p>
+            <p style="font-size: 10px; color: var(--text-muted); margin-bottom: 10px;">*If you leave break times blank, the system will automatically stagger them 15 mins after the latest break currently assigned in their shift.</p>
             <button class="btn btn-staff" style="width: 100%;" onclick="window.addEmployee()">Save New Employee to Cloud</button>
         </div>
 
@@ -353,7 +361,6 @@
 </div>
 
 <div class="workspace-wrapper">
-
     <header class="app-header">
         <div class="header-title-group">
             <h1>
@@ -649,7 +656,7 @@
         
         let cleaned = timeStr.trim().replace(/\s+/g, ' ');
         const parts = cleaned.split(' ');
-        if(parts.length < 2) return new Date(); // Safety fallback
+        if(parts.length < 2) return new Date(); 
         
         const time = parts[0];
         const modifier = parts[1].toUpperCase();
@@ -687,18 +694,14 @@
         let tStart = parseTimeToday(times[0]).getTime();
         let tEnd = parseTimeToday(times[1]).getTime();
         
-        // Handle Overnight Shifts (e.g. 7 PM to 2 AM)
         if (tStart > tEnd) {
             if (new Date(tzStr).getHours() < 12) {
-                // If it is currently morning (e.g. 1 AM), the shift started yesterday
                 tStart -= 24 * 3600 * 1000; 
             } else {
-                // If it is currently evening (e.g. 10 PM), the shift ends tomorrow
                 tEnd += 24 * 3600 * 1000; 
             }
         }
         
-        // 30 minute arrival grace period
         tStart -= (30 * 60000); 
         
         return now >= tStart && now <= tEnd;
@@ -745,7 +748,7 @@
                 if (!emp.timeEnd) emp.timeEnd = (fixedSlots[i] && fixedSlots[i].timeEnd) || "12:30 AM";
                 if (!emp.overlap) emp.overlap = "1 Staff";
                 if (!emp.pcNumber) emp.pcNumber = "PC-" + (i+1).toString().padStart(2, '0');
-                if (!emp.teamName) emp.teamName = "Main Team"; // FIXED FALLBACK
+                if (!emp.teamName) emp.teamName = "Main Team"; 
                 
                 if (typeof emp.isLocked === 'undefined') emp.isLocked = (defaultEmployees[i] && typeof defaultEmployees[i].isLocked !== 'undefined') ? defaultEmployees[i].isLocked : false;
                 if (typeof emp.quota30 === 'undefined') emp.quota30 = 0;
@@ -1304,12 +1307,49 @@
         const team = document.getElementById('newEmpTeam').value.trim() || "Main Team";
         const shift = document.getElementById('newEmpShift').value.trim() || "Shift A (07:00 PM - 02:00 AM)";
         const pOff = document.getElementById('newEmpDayOff').value;
+        const startRaw = document.getElementById('newEmpStart').value;
+        const endRaw = document.getElementById('newEmpEnd').value;
 
         if (!name) { alert("Please enter an employee name."); return; }
         
         const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
         const businessTime = new Date(new Date(tzStr).getTime() - (4 * 3600 * 1000));
         const todayDayStr = businessTime.toLocaleString('en-US', { weekday: 'long' });
+
+        // Smart Break Defaulting & Staggering Logic
+        let finalStart = "12:00 AM";
+        let finalEnd = "12:30 AM";
+
+        if (startRaw && endRaw) {
+            finalStart = convertTimeFormat(startRaw);
+            finalEnd = convertTimeFormat(endRaw);
+        } else {
+            const baseShiftSearch = shift.split(' (')[0];
+            let shiftStaff = currentEmployees.filter(e => e.shift.includes(baseShiftSearch));
+
+            const match = shift.match(/([0-1]?[0-9]:[0-5][0-9]\s*(?:AM|PM|am|pm))/);
+            if (match) {
+                let shiftStartMs = parseTimeToday(match[1].toUpperCase()).getTime();
+                let targetStartMs = shiftStartMs;
+
+                if (shiftStaff.length > 0) {
+                    let maxTimeMs = shiftStartMs;
+                    shiftStaff.forEach(e => {
+                        let eTimeMs = parseTimeToday(e.timeStart).getTime();
+                        if (eTimeMs < shiftStartMs && (shiftStartMs - eTimeMs) > 12 * 3600 * 1000) {
+                            eTimeMs += 24 * 3600 * 1000;
+                        }
+                        if (eTimeMs > maxTimeMs) {
+                            maxTimeMs = eTimeMs;
+                        }
+                    });
+                    targetStartMs = maxTimeMs + (15 * 60000);
+                }
+
+                finalStart = formatAMPM(targetStartMs);
+                finalEnd = formatAMPM(targetStartMs + (30 * 60000));
+            }
+        }
 
         const newEmp = {
             name: name,
@@ -1318,8 +1358,8 @@
             shift: shift,
             assignedDayOff: pOff,
             dayOff: (pOff === todayDayStr) ? todayDayStr : "None",
-            timeStart: "12:00 AM", 
-            timeEnd: "12:30 AM",
+            timeStart: finalStart, 
+            timeEnd: finalEnd,
             overlap: "1 Staff",
             isLocked: false,
             quota30: 0,
@@ -1331,7 +1371,9 @@
             set(ref(db, 'roster'), currentEmployees).then(() => {
                 document.getElementById('newEmpName').value = '';
                 document.getElementById('newEmpPC').value = '';
-                alert(`✅ SUCCESS: Employee ${name} has been securely saved to the live cloud database!\n\nTip: Use the Auto-Schedule tool above to generate their break time.`);
+                document.getElementById('newEmpStart').value = '';
+                document.getElementById('newEmpEnd').value = '';
+                alert(`✅ SUCCESS: Employee ${name} has been securely saved to the live cloud database!\n\nTheir break was automatically staggered and set to ${finalStart} - ${finalEnd}.`);
                 renderModalList();
             }).catch((error) => {
                 alert(`❌ FAILURE: Could not save employee to the cloud.\nError Details: ${error.message}`);
