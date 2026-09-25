@@ -37,6 +37,10 @@
             --shift-d-border: rgba(245, 158, 11, 0.3);
             --shift-d-text: #F59E0B; 
             
+            --shift-e-bg: rgba(236, 72, 153, 0.1);
+            --shift-e-border: rgba(236, 72, 153, 0.3);
+            --shift-e-text: #EC4899; 
+
             --shift-custom-bg: rgba(168, 85, 247, 0.1);
             --shift-custom-border: rgba(168, 85, 247, 0.3);
             --shift-custom-text: #A855F7; 
@@ -226,6 +230,7 @@
         .badge-shift-b { background: var(--shift-b-bg); border-color: var(--shift-b-border); color: var(--shift-b-text); }
         .badge-shift-c { background: var(--shift-c-bg); border-color: var(--shift-c-border); color: var(--shift-c-text); }
         .badge-shift-d { background: var(--shift-d-bg); border-color: var(--shift-d-border); color: var(--shift-d-text); }
+        .badge-shift-e { background: var(--shift-e-bg); border-color: var(--shift-e-border); color: var(--shift-e-text); }
         .badge-shift-custom { background: var(--shift-custom-bg); border-color: var(--shift-custom-border); color: var(--shift-custom-text); }
         
         .badge-team { background: var(--team-bg); border-color: var(--team-border); color: var(--team-text); margin-top: 4px; }
@@ -320,6 +325,7 @@
                         <option value="Shift B (07:30 PM - 02:30 AM)">Shift B (07:30 PM - 02:30 AM)</option>
                         <option value="Shift C (08:00 AM - 03:00 PM)">Shift C (08:00 AM - 03:00 PM)</option>
                         <option value="Shift D (04:00 PM - 11:00 PM)">Shift D (04:00 PM - 11:00 PM)</option>
+                        <option value="Shift E (09:00 AM - 03:00 PM)">Shift E (09:00 AM - 03:00 PM)</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -353,6 +359,7 @@
                         <option value="Shift B (07:30 PM - 02:30 AM)">Shift B (07:30 PM - 02:30 AM)</option>
                         <option value="Shift C (08:00 AM - 03:00 PM)">Shift C (08:00 AM - 03:00 PM)</option>
                         <option value="Shift D (04:00 PM - 11:00 PM)">Shift D (04:00 PM - 11:00 PM)</option>
+                        <option value="Shift E (09:00 AM - 03:00 PM)">Shift E (09:00 AM - 03:00 PM)</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -473,6 +480,7 @@
             <button class="tab-btn" onclick="window.filterShift('Shift B', this)">Shift B</button>
             <button class="tab-btn" onclick="window.filterShift('Shift C', this)">Shift C</button>
             <button class="tab-btn" onclick="window.filterShift('Shift D', this)">Shift D</button>
+            <button class="tab-btn" onclick="window.filterShift('Shift E', this)">Shift E</button>
         </div>
     </div>
 
@@ -572,7 +580,8 @@
         "Shift A (07:00 PM - 02:00 AM)",
         "Shift B (07:30 PM - 02:30 AM)",
         "Shift C (08:00 AM - 03:00 PM)",
-        "Shift D (04:00 PM - 11:00 PM)"
+        "Shift D (04:00 PM - 11:00 PM)",
+        "Shift E (09:00 AM - 03:00 PM)"
     ];
 
     const fixedSlots = [
@@ -839,6 +848,7 @@
             else if (emp.shift.includes('Shift B')) shiftClass = 'badge-shift-b';
             else if (emp.shift.includes('Shift C')) shiftClass = 'badge-shift-c';
             else if (emp.shift.includes('Shift D')) shiftClass = 'badge-shift-d';
+            else if (emp.shift.includes('Shift E')) shiftClass = 'badge-shift-e';
 
             let shiftSelectOptionsHtml = shiftOptions.map(opt => {
                 const isSelected = emp.shift === opt;
@@ -1087,6 +1097,7 @@
         let shiftBActive = 0;
         let shiftCActive = 0;
         let shiftDActive = 0;
+        let shiftEActive = 0;
         let otherActive = 0;
         let offCount = 0;
 
@@ -1102,6 +1113,7 @@
             else if (e.shift.includes('Shift B')) shiftBActive++;
             else if (e.shift.includes('Shift C')) shiftCActive++;
             else if (e.shift.includes('Shift D')) shiftDActive++;
+            else if (e.shift.includes('Shift E')) shiftEActive++;
             else otherActive++;
         });
 
@@ -1113,6 +1125,7 @@
         let shiftStr = `${shiftAActive} A | ${shiftBActive} B`;
         if (shiftCActive > 0) shiftStr += ` | ${shiftCActive} C`;
         if (shiftDActive > 0) shiftStr += ` | ${shiftDActive} D`;
+        if (shiftEActive > 0) shiftStr += ` | ${shiftEActive} E`;
         if (otherActive > 0) shiftStr += ` | ${otherActive} Oth`;
         document.getElementById('metricShiftBreakdown').innerText = shiftStr;
         
