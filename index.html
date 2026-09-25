@@ -19,18 +19,32 @@
             --text-main: #F8FAFC; 
             --text-muted: #94A3B8; 
             --border-color: #334155; 
+            
+            /* SHIFT COLORS */
             --shift-a-bg: rgba(56, 189, 248, 0.1);
             --shift-a-border: rgba(56, 189, 248, 0.3);
-            --shift-a-text: #38BDF8;
+            --shift-a-text: #38BDF8; /* Blue */
+            
             --shift-b-bg: rgba(244, 63, 94, 0.1);
             --shift-b-border: rgba(244, 63, 94, 0.3);
-            --shift-b-text: #FB7185;
+            --shift-b-text: #FB7185; /* Rose */
+            
+            --shift-c-bg: rgba(16, 185, 129, 0.1);
+            --shift-c-border: rgba(16, 185, 129, 0.3);
+            --shift-c-text: #10B981; /* Emerald Green */
+            
+            --shift-d-bg: rgba(245, 158, 11, 0.1);
+            --shift-d-border: rgba(245, 158, 11, 0.3);
+            --shift-d-text: #F59E0B; /* Amber Orange */
+            
             --shift-custom-bg: rgba(168, 85, 247, 0.1);
             --shift-custom-border: rgba(168, 85, 247, 0.3);
-            --shift-custom-text: #A855F7;
-            --team-bg: rgba(16, 185, 129, 0.1);
-            --team-border: rgba(16, 185, 129, 0.3);
-            --team-text: #10B981;
+            --shift-custom-text: #A855F7; /* Purple */
+
+            --team-bg: rgba(255, 255, 255, 0.05);
+            --team-border: rgba(255, 255, 255, 0.2);
+            --team-text: #CBD5E1;
+            
             --overlap-bg: rgba(251, 191, 36, 0.1);
             --overlap-border: rgba(251, 191, 36, 0.3);
             --overlap-text: #FBBF24;
@@ -124,7 +138,7 @@
         .metric-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 6px; }
         .metric-label { font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--text-muted); letter-spacing: 0.5px; }
         .metric-value { font-size: 20px; font-weight: 700; color: var(--text-main); }
-        .metric-sub { font-size: 11px; color: var(--primary); font-weight: 600; }
+        .metric-sub { font-size: 11px; color: var(--primary); font-weight: 600; line-height: 1.4; }
 
         /* --- ADMIN CLOUD BANNER --- */
         .admin-controls { background: rgba(30, 41, 59, 0.7); border: 1px dashed var(--border-color); border-radius: 12px; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
@@ -206,7 +220,10 @@
         .status-badge { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; border: 1px solid transparent; }
         .badge-shift-a { background: var(--shift-a-bg); border-color: var(--shift-a-border); color: var(--shift-a-text); }
         .badge-shift-b { background: var(--shift-b-bg); border-color: var(--shift-b-border); color: var(--shift-b-text); }
+        .badge-shift-c { background: var(--shift-c-bg); border-color: var(--shift-c-border); color: var(--shift-c-text); }
+        .badge-shift-d { background: var(--shift-d-bg); border-color: var(--shift-d-border); color: var(--shift-d-text); }
         .badge-shift-custom { background: var(--shift-custom-bg); border-color: var(--shift-custom-border); color: var(--shift-custom-text); }
+        
         .badge-team { background: var(--team-bg); border-color: var(--team-border); color: var(--team-text); margin-top: 4px; }
         .badge-overlap { background: var(--overlap-bg); border-color: var(--overlap-border); color: var(--overlap-text); }
         .badge-single { background: var(--single-bg); border-color: var(--single-border); color: var(--single-text); }
@@ -268,8 +285,13 @@
             <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 15px; line-height: 1.4;">Select a shift and set when the very first break starts. The system will automatically stagger 30-minute breaks every 15 minutes for everyone assigned to that shift.</p>
             <div class="form-grid">
                 <div class="form-group">
-                    <label>Target Shift Name</label>
-                    <input type="text" id="autoShiftName" class="form-control" placeholder="e.g. Shift A" value="Shift A (07:00 PM - 02:00 AM)">
+                    <label>Target Shift Preset</label>
+                    <select id="autoShiftName" class="form-control">
+                        <option value="Shift A (07:00 PM - 02:00 AM)">Shift A (07:00 PM - 02:00 AM)</option>
+                        <option value="Shift B (07:30 PM - 02:30 AM)">Shift B (07:30 PM - 02:30 AM)</option>
+                        <option value="Shift C (08:00 AM - 03:00 PM)">Shift C (08:00 AM - 03:00 PM)</option>
+                        <option value="Shift D (04:00 PM - 11:00 PM)">Shift D (04:00 PM - 11:00 PM)</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label>First Break Starts At</label>
@@ -296,8 +318,13 @@
                     <input type="text" id="newEmpTeam" class="form-control" placeholder="e.g. Phoenix Team" value="Main Team">
                 </div>
                 <div class="form-group">
-                    <label>Assigned Shift Window</label>
-                    <input type="text" id="newEmpShift" class="form-control" placeholder="e.g. Shift C (08:00 AM - 04:00 PM)" value="Shift A (07:00 PM - 02:00 AM)">
+                    <label>Assigned Shift Preset</label>
+                    <select id="newEmpShift" class="form-control">
+                        <option value="Shift A (07:00 PM - 02:00 AM)">Shift A (07:00 PM - 02:00 AM)</option>
+                        <option value="Shift B (07:30 PM - 02:30 AM)">Shift B (07:30 PM - 02:30 AM)</option>
+                        <option value="Shift C (08:00 AM - 03:00 PM)">Shift C (08:00 AM - 03:00 PM)</option>
+                        <option value="Shift D (04:00 PM - 11:00 PM)">Shift D (04:00 PM - 11:00 PM)</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label>Permanent Day Off</label>
@@ -405,6 +432,8 @@
             <button class="tab-btn" onclick="window.filterShift('dayoff', this)">🔴 On Day Off (<span id="countDayOff">0</span>)</button>
             <button class="tab-btn" onclick="window.filterShift('Shift A', this)">Shift A</button>
             <button class="tab-btn" onclick="window.filterShift('Shift B', this)">Shift B</button>
+            <button class="tab-btn" onclick="window.filterShift('Shift C', this)">Shift C</button>
+            <button class="tab-btn" onclick="window.filterShift('Shift D', this)">Shift D</button>
         </div>
     </div>
 
@@ -496,6 +525,13 @@
         document.getElementById('viewBadge').style.color = "#3B82F6";
         document.getElementById('viewBadge').style.borderColor = "rgba(59, 130, 246, 0.3)";
     }
+
+    const shiftOptions = [
+        "Shift A (07:00 PM - 02:00 AM)",
+        "Shift B (07:30 PM - 02:30 AM)",
+        "Shift C (08:00 AM - 03:00 PM)",
+        "Shift D (04:00 PM - 11:00 PM)"
+    ];
 
     const fixedSlots = [
         { timeStart: "08:30 PM", timeEnd: "09:00 PM", overlap: "2 Staff" },
@@ -597,7 +633,6 @@
                 let resetRoster = currentEmployees.map(emp => {
                     let permOff = emp.assignedDayOff || "None";
                     emp.dayOff = (permOff === businessDayStr) ? businessDayStr : "None";
-                    // Reset Daily Break Quotas
                     emp.quota30 = 0;
                     emp.quota10 = 0;
                     return emp;
@@ -682,8 +717,12 @@
                 if (typeof emp.isLocked === 'undefined') emp.isLocked = defaultEmployees[i] ? defaultEmployees[i].isLocked : false;
                 if (typeof emp.quota30 === 'undefined') emp.quota30 = 0;
                 if (typeof emp.quota10 === 'undefined') emp.quota10 = 0;
+                
+                // Legacy standardization mapping
                 if (emp.shift === 'Shift A') emp.shift = 'Shift A (07:00 PM - 02:00 AM)';
                 if (emp.shift === 'Shift B') emp.shift = 'Shift B (07:30 PM - 02:30 AM)';
+                if (emp.shift === 'Shift C (08:00 AM - 04:00 PM)') emp.shift = 'Shift C (08:00 AM - 03:00 PM)';
+                if (emp.shift === 'Shift D (04:00 PM - 12:00 AM)') emp.shift = 'Shift D (04:00 PM - 11:00 PM)';
                 return emp;
             });
         } 
@@ -728,8 +767,24 @@
             let shiftClass = 'badge-shift-custom';
             if (emp.shift.includes('Shift A')) shiftClass = 'badge-shift-a';
             else if (emp.shift.includes('Shift B')) shiftClass = 'badge-shift-b';
+            else if (emp.shift.includes('Shift C')) shiftClass = 'badge-shift-c';
+            else if (emp.shift.includes('Shift D')) shiftClass = 'badge-shift-d';
 
-            let shiftBadgeHtml = `<span class="status-badge ${shiftClass}">${emp.shift}</span>`;
+            let shiftSelectOptionsHtml = shiftOptions.map(opt => {
+                const isSelected = emp.shift === opt;
+                return `<option value="${opt}" ${isSelected ? 'selected' : ''}>${opt.split(' (')[0]}</option>`;
+            }).join('');
+            
+            if (!shiftOptions.includes(emp.shift)) {
+                shiftSelectOptionsHtml = `<option value="${emp.shift}" selected>${emp.shift.split(' (')[0]} (Custom)</option>` + shiftSelectOptionsHtml;
+            }
+
+            let shiftBadgeHtml = isStaffView 
+                ? `<span class="status-badge ${shiftClass}">${emp.shift.split(' (')[0]}</span>`
+                : `<select class="dayoff-select" style="margin-bottom: 4px; font-size: 11px; padding: 4px; width: 100%;" onchange="window.updateShift(${index}, this.value)">
+                     ${shiftSelectOptionsHtml}
+                   </select>`;
+
             if (isOffShift && !isOffToday) {
                 shiftBadgeHtml += ` <br><span style="font-size:10px; color:#EF4444; font-weight:700;">(OFF SHIFT)</span>`;
             }
@@ -752,7 +807,6 @@
             const presentBtnStyle = isOffToday ? 'color: #F87171; border-color: #F87171;' : 'color: #10B981; border-color: #10B981;';
             const presentBtnText = isOffToday ? '🔴 Absent Today' : '🟢 Present Today';
 
-            // Quota Badge Styling
             const q30Maxed = (emp.quota30 >= 1);
             const q10Maxed = (emp.quota10 >= 3);
             const q30Bg = q30Maxed ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)';
@@ -930,7 +984,6 @@
             
             if (!start) return;
 
-            // If endTarget is 0, this is a STOPWATCH (Prayer Break)
             if (endTarget === 0) {
                 let elapsedSecs = Math.floor((currentOrFrozen - start) / 1000);
                 const mins = Math.floor(elapsedSecs / 60);
@@ -942,7 +995,6 @@
                 return;
             }
 
-            // Normal Countdown
             let remainingSecs = Math.floor((endTarget - currentOrFrozen) / 1000);
             let isOvertime = remainingSecs < 0;
             let absSecs = Math.abs(remainingSecs);
@@ -958,11 +1010,13 @@
         });
     }
 
-    // --- LIVE KPI LOGIC ---
+    // --- LIVE KPI LOGIC (STRICT SHIFT FILTERING) ---
     function updateAutomatedMetrics() {
         let presentCount = 0;
         let shiftAActive = 0;
         let shiftBActive = 0;
+        let shiftCActive = 0;
+        let shiftDActive = 0;
         let otherActive = 0;
         let offCount = 0;
 
@@ -976,6 +1030,8 @@
             presentCount++;
             if (e.shift.includes('Shift A')) shiftAActive++;
             else if (e.shift.includes('Shift B')) shiftBActive++;
+            else if (e.shift.includes('Shift C')) shiftCActive++;
+            else if (e.shift.includes('Shift D')) shiftDActive++;
             else otherActive++;
         });
 
@@ -984,8 +1040,10 @@
         const total = currentEmployees.length;
 
         document.getElementById('metricStaffCount').innerText = `${presentCount} Present`;
-        let shiftStr = `${shiftAActive} Shift A | ${shiftBActive} Shift B`;
-        if (otherActive > 0) shiftStr += ` | ${otherActive} Custom`;
+        let shiftStr = `${shiftAActive} A | ${shiftBActive} B`;
+        if (shiftCActive > 0) shiftStr += ` | ${shiftCActive} C`;
+        if (shiftDActive > 0) shiftStr += ` | ${shiftDActive} D`;
+        if (otherActive > 0) shiftStr += ` | ${otherActive} Oth`;
         document.getElementById('metricShiftBreakdown').innerText = shiftStr;
         
         document.getElementById('metricOffCount').innerText = `${offCount} Staff Off`;
@@ -1102,7 +1160,6 @@
             breakData.endTime = 0; 
         }
         
-        // Consume the 10-min quota only upon Admin Approval
         if (breakData.limit === 10) {
             const empIndex = currentEmployees.findIndex(e => e.name === breakData.name);
             if (empIndex > -1) {
@@ -1161,15 +1218,17 @@
         const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
         let startTimeMs = parseToDate(convertTimeFormat(startRaw)).getTime();
 
-        let shiftStaff = currentEmployees.filter(e => e.shift.includes(shiftName));
+        const baseShiftSearch = shiftName.split(' (')[0];
+        let shiftStaff = currentEmployees.filter(e => e.shift.includes(baseShiftSearch));
+        
         if(shiftStaff.length === 0) {
-            alert("No employees found assigned to a shift containing: " + shiftName);
+            alert("No employees found assigned to a shift containing: " + baseShiftSearch);
             return;
         }
 
         let currentIndex = 0;
         currentEmployees.forEach(emp => {
-            if (emp.shift.includes(shiftName)) {
+            if (emp.shift.includes(baseShiftSearch)) {
                 let empStartMs = startTimeMs + (currentIndex * 15 * 60000);
                 let empEndMs = empStartMs + (30 * 60000);
 
@@ -1182,7 +1241,7 @@
         });
 
         set(ref(db, 'roster'), currentEmployees);
-        alert(`Successfully generated sequential breaks for ${currentIndex} employees in ${shiftName}!`);
+        alert(`Successfully generated sequential breaks for ${currentIndex} employees in ${baseShiftSearch}!`);
         renderModalList();
     };
 
@@ -1190,7 +1249,7 @@
         const name = document.getElementById('newEmpName').value.trim();
         const pc = document.getElementById('newEmpPC').value.trim() || "PC-XX";
         const team = document.getElementById('newEmpTeam').value.trim() || "Main Team";
-        const shift = document.getElementById('newEmpShift').value.trim() || "Custom Shift";
+        const shift = document.getElementById('newEmpShift').value.trim() || "Shift A (07:00 PM - 02:00 AM)";
         const pOff = document.getElementById('newEmpDayOff').value;
 
         if (!name) { alert("Please enter an employee name."); return; }
@@ -1230,7 +1289,6 @@
         }
     };
 
-    // DYNAMIC LOCK/UNLOCK FOR ANY EMPLOYEE
     window.toggleLock = function(index) {
         if (isStaffView) return;
         currentEmployees[index].isLocked = !currentEmployees[index].isLocked;
@@ -1245,7 +1303,7 @@
                 <div class="emp-list-item">
                     <div class="emp-list-info">
                         <span class="emp-list-name">${emp.pcNumber} | ${emp.name}</span>
-                        <span class="emp-list-meta">${emp.shift} | ${emp.teamName} | Break: ${emp.timeStart} - ${emp.timeEnd}</span>
+                        <span class="emp-list-meta">${emp.shift.split(' (')[0]} | ${emp.teamName} | Break: ${emp.timeStart} - ${emp.timeEnd}</span>
                     </div>
                     <div style="display: flex; gap: 8px;">
                         <button class="btn btn-staff" style="padding: 6px 12px; font-size: 11px;" onclick="window.toggleLock(${index})">${emp.isLocked ? '🔒 Locked' : '🔓 Unlock'}</button>
@@ -1257,6 +1315,12 @@
     }
 
     // TABLE INLINE EDITS
+    window.updateShift = function(index, newVal) {
+        if (isStaffView) return; 
+        currentEmployees[index].shift = newVal;
+        set(ref(db, 'roster'), currentEmployees);
+    };
+
     window.updatePC = function(index, newVal) {
         if (isStaffView) return; 
         currentEmployees[index].pcNumber = newVal.trim() || "PC-XX";
@@ -1306,6 +1370,7 @@
                 
                 const btn = document.getElementById('reshuffleBtn');
                 btn.disabled = false; btn.style.opacity = "1"; btn.style.cursor = "pointer";
+                renderTable(); 
             } else if (pin !== null) alert("Incorrect PIN. Access Denied.");
         } else {
             isUnlocked = false;
@@ -1373,7 +1438,7 @@
             if(!nameEl) return;
             const emp = currentEmployees[idx];
             const searchText = (emp.name + " " + (emp.pcNumber || "") + " " + emp.shift + " " + (emp.teamName || "")).toLowerCase();
-            const shiftText = row.querySelector('.col-shift').textContent;
+            const shiftText = emp.shift; 
             const isOff = emp && emp.dayOff !== 'None';
 
             const matchesSearch = searchText.includes(input);
