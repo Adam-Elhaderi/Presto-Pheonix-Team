@@ -23,23 +23,23 @@
             /* SHIFT COLORS */
             --shift-a-bg: rgba(56, 189, 248, 0.1);
             --shift-a-border: rgba(56, 189, 248, 0.3);
-            --shift-a-text: #38BDF8; /* Blue */
+            --shift-a-text: #38BDF8; 
             
             --shift-b-bg: rgba(244, 63, 94, 0.1);
             --shift-b-border: rgba(244, 63, 94, 0.3);
-            --shift-b-text: #FB7185; /* Rose */
+            --shift-b-text: #FB7185; 
             
             --shift-c-bg: rgba(16, 185, 129, 0.1);
             --shift-c-border: rgba(16, 185, 129, 0.3);
-            --shift-c-text: #10B981; /* Emerald Green */
+            --shift-c-text: #10B981; 
             
             --shift-d-bg: rgba(245, 158, 11, 0.1);
             --shift-d-border: rgba(245, 158, 11, 0.3);
-            --shift-d-text: #F59E0B; /* Amber Orange */
+            --shift-d-text: #F59E0B; 
             
             --shift-custom-bg: rgba(168, 85, 247, 0.1);
             --shift-custom-border: rgba(168, 85, 247, 0.3);
-            --shift-custom-text: #A855F7; /* Purple */
+            --shift-custom-text: #A855F7; 
 
             --team-bg: rgba(255, 255, 255, 0.05);
             --team-border: rgba(255, 255, 255, 0.2);
@@ -86,6 +86,10 @@
         .btn-danger:hover { background: #DC2626; }
         .btn-staff { background: #3B82F6; border-color: #3B82F6; color: white; }
         .btn-staff:hover { background: #2563EB; box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); }
+        .btn-warning { background: #F59E0B; border-color: #F59E0B; color: #FFFFFF; }
+        .btn-warning:hover { background: #D97706; box-shadow: 0 0 15px rgba(245, 158, 11, 0.3); }
+        .btn-audit { background: #8B5CF6; border-color: #8B5CF6; color: white; }
+        .btn-audit:hover { background: #7C3AED; box-shadow: 0 0 15px rgba(139, 92, 246, 0.3); }
 
         /* --- MODERN HOLOGRAM CLOCK --- */
         .holo-clock-container {
@@ -228,9 +232,10 @@
         .badge-overlap { background: var(--overlap-bg); border-color: var(--overlap-border); color: var(--overlap-text); }
         .badge-single { background: var(--single-bg); border-color: var(--single-border); color: var(--single-text); }
         
-        /* --- EMPLOYEE MANAGER MODAL --- */
+        /* --- MODALS --- */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
         .modal-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; width: 95%; max-width: 650px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        .modal-card-large { max-width: 850px; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; }
         .modal-header h2 { font-size: 18px; font-weight: 700; color: var(--text-main); margin: 0; }
         .close-btn { background: transparent; border: none; color: var(--text-muted); font-size: 24px; cursor: pointer; transition: color 0.2s; }
@@ -247,6 +252,14 @@
         .emp-list-info { display: flex; flex-direction: column; gap: 4px; }
         .emp-list-name { font-weight: 600; font-size: 14px; color: var(--text-main); }
         .emp-list-meta { font-size: 11px; color: var(--text-muted); font-weight: 600; }
+
+        /* --- LEADERBOARD SPECIFIC --- */
+        .leaderboard-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .leaderboard-table th { background: rgba(0,0,0,0.2); padding: 10px; text-transform: uppercase; font-size: 10px; color: var(--text-muted); text-align: left; }
+        .leaderboard-table td { padding: 10px; border-bottom: 1px solid var(--border-color); }
+        .score-good { color: #10B981; font-weight: 700; }
+        .score-bad { color: #EF4444; font-weight: 700; }
+        .score-neutral { color: var(--text-muted); font-weight: 700; }
 
         /* --- FULL RULES SECTION --- */
         .rules-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 12px; margin-top: 10px;}
@@ -270,6 +283,22 @@
     </style>
 </head>
 <body>
+
+<!-- LEADERBOARD MODAL -->
+<div id="leaderboardModal" class="modal-overlay">
+    <div class="modal-card modal-card-large">
+        <div class="modal-header">
+            <h2>🏆 Break Punctuality Rankings (All-Time)</h2>
+            <button class="close-btn" onclick="window.closeLeaderboard()">×</button>
+        </div>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">
+            The Punctuality Score represents their <strong>Net Balance</strong> (Minutes Early - Minutes Late). Positive scores mean they give time back to the floor. Negative scores mean they are stealing time.
+        </p>
+        <div id="leaderboardContent">
+            <p style="text-align: center; color: var(--primary);">Loading Analytics from Cloud...</p>
+        </div>
+    </div>
+</div>
 
 <!-- EMPLOYEE MANAGER MODAL -->
 <div id="employeeModal" class="modal-overlay">
@@ -376,8 +405,11 @@
         </div>
 
         <div class="actions-group" id="headerActions">
-            <button class="btn" onclick="window.exportCSV()">Export CSV</button>
-            <button class="btn btn-primary" onclick="window.print()">Print / Save PDF</button>
+            <button class="btn btn-audit" onclick="window.exportEmployeeHistory()">📅 90-Day Audit</button>
+            <button class="btn btn-warning" onclick="window.openLeaderboard()">🏆 Break Rankings</button>
+            <button class="btn btn-staff" onclick="window.exportHistory()">📊 Export History</button>
+            <button class="btn" onclick="window.exportCSV()">Export Roster</button>
+            <button class="btn btn-primary" onclick="window.print()">Print PDF</button>
         </div>
     </header>
 
@@ -501,7 +533,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-    import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+    import { getDatabase, ref, set, onValue, remove, push, get } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyCmlKjghDehj9L5aw1dJGa1WLjPRT2o-Yc",
@@ -1246,9 +1278,134 @@
         if (!requireAdmin()) return;
         const breakData = currentBreaks[key];
         if (breakData) {
+            const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
+            const businessDate = new Date(new Date(tzStr).getTime() - (4 * 3600 * 1000)).toISOString().split('T')[0];
+
+            let variance = "N/A";
+            let varianceMins = 0;
+
+            if (breakData.endTime > 0) {
+                const diffMs = breakData.returnRequestedTime - breakData.endTime;
+                varianceMins = Math.round(diffMs / 60000);
+
+                if (varianceMins > 0) variance = `LATE by ${varianceMins} min`;
+                else if (varianceMins < 0) variance = `EARLY by ${Math.abs(varianceMins)} min`;
+                else variance = "EXACT ON TIME";
+            } else {
+                varianceMins = Math.round((breakData.returnRequestedTime - breakData.startTime) / 60000);
+                variance = `Took ${varianceMins} min total`;
+            }
+
+            const historyRef = ref(db, `history/${businessDate}`);
+            push(historyRef, {
+                name: breakData.name,
+                type: breakData.type,
+                startTime: formatAMPM(breakData.startTime),
+                expectedEnd: breakData.endTime > 0 ? formatAMPM(breakData.endTime) : "Open Return",
+                actualReturn: formatAMPM(breakData.returnRequestedTime),
+                variance: variance,
+                timestamp: new Date(tzStr).getTime()
+            });
+
             breakData.status = 'completed'; 
             set(ref(db, 'breaks/' + key), breakData);
         }
+    };
+
+    // --- LEADERBOARD & ANALYTICS ---
+    window.openLeaderboard = async function() {
+        if (!requireAdmin()) return;
+        document.getElementById('leaderboardModal').style.display = 'flex';
+        const contentDiv = document.getElementById('leaderboardContent');
+        contentDiv.innerHTML = '<p style="text-align: center; color: var(--primary);">Fetching historical data...</p>';
+
+        try {
+            const snapshot = await get(ref(db, 'history'));
+            if (!snapshot.exists()) {
+                contentDiv.innerHTML = '<p style="text-align: center; color: var(--text-muted);">No break history has been recorded yet.</p>';
+                return;
+            }
+
+            const allHistory = snapshot.val();
+            let stats = {};
+
+            Object.values(allHistory).forEach(dayRecord => {
+                Object.values(dayRecord).forEach(log => {
+                    if (!stats[log.name]) {
+                        stats[log.name] = { earlyMins: 0, lateMins: 0, perfectCount: 0 };
+                    }
+
+                    if (log.variance.includes('LATE by')) {
+                        const mins = parseInt(log.variance.replace(/[^0-9]/g, ''));
+                        if (!isNaN(mins)) stats[log.name].lateMins += mins;
+                    } else if (log.variance.includes('EARLY by')) {
+                        const mins = parseInt(log.variance.replace(/[^0-9]/g, ''));
+                        if (!isNaN(mins)) stats[log.name].earlyMins += mins;
+                    } else if (log.variance === 'EXACT ON TIME') {
+                        stats[log.name].perfectCount += 1;
+                    }
+                });
+            });
+
+            let sortedStaff = Object.keys(stats).map(name => {
+                const s = stats[name];
+                return {
+                    name: name,
+                    early: s.earlyMins,
+                    late: s.lateMins,
+                    perfect: s.perfectCount,
+                    score: s.earlyMins - s.lateMins
+                };
+            }).sort((a, b) => b.score - a.score);
+
+            let html = `
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Employee Name</th>
+                            <th>Net Balance</th>
+                            <th>Total Late</th>
+                            <th>Total Early</th>
+                            <th>Perfect Returns</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            sortedStaff.forEach((emp, index) => {
+                let rankStr = `${index + 1}`;
+                if (index === 0) rankStr = '🥇 1';
+                if (index === 1) rankStr = '🥈 2';
+                if (index === 2) rankStr = '🥉 3';
+
+                let scoreClass = 'score-neutral';
+                let scoreText = `${emp.score} min`;
+                if (emp.score > 0) { scoreClass = 'score-good'; scoreText = `+${emp.score} min`; }
+                if (emp.score < 0) { scoreClass = 'score-bad'; scoreText = `${emp.score} min`; }
+
+                html += `
+                    <tr>
+                        <td style="font-weight: 800;">${rankStr}</td>
+                        <td style="font-weight: 700; color: var(--text-main);">${emp.name}</td>
+                        <td class="${scoreClass}">${scoreText}</td>
+                        <td style="color: #EF4444;">${emp.late > 0 ? emp.late + ' min' : '-'}</td>
+                        <td style="color: #10B981;">${emp.early > 0 ? emp.early + ' min' : '-'}</td>
+                        <td style="color: var(--text-main);">${emp.perfect}</td>
+                    </tr>
+                `;
+            });
+
+            html += `</tbody></table>`;
+            contentDiv.innerHTML = html;
+
+        } catch (e) {
+            contentDiv.innerHTML = `<p style="color: #EF4444;">Error loading leaderboard: ${e.message}</p>`;
+        }
+    };
+
+    window.closeLeaderboard = function() {
+        document.getElementById('leaderboardModal').style.display = 'none';
     };
 
     // --- EMPLOYEE MANAGEMENT & MODAL ---
@@ -1316,7 +1473,6 @@
         const businessTime = new Date(new Date(tzStr).getTime() - (4 * 3600 * 1000));
         const todayDayStr = businessTime.toLocaleString('en-US', { weekday: 'long' });
 
-        // Smart Break Defaulting & Staggering Logic
         let finalStart = "12:00 AM";
         let finalEnd = "12:30 AM";
 
@@ -1559,6 +1715,97 @@
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
         el.classList.add('active');
         window.filterTable();
+    };
+
+    // --- 90-DAY EMPLOYEE AUDIT ---
+    window.exportEmployeeHistory = async function() {
+        if (!requireAdmin()) return;
+        
+        const empName = prompt("Enter the exact Employee Name to pull their 90-day report:");
+        if (!empName) return;
+
+        try {
+            const snapshot = await get(ref(db, 'history'));
+            if (!snapshot.exists()) {
+                alert("No history found in database.");
+                return;
+            }
+
+            const allHistory = snapshot.val();
+            let csv = ["Date,Employee Name,Break Type,Start Time,Expected Return,Actual Return,Variance Log"];
+            let matchCount = 0;
+            
+            const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
+            const today = new Date(tzStr);
+            const ninetyDaysAgo = new Date(today.getTime() - (90 * 24 * 60 * 60 * 1000));
+
+            const dates = Object.keys(allHistory).sort((a, b) => new Date(b) - new Date(a));
+
+            dates.forEach(dateStr => {
+                const recordDate = new Date(dateStr);
+                if (recordDate >= ninetyDaysAgo && recordDate <= today) {
+                    const dailyRecords = allHistory[dateStr];
+                    Object.values(dailyRecords).forEach(log => {
+                        if (log.name.toLowerCase().includes(empName.toLowerCase().trim())) {
+                            csv.push(`"${dateStr}","${log.name}","${log.type}","${log.startTime}","${log.expectedEnd}","${log.actualReturn}","${log.variance}"`);
+                            matchCount++;
+                        }
+                    });
+                }
+            });
+
+            if (matchCount === 0) {
+                alert(`No records found for "${empName}" in the last 90 days.`);
+                return;
+            }
+
+            const csvFile = new Blob([csv.join('\n')], { type: 'text/csv' });
+            const downloadLink = document.createElement('a');
+            downloadLink.download = `Audit_${empName.replace(/\s+/g, '_')}_90Days.csv`;
+            downloadLink.href = window.URL.createObjectURL(csvFile);
+            downloadLink.style.display = 'none';
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+            
+            alert(`✅ Successfully exported ${matchCount} historical break records for ${empName}!`);
+            
+        } catch (e) {
+            alert("Error generating report: " + e.message);
+        }
+    };
+
+    window.exportHistory = async function() {
+        if (!requireAdmin()) return;
+        const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
+        const businessDate = new Date(new Date(tzStr).getTime() - (4 * 3600 * 1000)).toISOString().split('T')[0];
+
+        try {
+            const snapshot = await get(ref(db, `history/${businessDate}`));
+            if (!snapshot.exists()) {
+                alert("No break history logged for today yet!");
+                return;
+            }
+            
+            const data = snapshot.val();
+            let csv = ["Employee Name,Break Type,Start Time,Expected Return,Actual Return,Variance Log"];
+            
+            Object.values(data).forEach(log => {
+                csv.push(`"${log.name}","${log.type}","${log.startTime}","${log.expectedEnd}","${log.actualReturn}","${log.variance}"`);
+            });
+            
+            const csvFile = new Blob([csv.join('\n')], { type: 'text/csv' });
+            const downloadLink = document.createElement('a');
+            downloadLink.download = `Presto_Break_History_${businessDate}.csv`;
+            downloadLink.href = window.URL.createObjectURL(csvFile);
+            downloadLink.style.display = 'none';
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+            
+        } catch (e) {
+            alert("Failed to export history: " + e.message);
+        }
     };
 
     window.exportCSV = function() {
