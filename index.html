@@ -745,9 +745,7 @@
                 if (!emp.timeEnd) emp.timeEnd = (fixedSlots[i] && fixedSlots[i].timeEnd) || "12:30 AM";
                 if (!emp.overlap) emp.overlap = "1 Staff";
                 if (!emp.pcNumber) emp.pcNumber = "PC-" + (i+1).toString().padStart(2, '0');
-                
-                // BULLETPROOF FALLBACK TO PREVENT UNDEFINED ERROR
-                if (!emp.teamName) emp.teamName = "Main Team";
+                if (!emp.teamName) emp.teamName = "Main Team"; // FIXED FALLBACK
                 
                 if (typeof emp.isLocked === 'undefined') emp.isLocked = (defaultEmployees[i] && typeof defaultEmployees[i].isLocked !== 'undefined') ? defaultEmployees[i].isLocked : false;
                 if (typeof emp.quota30 === 'undefined') emp.quota30 = 0;
