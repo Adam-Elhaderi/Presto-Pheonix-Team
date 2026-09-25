@@ -643,18 +643,26 @@
     }, 60000);
 
     // --- REBUILT BULLETPROOF TIME PARSER ---
-    // Safely reads "08:00 AM" and converts it exactly to TODAY'S date.
     function parseTimeToday(timeStr) {
         if(!timeStr) return new Date();
         const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
-        const [time, modifier] = timeStr.split(' ');
-        let [hours, minutes] = time.split(':');
-        hours = parseInt(hours, 10);
+        
+        let cleaned = timeStr.trim().replace(/\s+/g, ' ');
+        const parts = cleaned.split(' ');
+        if(parts.length < 2) return new Date(); // Safety fallback
+        
+        const time = parts[0];
+        const modifier = parts[1].toUpperCase();
+        
+        let timeParts = time.split(':');
+        let hours = parseInt(timeParts[0], 10);
+        let minutes = parseInt(timeParts[1], 10);
+        
         if (hours === 12) hours = modifier === 'AM' ? 0 : 12;
         else if (modifier === 'PM') hours += 12;
         
         let d = new Date(tzStr);
-        d.setHours(hours, parseInt(minutes, 10), 0, 0);
+        d.setHours(hours, minutes, 0, 0);
         return d;
     }
 
@@ -669,7 +677,7 @@
     }
 
     function isCurrentlyOnShift(shiftString) {
-        const regex = /([0-1]?[0-9]:[0-5][0-9]\s*(?:AM|PM|am|pm))/g;
+        const regex = /([0-1]?[0-9]:[0-5][0-9]\s*(?:AM|PM|am|pm))/gi;
         const times = shiftString.match(regex);
         if (!times || times.length < 2) return true;
 
@@ -704,7 +712,6 @@
         let bStart = parseTimeToday(emp.timeStart).getTime();
         let bEnd = parseTimeToday(emp.timeEnd).getTime();
 
-        // Handle overnight break crossing midnight
         if (bStart > bEnd) {
             if (new Date(tzStr).getHours() < 12) {
                 bStart -= 24 * 3600 * 1000; 
@@ -729,11 +736,14 @@
     onValue(ref(db, 'roster'), (snapshot) => {
         const data = snapshot.val();
         if (data) { 
-            currentEmployees = data.map((emp, i) => {
+            let dataArray = Array.isArray(data) ? data : Object.values(data);
+            dataArray = dataArray.filter(e => e !== null && e !== undefined);
+            
+            currentEmployees = dataArray.map((emp, i) => {
                 if (!emp.assignedDayOff) emp.assignedDayOff = defaultEmployees[i] ? defaultEmployees[i].assignedDayOff : "None";
                 if (!emp.timeStart) emp.timeStart = fixedSlots[i] ? fixedSlots[i].timeStart : "12:00 AM";
                 if (!emp.timeEnd) emp.timeEnd = fixedSlots[i] ? fixedSlots[i].timeEnd : "12:30 AM";
-                if (!emp.overlap) emp.overlap = fixedSlots[i] ? fixedSlots[i].overlap : "1 Staff";
+                if (!emp.overlap) emp.overlap = "1 Staff";
                 if (!emp.pcNumber) emp.pcNumber = "PC-" + (i+1).toString().padStart(2, '0');
                 if (!emp.teamName) emp.teamName = defaultEmployees[i] ? defaultEmployees[i].teamName : "Main Team";
                 if (typeof emp.isLocked === 'undefined') emp.isLocked = defaultEmployees[i] ? defaultEmployees[i].isLocked : false;
@@ -756,7 +766,7 @@
                 emp.dayOff = (emp.assignedDayOff === todayDayStr) ? todayDayStr : "None";
                 emp.timeStart = fixedSlots[i] ? fixedSlots[i].timeStart : "12:00 AM";
                 emp.timeEnd = fixedSlots[i] ? fixedSlots[i].timeEnd : "12:30 AM";
-                emp.overlap = fixedSlots[i] ? fixedSlots[i].overlap : "1 Staff";
+                emp.overlap = "1 Staff";
                 emp.pcNumber = "PC-" + (i+1).toString().padStart(2, '0');
                 emp.teamName = "Main Team";
                 emp.quota30 = 0;
@@ -1011,7 +1021,7 @@
                 const secs = elapsedSecs % 60;
                 timerEl.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
                 
-                if (mins >= 10) timerEl.classList.add('overtime');
+                if (mins >= 15) timerEl.classList.add('overtime');
                 else timerEl.classList.remove('overtime');
                 return;
             }
@@ -1108,9 +1118,14 @@
     window.startBreak = function(empName, index, requestedType = 'standard') {
         const safeKey = empName.replace(/[.#$[\]]/g, '');
         if (currentBreaks[safeKey] && currentBreaks[safeKey].status !== 'completed') {
-            alert(`${empName} already has an active or pending break request.`);
+            alert(`🚨 BLOCK: ${empName} already has an active or pending break request.`);
             return;
         }
+
+        // Live capacity check 
+        const activeBreaksList = Object.values(currentBreaks).filter(b => b.status !== 'completed');
+        const currentPrayers = activeBreaksList.filter(b => b.type === 'Prayer').length;
+        const current10Mins = activeBreaksList.filter(b => b.type === 'Unscheduled (10m)').length;
 
         const emp = currentEmployees[index];
         const q30 = emp.quota30 || 0;
@@ -1118,6 +1133,10 @@
         const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
 
         if (requestedType === 'prayer') {
+            if (currentPrayers >= 2) {
+                alert(`🚨 BLOCK: Maximum prayer capacity reached! (2 employees are currently on or waiting for prayer). Please wait until someone returns.`);
+                return;
+            }
             alert(`A request for a Prayer break has been sent to the Admin.`);
             set(ref(db, 'breaks/' + safeKey), {
                 name: empName,
@@ -1133,7 +1152,7 @@
 
         if (isOfficial) {
             if (q30 >= 1) {
-                alert(`🚨 STOP: ${empName} has already used their 1 official 30-minute break for today!`);
+                alert(`🚨 BLOCK: ${empName} has already used their 1 official 30-minute break for today!`);
                 return;
             }
 
@@ -1159,7 +1178,12 @@
             });
         } else {
             if (q10 >= 3) {
-                alert(`🚨 STOP: ${empName} has already used all 3 of their 10-minute quick breaks today!`);
+                alert(`🚨 BLOCK: ${empName} has already used all 3 of their 10-minute quick breaks today!`);
+                return;
+            }
+
+            if (current10Mins >= 1) {
+                alert(`🚨 BLOCK: Maximum 10-minute break capacity reached! (1 employee is currently on or waiting for a quick break). Please wait until they return.`);
                 return;
             }
 
@@ -1302,12 +1326,19 @@
             quota10: 0
         };
 
-        currentEmployees.push(newEmp);
-        set(ref(db, 'roster'), currentEmployees);
-        
-        document.getElementById('newEmpName').value = '';
-        alert(`Employee ${name} Added! \nTip: Use the Auto-Schedule tool above to generate their break time.`);
-        renderModalList();
+        try {
+            currentEmployees.push(newEmp);
+            set(ref(db, 'roster'), currentEmployees).then(() => {
+                document.getElementById('newEmpName').value = '';
+                document.getElementById('newEmpPC').value = '';
+                alert(`✅ SUCCESS: Employee ${name} has been securely saved to the live cloud database!\n\nTip: Use the Auto-Schedule tool above to generate their break time.`);
+                renderModalList();
+            }).catch((error) => {
+                alert(`❌ FAILURE: Could not save employee to the cloud.\nError Details: ${error.message}`);
+            });
+        } catch (err) {
+            alert(`❌ FAILURE: An unexpected error occurred.\nError Details: ${err.message}`);
+        }
     };
 
     window.deleteEmployee = function(index) {
