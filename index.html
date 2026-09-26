@@ -1679,35 +1679,50 @@
     window.reshuffleSchedule = function() {
         if (!isUnlocked || isStaffView) return;
         
-        let lockedMap = {};
-        let unlockedEmployees = [];
+        // 1. Group the row indices of UNLOCKED employees by their Shift
+        let shiftGroups = {};
         
         currentEmployees.forEach((emp, idx) => {
-            if (emp.isLocked) {
-                lockedMap[idx] = emp;
-            } else {
-                unlockedEmployees.push(emp);
+            if (!emp.isLocked) {
+                // Group by base shift name (e.g., "Shift A") to respect shift times
+                let baseShift = emp.shift.split(' (')[0];
+                if (!shiftGroups[baseShift]) {
+                    shiftGroups[baseShift] = [];
+                }
+                shiftGroups[baseShift].push(idx);
             }
         });
         
-        for (let i = unlockedEmployees.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [unlockedEmployees[i], unlockedEmployees[j]] = [unlockedEmployees[j], unlockedEmployees[i]];
-        }
-        
-        let newRoster = [];
-        let unlockedIndex = 0;
-        
-        for (let i = 0; i < currentEmployees.length; i++) {
-            if (lockedMap[i]) {
-                newRoster.push(lockedMap[i]);
-            } else {
-                newRoster.push(unlockedEmployees[unlockedIndex]);
-                unlockedIndex++;
+        // 2. Shuffle ONLY the time slots within their respective shift groups
+        Object.keys(shiftGroups).forEach(shift => {
+            let indices = shiftGroups[shift];
+            
+            // Extract ONLY the time configurations from the unlocked staff
+            let timeSlotsToShuffle = indices.map(idx => {
+                let e = currentEmployees[idx];
+                return {
+                    timeStart: e.timeStart,
+                    timeEnd: e.timeEnd,
+                    overlap: e.overlap
+                };
+            });
+            
+            // Shuffle these extracted time slots
+            for (let i = timeSlotsToShuffle.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [timeSlotsToShuffle[i], timeSlotsToShuffle[j]] = [timeSlotsToShuffle[j], timeSlotsToShuffle[i]];
             }
-        }
+            
+            // 3. Assign the newly shuffled time slots back to the employees
+            // Names, PCs, Quotas, and Teams remain completely untouched in their original rows
+            indices.forEach((idx, i) => {
+                currentEmployees[idx].timeStart = timeSlotsToShuffle[i].timeStart;
+                currentEmployees[idx].timeEnd = timeSlotsToShuffle[i].timeEnd;
+                currentEmployees[idx].overlap = timeSlotsToShuffle[i].overlap;
+            });
+        });
         
-        currentEmployees = newRoster;
+        // Push the updated roster times to the live database
         set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
     };
 
