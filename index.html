@@ -1488,6 +1488,17 @@
             }
         });
 
+        // --- NEW SORTING LOGIC ---
+        currentEmployees.sort((a, b) => {
+            if (a.shift !== b.shift) return a.shift.localeCompare(b.shift);
+            const getSortTime = (t) => {
+                let d = parseTimeToday(t);
+                if (d.getHours() < 6) d.setDate(d.getDate() + 1);
+                return d.getTime();
+            };
+            return getSortTime(a.timeStart) - getSortTime(b.timeStart);
+        });
+
         set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
         alert(`Successfully generated sequential breaks for ${currentIndex} employees in ${baseShiftSearch}!`);
         renderModalList();
@@ -1559,6 +1570,18 @@
 
         try {
             currentEmployees.push(newEmp);
+            
+            // --- NEW SORTING LOGIC ---
+            currentEmployees.sort((a, b) => {
+                if (a.shift !== b.shift) return a.shift.localeCompare(b.shift);
+                const getSortTime = (t) => {
+                    let d = parseTimeToday(t);
+                    if (d.getHours() < 6) d.setDate(d.getDate() + 1);
+                    return d.getTime();
+                };
+                return getSortTime(a.timeStart) - getSortTime(b.timeStart);
+            });
+
             set(ref(db, `${FACTION_ID}/roster`), currentEmployees).then(() => {
                 document.getElementById('newEmpName').value = '';
                 document.getElementById('newEmpPC').value = '';
@@ -1684,7 +1707,6 @@
         
         currentEmployees.forEach((emp, idx) => {
             if (!emp.isLocked) {
-                // Group by base shift name (e.g., "Shift A") to respect shift times
                 let baseShift = emp.shift.split(' (')[0];
                 if (!shiftGroups[baseShift]) {
                     shiftGroups[baseShift] = [];
@@ -1697,7 +1719,6 @@
         Object.keys(shiftGroups).forEach(shift => {
             let indices = shiftGroups[shift];
             
-            // Extract ONLY the time configurations from the unlocked staff
             let timeSlotsToShuffle = indices.map(idx => {
                 let e = currentEmployees[idx];
                 return {
@@ -1707,14 +1728,11 @@
                 };
             });
             
-            // Shuffle these extracted time slots
             for (let i = timeSlotsToShuffle.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [timeSlotsToShuffle[i], timeSlotsToShuffle[j]] = [timeSlotsToShuffle[j], timeSlotsToShuffle[i]];
             }
             
-            // 3. Assign the newly shuffled time slots back to the employees
-            // Names, PCs, Quotas, and Teams remain completely untouched in their original rows
             indices.forEach((idx, i) => {
                 currentEmployees[idx].timeStart = timeSlotsToShuffle[i].timeStart;
                 currentEmployees[idx].timeEnd = timeSlotsToShuffle[i].timeEnd;
@@ -1722,7 +1740,21 @@
             });
         });
         
-        // Push the updated roster times to the live database
+        // --- NEW SORTING LOGIC ---
+        currentEmployees.sort((a, b) => {
+            // Group by shift first
+            if (a.shift !== b.shift) return a.shift.localeCompare(b.shift);
+            
+            // Then sort chronologically by break start time
+            const getSortTime = (t) => {
+                let d = parseTimeToday(t);
+                // 12:00 AM - 5:59 AM belongs to the "next day" operationally
+                if (d.getHours() < 6) d.setDate(d.getDate() + 1);
+                return d.getTime();
+            };
+            return getSortTime(a.timeStart) - getSortTime(b.timeStart);
+        });
+        
         set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
     };
 
