@@ -610,7 +610,18 @@
     const isSpoofedMac = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
     const isSpoofedAndroid = navigator.maxTouchPoints > 0 && screen.height > screen.width;
     const isTouchOnly = window.matchMedia("(pointer: coarse)").matches && !window.matchMedia("(pointer: fine)").matches;
-    const isMobile = isMobileUA || isSpoofedMac || isSpoofedAndroid || isTouchOnly || window.innerWidth < 800;
+    const isSmallScreen = Math.min(window.screen.width, window.screen.height) < 700; // Defeats rotated landscape spoofing
+    
+    const isMobile = isMobileUA || isSpoofedMac || isSpoofedAndroid || isTouchOnly || isSmallScreen || window.innerWidth < 800;
+
+    // Hard-blocker function to prevent console command hacking
+    function enforcePCWorkstation() {
+        if (isStaffView && isMobile) {
+            alert("📱 Mobile Blocked: You must physically use your designated PC workstation to sign in, request breaks, or return from breaks.");
+            return true;
+        }
+        return false;
+    }
 
     if (isStaffView) {
         document.getElementById('adminControlsArea').style.display = 'none';
@@ -864,6 +875,8 @@
 
     // --- CLOCK IN LOGIC & AUTH ---
     window.processClockIn = function() {
+        if (enforcePCWorkstation()) return;
+
         const inputId = document.getElementById('clockInId').value.trim().toLowerCase();
         const inputPin = document.getElementById('clockInPin').value.trim();
 
@@ -941,6 +954,8 @@
     };
 
     window.processClockOut = function() {
+        if (enforcePCWorkstation()) return;
+
         if(confirm("Are you sure you want to sign out of this device?")) {
             localStorage.removeItem('prestoStaffAuth');
             updateHeaderAuthUI();
@@ -1243,15 +1258,24 @@
                 const isOfficial = b.limit === 30;
                 card.className = `break-card ${isOfficial ? 'card-official' : 'card-unofficial'}`;
                 
-                // CONDITIONAL RETURN BUTTON LOGIC
+                // CONDITIONAL RETURN BUTTON LOGIC WITH MOBILE TRAP
                 let returnBtnHtml = '';
-                if (localAuthUser === b.name) {
+                let canReturn = true;
+
+                if (isStaffView && localAuthUser !== b.name) canReturn = false;
+                if (isStaffView && isMobile) canReturn = false; 
+
+                if (canReturn) {
                     returnBtnHtml = `<button class="btn btn-primary" onclick="window.requestReturn('${key}')">Request Return</button>`;
                 } else if (!isStaffView) {
                     // Failsafe override for Admins
                     returnBtnHtml = `<button class="btn btn-primary" style="background: #F59E0B; border-color: #F59E0B;" onclick="if(confirm('Admin Override: Force return for ${b.name}?')) window.requestReturn('${key}')" title="Admin Override">Force Return</button>`;
                 } else {
-                    returnBtnHtml = `<span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">🔒 Waiting for ${b.name.split(' ')[0]}</span>`;
+                    if (isStaffView && isMobile) {
+                        returnBtnHtml = `<span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">📱 PC Sign-in Required</span>`;
+                    } else {
+                        returnBtnHtml = `<span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">🔒 Waiting for ${b.name.split(' ')[0]}</span>`;
+                    }
                 }
 
                 card.innerHTML = `
@@ -1402,6 +1426,8 @@
 
     // --- GLOBAL ACTIONS ---
     window.startBreak = function(empName, index, requestedType = 'standard') {
+        if (enforcePCWorkstation()) return;
+
         const safeKey = empName.replace(/[.#$[\]]/g, '');
         if (currentBreaks[safeKey] && currentBreaks[safeKey].status !== 'completed') {
             alert(`🚨 BLOCK: ${empName} already has an active or pending break request.`);
@@ -1515,6 +1541,8 @@
     };
 
     window.requestReturn = function(key) {
+        if (enforcePCWorkstation()) return;
+
         const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
         const breakData = currentBreaks[key];
         if (breakData) {
