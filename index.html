@@ -83,13 +83,13 @@
         .header-title-group p { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
         .brand-badge { background: rgba(255, 59, 0, 0.15); color: var(--primary); font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.8px; border: 1px solid rgba(255, 59, 0, 0.3); }
         
-        .actions-group { display: flex; gap: 10px; flex-wrap: wrap; }
+        .actions-group { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
         .btn { background: var(--bg-card-hover); color: var(--text-main); border: 1px solid var(--border-color); padding: 9px 16px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn:hover { border-color: var(--text-muted); background: #475569; }
         .btn-primary { background: var(--primary); border-color: var(--primary); color: #FFFFFF; }
         .btn-primary:hover { background: var(--primary-hover); border-color: var(--primary-hover); box-shadow: 0 0 15px var(--primary-glow); }
         .btn-success { background: #10B981; border-color: #10B981; color: #FFFFFF; }
-        .btn-success:hover { background: #059669; }
+        .btn-success:hover { background: #059669; box-shadow: 0 0 15px rgba(16, 185, 129, 0.3); }
         .btn-danger { background: #EF4444; border-color: #EF4444; color: #FFFFFF; }
         .btn-danger:hover { background: #DC2626; }
         .btn-staff { background: #3B82F6; border-color: #3B82F6; color: white; }
@@ -294,6 +294,24 @@
 </head>
 <body>
 
+<!-- CLOCK IN MODAL -->
+<div id="clockInModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 400px; text-align: center;">
+        <div class="modal-header">
+            <h2 style="color: #10B981;">🕒 Staff Sign In</h2>
+            <button class="close-btn" onclick="document.getElementById('clockInModal').style.display='none'">×</button>
+        </div>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Enter your assigned PC Number (e.g., PC-01) or exact Name, along with your 4-digit PIN to sign in.</p>
+        
+        <input type="text" id="clockInId" class="form-control" placeholder="PC Number or Exact Name" style="width: 100%; margin-bottom: 15px; font-size: 16px; text-align: center;">
+        <input type="password" id="clockInPin" class="form-control" placeholder="4-Digit PIN" maxlength="4" style="width: 100%; margin-bottom: 10px; font-size: 18px; text-align: center; letter-spacing: 4px;" onkeypress="if(event.key === 'Enter') window.processClockIn()">
+        
+        <p style="font-size: 10px; color: #38BDF8; margin-bottom: 20px; line-height: 1.4;">*If this is your very first time signing in, the PIN you enter above will be permanently saved as your passkey.</p>
+        
+        <button class="btn btn-success" style="width: 100%; padding: 12px; font-size: 14px;" onclick="window.processClockIn()">Authenticate & Sign In</button>
+    </div>
+</div>
+
 <!-- LEADERBOARD MODAL -->
 <div id="leaderboardModal" class="modal-overlay">
     <div class="modal-card modal-card-large">
@@ -397,7 +415,7 @@
 
         <!-- Remove Employees List -->
         <div class="emp-list-container">
-            <h3 style="font-size: 13px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 15px; font-weight: 700;">🗑️ Current Roster (Lock / Delete)</h3>
+            <h3 style="font-size: 13px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 15px; font-weight: 700;">🗑️ Current Roster (Lock / Reset / Delete)</h3>
             <div id="modalEmpList"></div>
         </div>
     </div>
@@ -416,6 +434,10 @@
         <div class="holo-clock-container">
             <div class="holo-time" id="osdTime">--:--:-- --</div>
             <div class="holo-date" id="osdDate">Loading Time...</div>
+        </div>
+
+        <div class="actions-group" id="staffAuthContainer">
+            <!-- Dynamically populated by JS based on sign-in status -->
         </div>
 
         <div class="actions-group" id="headerActions">
@@ -642,6 +664,19 @@
     let currentBreaks = {};
     let timerInterval = null;
 
+    // --- HEADER AUTH UI ---
+    function updateHeaderAuthUI() {
+        const authBtnContainer = document.getElementById('staffAuthContainer');
+        if (!authBtnContainer) return;
+
+        const localUser = localStorage.getItem('prestoStaffAuth');
+        if (localUser) {
+            authBtnContainer.innerHTML = `<button class="btn btn-warning" style="font-size: 14px; padding: 10px 20px;" onclick="window.processClockOut()">🚪 Sign Out (${localUser})</button>`;
+        } else {
+            authBtnContainer.innerHTML = `<button class="btn btn-success" style="font-size: 14px; padding: 10px 20px;" onclick="document.getElementById('clockInModal').style.display='flex'">🕒 Sign In</button>`;
+        }
+    }
+
     // --- HOLOGRAM CLOCK SCRIPT ---
     function updateHoloClock() {
         const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
@@ -664,6 +699,7 @@
     }
     setInterval(updateHoloClock, 1000);
     updateHoloClock(); 
+    updateHeaderAuthUI();
 
     function formatAMPM(timestamp) {
         if (!timestamp) return '--:--';
@@ -695,6 +731,7 @@
                     emp.dayOff = (permOff === businessDayStr) ? businessDayStr : "None";
                     emp.quota30 = 0;
                     emp.quota10 = 0;
+                    emp.clockInTime = null;
                     return emp;
                 });
                 set(ref(db, `${FACTION_ID}/roster`), resetRoster);
@@ -704,7 +741,7 @@
 
     // --- REBUILT BULLETPROOF TIME PARSER ---
     function parseTimeToday(timeStr) {
-        if(!timeStr) return new Date();
+        if(!timeStr || timeStr === '--:--') return new Date();
         const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
         
         let cleaned = timeStr.trim().replace(/\s+/g, ' ');
@@ -762,6 +799,8 @@
 
     function isOfficialBreakTime(index) {
         const emp = currentEmployees[index];
+        if (!emp.timeStart || emp.timeStart === '--:--') return false;
+        
         const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
         const now = new Date(tzStr).getTime();
 
@@ -788,6 +827,87 @@
         return false;
     }
 
+    // --- CLOCK IN LOGIC & AUTH ---
+    window.processClockIn = function() {
+        const inputId = document.getElementById('clockInId').value.trim().toLowerCase();
+        const inputPin = document.getElementById('clockInPin').value.trim();
+
+        if (!inputId || !inputPin) {
+            alert("Please enter both your ID/Name and your 4-digit PIN.");
+            return;
+        }
+
+        let empIndex = currentEmployees.findIndex(e => 
+            (e.pcNumber && e.pcNumber.toLowerCase() === inputId) || 
+            (e.name && e.name.toLowerCase() === inputId)
+        );
+
+        if (empIndex === -1) {
+            alert("❌ ID not found. Please type your exact PC Number (e.g., PC-14) or full Name.");
+            return;
+        }
+
+        let emp = currentEmployees[empIndex];
+
+        if (!emp.passkey) {
+            if (inputPin.length !== 4 || isNaN(inputPin)) {
+                alert("Please enter a valid 4-digit numeric PIN to setup your account.");
+                return;
+            }
+            emp.passkey = inputPin;
+            alert("✅ PIN successfully registered! Please remember this 4-digit PIN for future sign-ins.");
+        } else if (emp.passkey !== inputPin) {
+            alert("❌ Incorrect PIN. Please try again.");
+            return;
+        }
+
+        const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
+        const nowMs = new Date(tzStr).getTime();
+        const nowTime = formatAMPM(nowMs);
+        const businessDate = new Date(nowMs - (4 * 3600 * 1000)).toISOString().split('T')[0];
+
+        if (!emp.clockInTime) {
+            emp.clockInTime = nowTime;
+            
+            const historyRef = ref(db, `${FACTION_ID}/history/${businessDate}`);
+            push(historyRef, {
+                name: emp.name,
+                clockInTime: nowTime,
+                type: "Shift Sign-In",       
+                startTime: nowTime,
+                expectedEnd: "N/A",
+                actualReturn: "N/A",
+                variance: "N/A",
+                adminNote: "Staff Clocked In via PIN", 
+                timestamp: nowMs
+            });
+        }
+        
+        emp.dayOff = "None"; // Ensure they are marked present
+
+        // Set Local Browser Session
+        localStorage.setItem('prestoStaffAuth', emp.name);
+        updateHeaderAuthUI();
+
+        set(ref(db, `${FACTION_ID}/roster`), currentEmployees).then(() => {
+            document.getElementById('clockInId').value = '';
+            document.getElementById('clockInPin').value = '';
+            document.getElementById('clockInModal').style.display = 'none';
+            alert(`✅ Welcome, ${emp.name}!\n\nYou are now authenticated on this device.`);
+            renderTable();
+        }).catch(err => {
+            alert("Error saving clock-in data: " + err.message);
+        });
+    };
+
+    window.processClockOut = function() {
+        if(confirm("Are you sure you want to sign out of this device?")) {
+            localStorage.removeItem('prestoStaffAuth');
+            updateHeaderAuthUI();
+            renderTable();
+        }
+    };
+
     // --- FIREBASE LISTENERS ---
     onValue(ref(db, `${FACTION_ID}/roster`), (snapshot) => {
         const data = snapshot.val();
@@ -806,6 +926,8 @@
                 if (typeof emp.isLocked === 'undefined') emp.isLocked = (defaultEmployees[i] && typeof defaultEmployees[i].isLocked !== 'undefined') ? defaultEmployees[i].isLocked : false;
                 if (typeof emp.quota30 === 'undefined') emp.quota30 = 0;
                 if (typeof emp.quota10 === 'undefined') emp.quota10 = 0;
+                if (typeof emp.clockInTime === 'undefined') emp.clockInTime = null;
+                if (typeof emp.passkey === 'undefined') emp.passkey = "";
                 
                 if (emp.shift === 'Shift A') emp.shift = 'Shift A (07:00 PM - 02:00 AM)';
                 if (emp.shift === 'Shift B') emp.shift = 'Shift B (07:30 PM - 02:30 AM)';
@@ -828,6 +950,8 @@
                 emp.teamName = "Main Team";
                 emp.quota30 = 0;
                 emp.quota10 = 0;
+                emp.clockInTime = null;
+                emp.passkey = "";
                 return emp;
             });
             set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
@@ -845,6 +969,8 @@
         if (!currentEmployees || currentEmployees.length === 0) return;
         const tbody = document.getElementById('tableBody');
         tbody.innerHTML = '';
+
+        const localAuthUser = localStorage.getItem('prestoStaffAuth');
 
         currentEmployees.forEach((emp, index) => {
             const isOffToday = emp.dayOff !== 'None';
@@ -907,18 +1033,43 @@
             const q10Color = q10Maxed ? '#EF4444' : '#38BDF8';
             const q10Border = q10Maxed ? 'rgba(239, 68, 68, 0.3)' : 'rgba(56, 189, 248, 0.3)';
 
+            let clockInHtml = emp.clockInTime 
+                ? `<div style="font-size: 10px; color: #10B981; font-weight: 700; margin-top: 6px;">▶ In: ${emp.clockInTime}</div>` 
+                : `<div style="font-size: 10px; color: var(--text-muted); font-weight: 600; margin-top: 6px;">No Sign-In</div>`;
+
+            // STAFF VIEW AUTH LOGIC
+            let canViewButtons = true;
+            if (isStaffView && localAuthUser !== emp.name) {
+                canViewButtons = false;
+            }
+
+            let actionButtonsHtml = '';
+            if (canViewButtons) {
+                actionButtonsHtml = `
+                    <button class="btn-mini-break" onclick="window.startBreak('${emp.name.replace(/'/g, "\\'")}', ${index}, 'standard')" ${breakDisabled}>☕ Break</button>
+                    <button class="btn-mini-break" style="color: #38BDF8; border-color: rgba(56, 189, 248, 0.3);" onclick="window.startBreak('${emp.name.replace(/'/g, "\\'")}', ${index}, 'prayer')" ${breakDisabled}>🕌 Prayer</button>
+                `;
+            } else {
+                actionButtonsHtml = `<span style="font-size: 10px; color: var(--text-muted); padding: 4px;">🔒 Sign in to access</span>`;
+            }
+
+            if (!isStaffView) {
+                actionButtonsHtml += `<button class="btn-mini-break" style="${emp.isLocked ? 'border-color: #F59E0B; color: #F59E0B;' : 'opacity: 0.6;'}" onclick="window.toggleLock(${index})" title="Prevent from Reshuffling">${emp.isLocked ? '🔒 Locked' : '🔓 Unlock'}</button>`;
+            } else if (emp.isLocked && canViewButtons) {
+                actionButtonsHtml += '<span class="lock-badge">🔒 FIXED</span>';
+            }
+
             tr.innerHTML = `
                 <td class="col-id">${index + 1}</td>
                 <td class="col-pc">
                     <span class="editable-name" ${editableAttr} onblur="window.updatePC(${index}, this.innerText)">${emp.pcNumber}</span>
+                    ${clockInHtml}
                 </td>
                 <td class="col-name">
                     <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 6px;">
                         <span class="editable-name" ${editableAttr} onblur="window.updateName(${index}, this.innerText)">${emp.name}</span>
-                        <div style="display: flex; gap: 4px; flex-wrap: wrap;">
-                            <button class="btn-mini-break" onclick="window.startBreak('${emp.name.replace(/'/g, "\\'")}', ${index}, 'standard')" ${breakDisabled}>☕ Break</button>
-                            <button class="btn-mini-break" style="color: #38BDF8; border-color: rgba(56, 189, 248, 0.3);" onclick="window.startBreak('${emp.name.replace(/'/g, "\\'")}', ${index}, 'prayer')" ${breakDisabled}>🕌 Prayer</button>
-                            ${!isStaffView ? `<button class="btn-mini-break" style="${emp.isLocked ? 'border-color: #F59E0B; color: #F59E0B;' : 'opacity: 0.6;'}" onclick="window.toggleLock(${index})" title="Prevent from Reshuffling">${emp.isLocked ? '🔒 Locked' : '🔓 Unlock'}</button>` : (emp.isLocked ? '<span class="lock-badge">🔒 FIXED</span>' : '')}
+                        <div style="display: flex; gap: 4px; flex-wrap: wrap; align-items: center;">
+                            ${actionButtonsHtml}
                         </div>
                     </div>
                 </td>
@@ -1329,9 +1480,13 @@
                     variance = `Took ${varianceMins} min total`;
                 }
 
+                const emp = currentEmployees.find(e => e.name === breakData.name);
+                const clockInToSave = (emp && emp.clockInTime) ? emp.clockInTime : "No Sign-In";
+
                 const historyRef = ref(db, `${FACTION_ID}/history/${businessDate}`);
                 push(historyRef, {
                     name: breakData.name,
+                    clockInTime: clockInToSave,
                     type: breakData.type,
                     startTime: formatAMPM(breakData.startTime),
                     expectedEnd: breakData.endTime > 0 ? formatAMPM(breakData.endTime) : "Open Return",
@@ -1475,6 +1630,7 @@
         }
 
         let currentIndex = 0;
+
         currentEmployees.forEach(emp => {
             if (emp.shift.includes(baseShiftSearch)) {
                 let empStartMs = startTimeMs + (currentIndex * 15 * 60000);
@@ -1488,10 +1644,11 @@
             }
         });
 
-        // --- NEW SORTING LOGIC ---
+        // Re-sort global roster chronologically
         currentEmployees.sort((a, b) => {
             if (a.shift !== b.shift) return a.shift.localeCompare(b.shift);
             const getSortTime = (t) => {
+                if (!t || t === '--:--') return 9999999999999;
                 let d = parseTimeToday(t);
                 if (d.getHours() < 6) d.setDate(d.getDate() + 1);
                 return d.getTime();
@@ -1565,16 +1722,19 @@
             overlap: "1 Staff",
             isLocked: false,
             quota30: 0,
-            quota10: 0
+            quota10: 0,
+            clockInTime: null,
+            passkey: ""
         };
 
         try {
             currentEmployees.push(newEmp);
             
-            // --- NEW SORTING LOGIC ---
+            // Re-sort global roster chronologically
             currentEmployees.sort((a, b) => {
                 if (a.shift !== b.shift) return a.shift.localeCompare(b.shift);
                 const getSortTime = (t) => {
+                    if (!t || t === '--:--') return 9999999999999;
                     let d = parseTimeToday(t);
                     if (d.getHours() < 6) d.setDate(d.getDate() + 1);
                     return d.getTime();
@@ -1611,6 +1771,14 @@
         set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
     };
 
+    window.resetPIN = function(index) {
+        if(confirm(`Reset the 4-digit PIN for ${currentEmployees[index].name}? They will be prompted to create a new one on their next sign-in.`)) {
+            currentEmployees[index].passkey = "";
+            set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
+            renderModalList();
+        }
+    };
+
     function renderModalList() {
         const listDiv = document.getElementById('modalEmpList');
         listDiv.innerHTML = '';
@@ -1622,6 +1790,7 @@
                         <span class="emp-list-meta">${emp.shift.split(' (')[0]} | ${emp.teamName} | Break: ${emp.timeStart} - ${emp.timeEnd}</span>
                     </div>
                     <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-warning" style="padding: 6px 12px; font-size: 11px;" onclick="window.resetPIN(${index})">Reset PIN</button>
                         <button class="btn btn-staff" style="padding: 6px 12px; font-size: 11px;" onclick="window.toggleLock(${index})">${emp.isLocked ? '🔒 Locked' : '🔓 Unlock'}</button>
                         <button class="btn btn-danger" style="padding: 6px 12px; font-size: 11px;" onclick="window.deleteEmployee(${index})">Remove</button>
                     </div>
@@ -1702,53 +1871,60 @@
     window.reshuffleSchedule = function() {
         if (!isUnlocked || isStaffView) return;
         
-        // 1. Group the row indices of UNLOCKED employees by their Shift
         let shiftGroups = {};
         
         currentEmployees.forEach((emp, idx) => {
             if (!emp.isLocked) {
                 let baseShift = emp.shift.split(' (')[0];
                 if (!shiftGroups[baseShift]) {
-                    shiftGroups[baseShift] = [];
+                    shiftGroups[baseShift] = {
+                        unlockedIndices: [],
+                        timeSlots: []
+                    };
                 }
-                shiftGroups[baseShift].push(idx);
+                shiftGroups[baseShift].unlockedIndices.push(idx);
+                shiftGroups[baseShift].timeSlots.push({
+                    timeStart: emp.timeStart,
+                    timeEnd: emp.timeEnd,
+                    overlap: emp.overlap
+                });
             }
         });
         
-        // 2. Shuffle ONLY the time slots within their respective shift groups
         Object.keys(shiftGroups).forEach(shift => {
-            let indices = shiftGroups[shift];
+            let group = shiftGroups[shift];
             
-            let timeSlotsToShuffle = indices.map(idx => {
-                let e = currentEmployees[idx];
-                return {
-                    timeStart: e.timeStart,
-                    timeEnd: e.timeEnd,
-                    overlap: e.overlap
+            // Sort extracted time slots chronologically
+            group.timeSlots.sort((a, b) => {
+                const getSortTime = (t) => {
+                    if (!t || t === '--:--') return 9999999999999;
+                    let d = parseTimeToday(t);
+                    if (d.getHours() < 6) d.setDate(d.getDate() + 1);
+                    return d.getTime();
                 };
+                return getSortTime(a.timeStart) - getSortTime(b.timeStart);
             });
             
-            for (let i = timeSlotsToShuffle.length - 1; i > 0; i--) {
+            // Shuffle ALL unlocked employees within this shift
+            for (let i = group.unlockedIndices.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
-                [timeSlotsToShuffle[i], timeSlotsToShuffle[j]] = [timeSlotsToShuffle[j], timeSlotsToShuffle[i]];
+                [group.unlockedIndices[i], group.unlockedIndices[j]] = [group.unlockedIndices[j], group.unlockedIndices[i]];
             }
             
-            indices.forEach((idx, i) => {
-                currentEmployees[idx].timeStart = timeSlotsToShuffle[i].timeStart;
-                currentEmployees[idx].timeEnd = timeSlotsToShuffle[i].timeEnd;
-                currentEmployees[idx].overlap = timeSlotsToShuffle[i].overlap;
+            // Re-deal the sorted time slots back to the shuffled employees
+            group.unlockedIndices.forEach((idx, i) => {
+                currentEmployees[idx].timeStart = group.timeSlots[i].timeStart;
+                currentEmployees[idx].timeEnd = group.timeSlots[i].timeEnd;
+                currentEmployees[idx].overlap = group.timeSlots[i].overlap;
             });
         });
         
-        // --- NEW SORTING LOGIC ---
+        // Final Global Sort to keep the UI table clean
         currentEmployees.sort((a, b) => {
-            // Group by shift first
             if (a.shift !== b.shift) return a.shift.localeCompare(b.shift);
-            
-            // Then sort chronologically by break start time
             const getSortTime = (t) => {
+                if (!t || t === '--:--') return 9999999999999;
                 let d = parseTimeToday(t);
-                // 12:00 AM - 5:59 AM belongs to the "next day" operationally
                 if (d.getHours() < 6) d.setDate(d.getDate() + 1);
                 return d.getTime();
             };
@@ -1814,7 +1990,7 @@
             }
 
             const allHistory = snapshot.val();
-            let csv = ["Date,Employee Name,Break Type,Start Time,Expected Return,Actual Return,Variance Log,Admin Notes"];
+            let csv = ["Date,Employee Name,Clock In Time,Break Type,Start Time,Expected Return,Actual Return,Variance Log,Admin Notes"];
             let matchCount = 0;
             
             const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
@@ -1829,7 +2005,7 @@
                     const dailyRecords = allHistory[dateStr];
                     Object.values(dailyRecords).forEach(log => {
                         if (log.name.toLowerCase().includes(empName.toLowerCase().trim())) {
-                            csv.push(`"${dateStr}","${log.name}","${log.type}","${log.startTime}","${log.expectedEnd}","${log.actualReturn}","${log.variance}","${log.adminNote || ''}"`);
+                            csv.push(`"${dateStr}","${log.name}","${log.clockInTime || 'N/A'}","${log.type}","${log.startTime}","${log.expectedEnd}","${log.actualReturn}","${log.variance}","${log.adminNote || ''}"`);
                             matchCount++;
                         }
                     });
@@ -1870,10 +2046,10 @@
             }
             
             const data = snapshot.val();
-            let csv = ["Employee Name,Break Type,Start Time,Expected Return,Actual Return,Variance Log,Admin Notes"];
+            let csv = ["Employee Name,Clock In Time,Break Type,Start Time,Expected Return,Actual Return,Variance Log,Admin Notes"];
             
             Object.values(data).forEach(log => {
-                csv.push(`"${log.name}","${log.type}","${log.startTime}","${log.expectedEnd}","${log.actualReturn}","${log.variance}","${log.adminNote || ''}"`);
+                csv.push(`"${log.name}","${log.clockInTime || 'N/A'}","${log.type}","${log.startTime}","${log.expectedEnd}","${log.actualReturn}","${log.variance}","${log.adminNote || ''}"`);
             });
             
             const csvFile = new Blob([csv.join('\n')], { type: 'text/csv' });
