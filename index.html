@@ -573,6 +573,15 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
     import { getDatabase, ref, set, onValue, remove, push, get } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
+    // --- ANTI UI-SNOOPING ---
+    document.addEventListener('contextmenu', event => event.preventDefault());
+    document.onkeydown = function(e) {
+        if(e.keyCode == 123) return false; 
+        if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) return false; 
+        if(e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) return false; 
+        if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false; 
+    };
+
     const firebaseConfig = {
         apiKey: "AIzaSyCmlKjghDehj9L5aw1dJGa1WLjPRT2o-Yc",
         authDomain: "presto-phoenix-team.firebaseapp.com",
@@ -596,8 +605,12 @@
     const urlParams = new URLSearchParams(window.location.search);
     const isStaffView = urlParams.get('view') === 'staff';
     
-    // MOBILE DEVICE DETECTION
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 800;
+    // --- ADVANCED ANTI-SPOOF MOBILE DETECTION ---
+    const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isSpoofedMac = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+    const isSpoofedAndroid = navigator.maxTouchPoints > 0 && screen.height > screen.width;
+    const isTouchOnly = window.matchMedia("(pointer: coarse)").matches && !window.matchMedia("(pointer: fine)").matches;
+    const isMobile = isMobileUA || isSpoofedMac || isSpoofedAndroid || isTouchOnly || window.innerWidth < 800;
 
     if (isStaffView) {
         document.getElementById('adminControlsArea').style.display = 'none';
