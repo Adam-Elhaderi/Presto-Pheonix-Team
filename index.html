@@ -437,7 +437,7 @@
         </div>
 
         <div class="actions-group" id="staffAuthContainer">
-            <!-- Dynamically populated by JS based on sign-in status -->
+            <!-- Dynamically populated by JS based on sign-in status and device -->
         </div>
 
         <div class="actions-group" id="headerActions">
@@ -595,6 +595,9 @@
     // Staff View UI Toggle
     const urlParams = new URLSearchParams(window.location.search);
     const isStaffView = urlParams.get('view') === 'staff';
+    
+    // MOBILE DEVICE DETECTION
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 800;
 
     if (isStaffView) {
         document.getElementById('adminControlsArea').style.display = 'none';
@@ -672,6 +675,13 @@
 
         if (!authBtnContainer) return;
 
+        // If Staff View AND on a Mobile Phone -> Block Sign-In completely (View Only)
+        if (isStaffView && isMobile) {
+            authBtnContainer.innerHTML = `<span class="brand-badge" style="background: rgba(148, 163, 184, 0.15); color: #94A3B8; border-color: rgba(148, 163, 184, 0.3); padding: 8px 16px; font-size: 13px;">📱 Mobile View Only</span>`;
+            if (clockInModal) clockInModal.style.display = 'none';
+            return;
+        }
+
         const localUser = localStorage.getItem('prestoStaffAuth');
         if (localUser) {
             authBtnContainer.innerHTML = `<button class="btn btn-warning" style="font-size: 14px; padding: 10px 20px;" onclick="window.processClockOut()">🚪 Sign Out (${localUser})</button>`;
@@ -679,10 +689,10 @@
         } else {
             authBtnContainer.innerHTML = `<button class="btn btn-success" style="font-size: 14px; padding: 10px 20px;" onclick="document.getElementById('clockInModal').style.display='flex'">🕒 Sign In</button>`;
             
-            // IF STAFF VIEW AND NOT LOGGED IN -> FORCE MODAL AND REMOVE CLOSE BUTTON
+            // IF STAFF VIEW AND NOT LOGGED IN (AND NOT ON MOBILE) -> FORCE MODAL AND REMOVE CLOSE BUTTON
             if (isStaffView && clockInModal) {
                 clockInModal.style.display = 'flex';
-                if (closeBtn) closeBtn.style.display = 'none';
+                if (closeBtn) closeBtn.style.display = 'none'; // Cannot exit without signing in
             } else {
                 if (closeBtn) closeBtn.style.display = 'block'; // Admin view can close it
             }
@@ -873,6 +883,11 @@
             return;
         }
 
+        if (!isCurrentlyOnShift(emp.shift)) {
+            alert("❌ You cannot sign in right now. You are currently outside of your scheduled shift window.");
+            return;
+        }
+
         const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
         const nowMs = new Date(tzStr).getTime();
         const nowTime = formatAMPM(nowMs);
@@ -917,6 +932,16 @@
             localStorage.removeItem('prestoStaffAuth');
             updateHeaderAuthUI();
             renderTable();
+        }
+    };
+
+    window.voidClockIn = function(index) {
+        if (isStaffView) return;
+        if (!requireAdmin()) return;
+        
+        if (confirm(`Are you sure you want to VOID the clock-in for ${currentEmployees[index].name}? This will mark them as not signed in and force them to re-enter their PIN.`)) {
+            currentEmployees[index].clockInTime = null;
+            set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
         }
     };
 
@@ -1030,7 +1055,7 @@
 
             const editableAttr = isStaffView ? 'contenteditable="false"' : 'contenteditable="true"';
             const selectDisabled = isStaffView ? 'disabled' : '';
-            const breakDisabled = (isOffToday || isOffShift) ? 'disabled title="Employee is absent or off shift"' : 'title="Request Break"';
+            const breakDisabled = (isOffToday || isOffShift || !emp.clockInTime) ? 'disabled title="Employee is absent, off shift, or has not signed in"' : 'title="Request Break"';
 
             const presentBtnStyle = isOffToday ? 'color: #F87171; border-color: #F87171;' : 'color: #10B981; border-color: #10B981;';
             const presentBtnText = isOffToday ? '🔴 Absent Today' : '🟢 Present Today';
@@ -1046,12 +1071,15 @@
             const q10Border = q10Maxed ? 'rgba(239, 68, 68, 0.3)' : 'rgba(56, 189, 248, 0.3)';
 
             let clockInHtml = emp.clockInTime 
-                ? `<div style="font-size: 10px; color: #10B981; font-weight: 700; margin-top: 6px;">▶ In: ${emp.clockInTime}</div>` 
+                ? `<div style="font-size: 10px; color: #10B981; font-weight: 700; margin-top: 6px; ${!isStaffView ? 'cursor:pointer;' : ''}" ${!isStaffView ? `onclick="window.voidClockIn(${index})"` : ''} title="${!isStaffView ? 'Admin: Click to VOID this sign-in' : ''}">▶ In: ${emp.clockInTime}</div>` 
                 : `<div style="font-size: 10px; color: var(--text-muted); font-weight: 600; margin-top: 6px;">No Sign-In</div>`;
 
             // STAFF VIEW AUTH LOGIC
             let canViewButtons = true;
             if (isStaffView && localAuthUser !== emp.name) {
+                canViewButtons = false;
+            }
+            if (isStaffView && isMobile) {
                 canViewButtons = false;
             }
 
@@ -1062,7 +1090,11 @@
                     <button class="btn-mini-break" style="color: #38BDF8; border-color: rgba(56, 189, 248, 0.3);" onclick="window.startBreak('${emp.name.replace(/'/g, "\\'")}', ${index}, 'prayer')" ${breakDisabled}>🕌 Prayer</button>
                 `;
             } else {
-                actionButtonsHtml = `<span style="font-size: 10px; color: var(--text-muted); padding: 4px;">🔒 Sign in to access</span>`;
+                if (isStaffView && isMobile) {
+                    actionButtonsHtml = `<span style="font-size: 10px; color: var(--text-muted); padding: 4px;">📱 PC Sign-in Required</span>`;
+                } else {
+                    actionButtonsHtml = `<span style="font-size: 10px; color: var(--text-muted); padding: 4px;">🔒 Sign in to access</span>`;
+                }
             }
 
             if (!isStaffView) {
@@ -1125,6 +1157,7 @@
         const section = document.getElementById('breakTrackerSection');
         const grid = document.getElementById('breakTrackerGrid');
         const breakKeys = Object.keys(currentBreaks);
+        const localAuthUser = localStorage.getItem('prestoStaffAuth');
         
         const visibleBreaks = breakKeys.filter(key => currentBreaks[key].status !== 'completed');
 
@@ -1196,6 +1229,18 @@
             else {
                 const isOfficial = b.limit === 30;
                 card.className = `break-card ${isOfficial ? 'card-official' : 'card-unofficial'}`;
+                
+                // CONDITIONAL RETURN BUTTON LOGIC
+                let returnBtnHtml = '';
+                if (localAuthUser === b.name) {
+                    returnBtnHtml = `<button class="btn btn-primary" onclick="window.requestReturn('${key}')">Request Return</button>`;
+                } else if (!isStaffView) {
+                    // Failsafe override for Admins
+                    returnBtnHtml = `<button class="btn btn-primary" style="background: #F59E0B; border-color: #F59E0B;" onclick="if(confirm('Admin Override: Force return for ${b.name}?')) window.requestReturn('${key}')" title="Admin Override">Force Return</button>`;
+                } else {
+                    returnBtnHtml = `<span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">🔒 Waiting for ${b.name.split(' ')[0]}</span>`;
+                }
+
                 card.innerHTML = `
                     <div class="break-info">
                         <span class="break-name">${b.name} ${pcBadge} ${teamBadge} ${shiftBadge}</span>
@@ -1207,7 +1252,7 @@
                     </div>
                     <div class="break-timer-group">
                         <span class="break-timer" data-start="${b.startTime}" data-endtime="${endTimeMs}"></span>
-                        <button class="btn btn-primary" onclick="window.requestReturn('${key}')">Request Return</button>
+                        ${returnBtnHtml}
                     </div>
                 `;
             }
