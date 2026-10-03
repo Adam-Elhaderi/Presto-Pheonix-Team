@@ -299,7 +299,7 @@
     <div class="modal-card" style="max-width: 400px; text-align: center;">
         <div class="modal-header">
             <h2 style="color: #10B981;">🕒 Staff Sign In</h2>
-            <button class="close-btn" onclick="document.getElementById('clockInModal').style.display='none'">×</button>
+            <button id="clockInCloseBtn" class="close-btn" onclick="document.getElementById('clockInModal').style.display='none'">×</button>
         </div>
         <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Enter your assigned PC Number (e.g., PC-01) or exact Name, along with your 4-digit PIN to sign in.</p>
         
@@ -667,13 +667,25 @@
     // --- HEADER AUTH UI ---
     function updateHeaderAuthUI() {
         const authBtnContainer = document.getElementById('staffAuthContainer');
+        const clockInModal = document.getElementById('clockInModal');
+        const closeBtn = document.getElementById('clockInCloseBtn');
+
         if (!authBtnContainer) return;
 
         const localUser = localStorage.getItem('prestoStaffAuth');
         if (localUser) {
             authBtnContainer.innerHTML = `<button class="btn btn-warning" style="font-size: 14px; padding: 10px 20px;" onclick="window.processClockOut()">🚪 Sign Out (${localUser})</button>`;
+            if (clockInModal) clockInModal.style.display = 'none'; // Keep hidden if logged in
         } else {
             authBtnContainer.innerHTML = `<button class="btn btn-success" style="font-size: 14px; padding: 10px 20px;" onclick="document.getElementById('clockInModal').style.display='flex'">🕒 Sign In</button>`;
+            
+            // IF STAFF VIEW AND NOT LOGGED IN -> FORCE MODAL AND REMOVE CLOSE BUTTON
+            if (isStaffView && clockInModal) {
+                clockInModal.style.display = 'flex';
+                if (closeBtn) closeBtn.style.display = 'none';
+            } else {
+                if (closeBtn) closeBtn.style.display = 'block'; // Admin view can close it
+            }
         }
     }
 
