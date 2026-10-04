@@ -338,7 +338,7 @@
 <div id="employeeModal" class="modal-overlay">
     <div class="modal-card">
         <div class="modal-header">
-            <h2>⚙️ Manage Roster & Shifts</h2>
+            <h2>⚙️️ Manage Roster & Shifts</h2>
             <button class="close-btn" onclick="window.closeEmployeeManager()">×</button>
         </div>
         
@@ -603,7 +603,11 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const SECRET_PIN = "2242";
+    
+    // --- PIN CODES ---
+    const SECRET_PIN = "2242";         // For Reshuffling and Approve/Deny buttons
+    const GATEKEEPER_PIN = "9949";     // Initial Admin Page Load PIN
+
     let isUnlocked = false;
     let activeShiftFilter = 'all';
 
@@ -614,10 +618,10 @@
     // --- NEW: ADMIN GATEKEEPER ---
     if (!isStaffView) {
         const sessionAdmin = sessionStorage.getItem('adminAuthed');
-        if (sessionAdmin !== SECRET_PIN) {
-            const enteredPin = prompt("🔒 Restricted Access\nEnter Supervisor PIN to load the Admin Dashboard:");
-            if (enteredPin === SECRET_PIN) {
-                sessionStorage.setItem('adminAuthed', SECRET_PIN);
+        if (sessionAdmin !== GATEKEEPER_PIN) {
+            const enteredPin = prompt("🔒 Restricted Access\nEnter Admin Gatekeeper PIN to load the Admin Dashboard:");
+            if (enteredPin === GATEKEEPER_PIN) {
+                sessionStorage.setItem('adminAuthed', GATEKEEPER_PIN);
             } else {
                 window.location.replace(window.location.pathname + "?view=staff");
             }
@@ -630,7 +634,7 @@
     const isSpoofedMac = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
     const isSpoofedAndroid = navigator.maxTouchPoints > 0 && screen.height > screen.width;
     const isTouchOnly = window.matchMedia("(pointer: coarse)").matches && !window.matchMedia("(pointer: fine)").matches;
-    const isSmallScreen = Math.min(window.screen.width, window.screen.height) < 700; // Defeats rotated landscape spoofing
+    const isSmallScreen = Math.min(window.screen.width, window.screen.height) < 700; 
     
     const isMobile = isMobileUA || isSpoofedMac || isSpoofedAndroid || isTouchOnly || isSmallScreen || window.innerWidth < 800;
 
