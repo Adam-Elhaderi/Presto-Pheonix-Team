@@ -307,9 +307,12 @@
             <h2 style="color: #10B981;">🕒 Staff Sign In</h2>
             <button id="clockInCloseBtn" class="close-btn" onclick="document.getElementById('clockInModal').style.display='none'">×</button>
         </div>
-        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Enter your assigned PC Number (e.g., PC-01) or exact Name, along with your 4-digit PIN to sign in.</p>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Select your assigned PC Number / Name, and enter your 4-digit PIN to sign in.</p>
         
-        <input type="text" id="clockInId" class="form-control" placeholder="PC Number or Exact Name" style="width: 100%; margin-bottom: 15px; font-size: 16px; text-align: center;">
+        <select id="clockInId" class="form-control" style="width: 100%; margin-bottom: 15px; font-size: 16px; text-align: center; cursor: pointer;">
+            <option value="">-- Select Your Name / PC --</option>
+        </select>
+        
         <input type="password" id="clockInPin" class="form-control" placeholder="4-Digit PIN" maxlength="4" style="width: 100%; margin-bottom: 10px; font-size: 18px; text-align: center; letter-spacing: 4px;" onkeypress="if(event.key === 'Enter') window.processClockIn()">
         
         <p style="font-size: 10px; color: #38BDF8; margin-bottom: 20px; line-height: 1.4;">*If this is your very first time signing in, the PIN you enter above will be permanently saved as your passkey.</p>
@@ -338,7 +341,7 @@
 <div id="employeeModal" class="modal-overlay">
     <div class="modal-card">
         <div class="modal-header">
-            <h2>⚙️️ Manage Roster & Shifts</h2>
+            <h2>⚙️ Manage Roster & Shifts</h2>
             <button class="close-btn" onclick="window.closeEmployeeManager()">×</button>
         </div>
         
@@ -983,21 +986,18 @@
     window.processClockIn = function() {
         if (enforcePCWorkstation()) return;
 
-        const inputId = document.getElementById('clockInId').value.trim().toLowerCase();
+        const inputId = document.getElementById('clockInId').value; // Now reads from Dropdown
         const inputPin = document.getElementById('clockInPin').value.trim();
 
         if (!inputId || !inputPin) {
-            alert("Please enter both your ID/Name and your 4-digit PIN.");
+            alert("Please select your Name/PC from the list and enter your 4-digit PIN.");
             return;
         }
 
-        let empIndex = currentEmployees.findIndex(e => 
-            (e.pcNumber && e.pcNumber.toLowerCase() === inputId) || 
-            (e.name && e.name.toLowerCase() === inputId)
-        );
+        let empIndex = currentEmployees.findIndex(e => e.name === inputId);
 
         if (empIndex === -1) {
-            alert("❌ ID not found. Please type your exact PC Number (e.g., PC-14) or full Name.");
+            alert("❌ Name not found in system.");
             return;
         }
 
@@ -1127,6 +1127,21 @@
             });
             set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
         }
+        
+        // Auto-populate the Sign-In Dropdown
+        const clockInSelect = document.getElementById('clockInId');
+        if (clockInSelect) {
+            const currentSelection = clockInSelect.value;
+            clockInSelect.innerHTML = '<option value="">-- Select Your Name / PC --</option>';
+            currentEmployees.forEach(emp => {
+                const opt = document.createElement('option');
+                opt.value = emp.name; 
+                opt.innerText = `${emp.pcNumber} | ${emp.name}`;
+                clockInSelect.appendChild(opt);
+            });
+            if (currentSelection) clockInSelect.value = currentSelection;
+        }
+
         renderTable();
     });
 
