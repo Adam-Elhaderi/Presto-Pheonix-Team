@@ -196,7 +196,7 @@
         
         .dayoff-select { background: rgba(0,0,0,0.4); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 6px; padding: 6px 10px; font-size: 12px; font-weight: 600; outline: none; cursor: pointer; }
         .dayoff-select:focus { border-color: var(--primary); }
-        .dayoff-select:disabled { cursor: not-allowed; opacity: 0.8; border-color: transparent; }
+        .dayoff-select:disabled { cursor: not-allowed; opacity: 0.8; border-color: transparent; appearance: none; -moz-appearance: none; -webkit-appearance: none; background: transparent;}
 
         .lock-badge { background: rgba(239, 68, 68, 0.15); color: #F87171; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(239, 68, 68, 0.3); }
         .status-badge { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; border: 1px solid transparent; }
@@ -322,6 +322,23 @@
         <p style="font-size: 10px; color: #38BDF8; margin-bottom: 20px; line-height: 1.4;">*If this is your very first time signing in, the PIN you enter above will be permanently saved as your passkey.</p>
         
         <button class="btn btn-success" style="width: 100%; padding: 12px; font-size: 14px;" onclick="window.processClockIn()">Authenticate & Sign In</button>
+    </div>
+</div>
+
+<!-- KUDOS MANAGER MODAL -->
+<div id="kudosModal" class="modal-overlay">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h2 style="color: #EC4899;">💖 Manage Team Kudos</h2>
+            <button class="close-btn" onclick="window.closeKudosManager()">×</button>
+        </div>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">Edit existing team shoutouts, delete old ones, or add a new one.</p>
+        
+        <div id="kudosListContainer" style="display:flex; flex-direction:column; gap:10px; margin-bottom: 20px;">
+            <!-- Rendered via JS -->
+        </div>
+        
+        <button class="btn btn-success" style="width:100%;" onclick="window.addKudoFromManager()">+ Add New Kudo</button>
     </div>
 </div>
 
@@ -464,7 +481,7 @@
     </header>
 
     <!-- LIVE DISPATCH TICKER -->
-    <div class="ticker-wrap glass-panel" onclick="window.updateTicker()">
+    <div class="ticker-wrap glass-panel" onclick="window.updateTicker()" title="Admin: Click to update or clear message">
         <div class="ticker-label">📢 LIVE DISPATCH</div>
         <div class="ticker-text" id="tickerText">Connecting to Presto live network...</div>
     </div>
@@ -504,7 +521,9 @@
         <div class="metric-card glass-panel" style="background: rgba(236, 72, 153, 0.05); border-color: rgba(236, 72, 153, 0.2);">
             <span class="metric-label" style="color: #EC4899; display: flex; justify-content: space-between; align-items: center;">
                 💖 Team Kudos Board
-                <button id="kudosAddBtn" class="btn" style="padding: 2px 8px; font-size: 10px; background: rgba(236, 72, 153, 0.1); color: #EC4899; border-color: transparent;" onclick="window.addKudo()">+ Add</button>
+                <div style="display:flex; gap:5px;" id="kudosAdminControls">
+                    <button class="btn" style="padding: 2px 8px; font-size: 10px; background: rgba(236, 72, 153, 0.1); color: #EC4899; border-color: transparent;" onclick="window.openKudosManager()">⚙️ Manage</button>
+                </div>
             </span>
             <span class="metric-value" id="kudosText" style="font-size: 15px; font-weight: 500; font-style: italic; margin-top: 8px; flex-grow: 1; display:flex; align-items:center;">Loading positive vibes...</span>
         </div>
@@ -654,7 +673,7 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     
-    const SECRET_PIN = "2242";         
+    const SECRET_PIN = "9949";         
 
     let isUnlocked = false;
     let activeShiftFilter = 'all';
@@ -680,14 +699,13 @@
     }
 
     if (isStaffView) {
-        // HIDE ADMIN TOOLS FROM STAFF ENTIRELY
         document.getElementById('adminControlsArea').style.display = 'none';
         document.getElementById('adminHeaderActions').style.display = 'none';
         document.getElementById('filterTabs').style.display = 'none'; 
         
-        // DISABLE KUDOS ADD BUTTON AND TICKER CLICK FOR STAFF
-        const kudoBtn = document.getElementById('kudosAddBtn');
-        if(kudoBtn) kudoBtn.style.display = 'none';
+        const kudoCtrl = document.getElementById('kudosAdminControls');
+        if(kudoCtrl) kudoCtrl.style.display = 'none';
+        
         document.querySelector('.ticker-wrap').style.cursor = 'default';
         document.getElementById('queueOrb').style.cursor = 'default';
         
@@ -804,12 +822,15 @@
         }
     };
 
+    // --- KUDOS WIDGET MANAGER ---
+    let rawKudosData = {};
     let kudosList = ["Great teamwork today everyone!", "Keep pushing, you're doing amazing."];
     let kudosIndex = 0;
     
     onValue(ref(db, `${FACTION_ID}/system/kudos`), (snapshot) => {
-        const data = snapshot.val();
-        if (data) kudosList = Object.values(data);
+        rawKudosData = snapshot.val() || {};
+        kudosList = Object.values(rawKudosData);
+        if(kudosList.length === 0) kudosList = ["Great teamwork today everyone!", "Keep pushing, you're doing amazing."];
     });
 
     setInterval(() => {
@@ -826,48 +847,81 @@
         }
     }, 8000);
 
-    window.addKudo = function() {
+    window.openKudosManager = function() {
         if (!requireAdmin()) return;
-        const note = prompt("Submit a quick shoutout or kudo for the team:");
+        document.getElementById('kudosModal').style.display = 'flex';
+        renderKudosManager();
+    };
+
+    window.closeKudosManager = function() {
+        document.getElementById('kudosModal').style.display = 'none';
+    };
+
+    function renderKudosManager() {
+        const container = document.getElementById('kudosListContainer');
+        container.innerHTML = '';
+        
+        const keys = Object.keys(rawKudosData);
+        if(keys.length === 0) {
+            container.innerHTML = '<p style="color:var(--text-muted); font-size:13px;">No custom kudos found. Default messages are playing.</p>';
+            return;
+        }
+
+        keys.forEach(k => {
+            const text = rawKudosData[k];
+            container.innerHTML += `
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <input type="text" id="kudo_edit_${k}" class="form-control" style="flex-grow:1; background: rgba(0,0,0,0.5);" value="${text.replace(/"/g, '&quot;')}">
+                    <button class="btn btn-staff" onclick="window.updateKudo('${k}')">Save</button>
+                    <button class="btn btn-danger" onclick="window.deleteKudo('${k}')">🗑️</button>
+                </div>
+            `;
+        });
+    }
+
+    window.addKudoFromManager = function() {
+        const note = prompt("Enter a new shoutout:");
         if (note && note.trim() !== "") {
-            push(ref(db, `${FACTION_ID}/system/kudos`), note.trim());
+            push(ref(db, `${FACTION_ID}/system/kudos`), note.trim()).then(() => renderKudosManager());
         }
     };
 
-    // --- PRESTO DELIVERY RUSH (GAME) ---
+    window.updateKudo = function(key) {
+        const newVal = document.getElementById('kudo_edit_' + key).value.trim();
+        if (newVal) {
+            set(ref(db, `${FACTION_ID}/system/kudos/${key}`), newVal).then(() => {
+                alert("Kudo updated successfully.");
+                renderKudosManager();
+            });
+        }
+    };
+
+    window.deleteKudo = function(key) {
+        if(confirm("Delete this shoutout?")) {
+            remove(ref(db, `${FACTION_ID}/system/kudos/${key}`)).then(() => renderKudosManager());
+        }
+    };
+
+    // --- PRESTO DELIVERY RUSH (GAME) WITH VERIFIED SOLVABLE LEVELS ---
     const trafficLevels = [
         [ // Level 1 (Easy)
-            { id: 0, x: 1, y: 2, len: 2, horiz: true, isRed: true },
-            { id: 1, x: 0, y: 0, len: 3, horiz: false },
-            { id: 2, x: 1, y: 0, len: 2, horiz: true },
-            { id: 3, x: 3, y: 1, len: 2, horiz: false },
-            { id: 4, x: 4, y: 0, len: 2, horiz: false },
-            { id: 5, x: 4, y: 2, len: 2, horiz: true },
-            { id: 6, x: 2, y: 4, len: 2, horiz: false },
-            { id: 7, x: 3, y: 3, len: 2, horiz: true },
-            { id: 8, x: 4, y: 4, len: 2, horiz: true }
+            { id: 0, x: 0, y: 2, len: 2, horiz: true, isRed: true },
+            { id: 1, x: 3, y: 1, len: 3, horiz: false }, 
+            { id: 2, x: 4, y: 4, len: 2, horiz: true }
         ],
         [ // Level 2 (Medium)
             { id: 0, x: 0, y: 2, len: 2, horiz: true, isRed: true },
-            { id: 1, x: 2, y: 1, len: 3, horiz: false },
-            { id: 2, x: 0, y: 0, len: 2, horiz: true },
-            { id: 3, x: 3, y: 0, len: 2, horiz: false },
-            { id: 4, x: 4, y: 0, len: 2, horiz: true },
-            { id: 5, x: 5, y: 1, len: 3, horiz: false },
-            { id: 6, x: 3, y: 3, len: 2, horiz: true },
-            { id: 7, x: 0, y: 5, len: 3, horiz: true },
-            { id: 8, x: 3, y: 4, len: 2, horiz: false }
+            { id: 1, x: 2, y: 1, len: 2, horiz: false }, 
+            { id: 2, x: 2, y: 3, len: 2, horiz: true }, 
+            { id: 3, x: 5, y: 0, len: 3, horiz: false }
         ],
         [ // Level 3 (Hard)
-            { id: 0, x: 1, y: 2, len: 2, horiz: true, isRed: true },
-            { id: 1, x: 0, y: 1, len: 3, horiz: false },
-            { id: 2, x: 1, y: 1, len: 2, horiz: true },
-            { id: 3, x: 3, y: 0, len: 3, horiz: false },
-            { id: 4, x: 4, y: 0, len: 2, horiz: true },
-            { id: 5, x: 5, y: 1, len: 2, horiz: false },
-            { id: 6, x: 4, y: 3, len: 2, horiz: true },
-            { id: 7, x: 3, y: 4, len: 2, horiz: false },
-            { id: 8, x: 0, y: 5, len: 3, horiz: true }
+            { id: 0, x: 0, y: 2, len: 2, horiz: true, isRed: true },
+            { id: 1, x: 2, y: 0, len: 3, horiz: false }, 
+            { id: 2, x: 0, y: 3, len: 2, horiz: true },
+            { id: 3, x: 3, y: 3, len: 3, horiz: false },
+            { id: 4, x: 4, y: 2, len: 2, horiz: false },
+            { id: 5, x: 4, y: 5, len: 2, horiz: true }
         ]
     ];
     let currentLevelIndex = 0;
@@ -1009,7 +1063,7 @@
             loadTrivia();
         }
     };
-    loadTrivia(); // Init on start
+    loadTrivia();
 
     // --- FIREBASE LISTENERS FOR TICKER & ORB ---
     onValue(ref(db, `${FACTION_ID}/system/tickerMsg`), (snapshot) => {
@@ -1057,15 +1111,23 @@
     });
 
     window.updateTicker = function() {
-        if (!requireAdmin()) return;
-        let newMsg = prompt("Enter a new live dispatch announcement:");
-        if (newMsg !== null && newMsg.trim() !== "") {
-            set(ref(db, `${FACTION_ID}/system/tickerMsg`), newMsg.trim());
+        if (isStaffView || !requireAdmin()) return;
+        let currentMsg = document.getElementById('tickerText').innerText;
+        let defaultMsg = "Welcome to Presto CS Operations. Have a great shift!";
+        let prefill = (currentMsg === defaultMsg) ? "" : currentMsg;
+        
+        let newMsg = prompt("Update dispatch announcement (leave completely blank and hit OK to delete):", prefill);
+        if (newMsg !== null) {
+            if (newMsg.trim() === "") {
+                remove(ref(db, `${FACTION_ID}/system/tickerMsg`));
+            } else {
+                set(ref(db, `${FACTION_ID}/system/tickerMsg`), newMsg.trim());
+            }
         }
     };
 
     window.cycleQueueStatus = function() {
-        if (!requireAdmin()) return;
+        if (isStaffView || !requireAdmin()) return;
         const orb = document.getElementById('queueOrb');
         let current = orb.getAttribute('data-status');
         let next = 'green';
@@ -1077,13 +1139,14 @@
     // --- ADMIN LAZY GATEKEEPER ---
     function requireAdmin() {
         if (isUnlocked) return true;
-        const sessionAdmin = sessionStorage.getItem('adminAuthed');
         
-        if (sessionAdmin === SECRET_PIN) return true;
+        const sessionSupervisor = sessionStorage.getItem('supervisorAuthed');
+        
+        if (sessionSupervisor === SECRET_PIN) return true;
 
         const pin = prompt("🔒 Restricted Access\nEnter Supervisor PIN to execute this operation:");
         if (pin === SECRET_PIN) {
-            sessionStorage.setItem('adminAuthed', pin);
+            sessionStorage.setItem('supervisorAuthed', pin);
             return true;
         }
         if (pin !== null) alert("Incorrect PIN. Action denied.");
@@ -1275,7 +1338,8 @@
         if (isStaffView || currentEmployees.length === 0) return; 
         const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
         const now = new Date(tzStr);
-        const businessTime = new Date(now.getTime() - (4 * 3600 * 1000));
+        // Retard Sweep to 3:00 AM 
+        const businessTime = new Date(now.getTime() - (3 * 3600 * 1000));
         const businessDateStr = businessTime.toLocaleDateString('en-US'); 
         const businessDayStr = businessTime.toLocaleString('en-US', { weekday: 'long' }); 
 
@@ -1321,7 +1385,7 @@
         let ampm = hours >= 12 ? 'PM' : 'AM';
         hours = hours % 12;
         hours = hours ? hours : 12;
-        return `${hours.toString().padStart(2, '0')}:${m}${ampm}`;
+        return `${hours.toString().padStart(2, '0')}:${m} ${ampm}`;
     }
 
     function isCurrentlyOnShift(shiftString) {
@@ -1402,7 +1466,7 @@
         const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
         const nowMs = new Date(tzStr).getTime();
         const nowTime = formatAMPM(nowMs);
-        const businessDate = new Date(nowMs - (4 * 3600 * 1000)).toISOString().split('T')[0];
+        const businessDate = new Date(nowMs - (3 * 3600 * 1000)).toISOString().split('T')[0];
 
         if (!emp.clockInTime) {
             emp.clockInTime = nowTime;
@@ -1463,503 +1527,427 @@
         }
     };
 
-    // --- FIREBASE LISTENERS ---
-    onValue(ref(db, `${FACTION_ID}/roster`), (snapshot) => {
-        const data = snapshot.val();
-        if (data) { 
-            let dataArray = Array.isArray(data) ? data : Object.values(data);
-            dataArray = dataArray.filter(e => e !== null && e !== undefined);
-            
-            currentEmployees = dataArray.map((emp, i) => {
-                if (!emp.assignedDayOff) emp.assignedDayOff = (defaultEmployees[i] && defaultEmployees[i].assignedDayOff) || "None";
-                if (!emp.timeStart) emp.timeStart = (fixedSlots[i] && fixedSlots[i].timeStart) || "12:00 AM";
-                if (!emp.timeEnd) emp.timeEnd = (fixedSlots[i] && fixedSlots[i].timeEnd) || "12:30 AM";
-                if (!emp.overlap) emp.overlap = "1 Staff";
-                if (!emp.pcNumber) emp.pcNumber = "PC-" + (i+1).toString().padStart(2, '0');
-                if (!emp.teamName) emp.teamName = "Main Team"; 
-                if (typeof emp.isLocked === 'undefined') emp.isLocked = (defaultEmployees[i] && typeof defaultEmployees[i].isLocked !== 'undefined') ? defaultEmployees[i].isLocked : false;
-                if (typeof emp.quota30 === 'undefined') emp.quota30 = 0;
-                if (typeof emp.quota10 === 'undefined') emp.quota10 = 0;
-                if (typeof emp.clockInTime === 'undefined') emp.clockInTime = null;
-                if (typeof emp.passkey === 'undefined') emp.passkey = "";
-                
-                if (emp.shift === 'Shift A') emp.shift = 'Shift A (07:00 PM - 02:00 AM)';
-                if (emp.shift === 'Shift B') emp.shift = 'Shift B (07:30 PM - 02:30 AM)';
-                if (emp.shift === 'Shift C (08:00 AM - 04:00 PM)') emp.shift = 'Shift C (08:00 AM - 03:00 PM)';
-                if (emp.shift === 'Shift D (04:00 PM - 12:00 AM)') emp.shift = 'Shift D (04:00 PM - 11:00 PM)';
-                return emp;
-            });
-        } 
-        else {
-            const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
-            const businessTime = new Date(new Date(tzStr).getTime() - (4 * 3600 * 1000));
-            const todayDayStr = businessTime.toLocaleString('en-US', { weekday: 'long' });
-            
-            currentEmployees = defaultEmployees.map((emp, i) => {
-                emp.dayOff = (emp.assignedDayOff === todayDayStr) ? todayDayStr : "None";
-                emp.timeStart = fixedSlots[i] ? fixedSlots[i].timeStart : "12:00 AM";
-                emp.timeEnd = fixedSlots[i] ? fixedSlots[i].timeEnd : "12:30 AM";
-                emp.overlap = "1 Staff";
-                emp.pcNumber = "PC-" + (i+1).toString().padStart(2, '0');
-                emp.teamName = "Main Team";
-                emp.quota30 = 0;
-                emp.quota10 = 0;
-                emp.clockInTime = null;
-                emp.passkey = "";
-                return emp;
-            });
-            set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
-        }
-        
-        const clockInSelect = document.getElementById('clockInId');
-        if (clockInSelect) {
-            const currentSelection = clockInSelect.value;
-            clockInSelect.innerHTML = '<option value="">-- Select Your Name / PC --</option>';
-            currentEmployees.forEach(emp => {
-                const opt = document.createElement('option');
-                opt.value = emp.name; 
-                opt.innerText = `${emp.pcNumber} \vert{}${emp.name}`;
-                clockInSelect.appendChild(opt);
-            });
-            if (currentSelection) clockInSelect.value = currentSelection;
-        }
+    // --- BREAK LOGIC ---
+    window.startBreak = function(empName, index, requestedType = 'standard') {
+        if (enforcePCWorkstation()) return;
 
-        renderTable();
-    });
-
-    onValue(ref(db, `${FACTION_ID}/breaks`), (snapshot) => {
-        currentBreaks = snapshot.val() || {};
-        renderActiveBreaks();
-    });
-
-    // --- RENDERING ---
-    function renderTable() {
-        if (!currentEmployees || currentEmployees.length === 0) return;
-        const tbody = document.getElementById('tableBody');
-        tbody.innerHTML = '';
-
-        const localAuthUser = sessionStorage.getItem('prestoStaffAuth');
-        const isDraggableList = !isStaffView && isUnlocked && activeShiftFilter === 'all' && document.getElementById('searchInput').value.trim() === '';
-        const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
-        const nowTimeMs = new Date(tzStr).getTime();
-
-        currentEmployees.forEach((emp, index) => {
-            const isOffToday = emp.dayOff !== 'None';
-            const isOffShift = !isCurrentlyOnShift(emp.shift);
-
-            if (isStaffView && (isOffToday || isOffShift)) return;
-
-            let shiftClass = 'badge-shift-custom';
-            if (emp.shift.includes('Shift A')) shiftClass = 'badge-shift-a';
-            else if (emp.shift.includes('Shift B')) shiftClass = 'badge-shift-b';
-            else if (emp.shift.includes('Shift C')) shiftClass = 'badge-shift-c';
-            else if (emp.shift.includes('Shift D')) shiftClass = 'badge-shift-d';
-            else if (emp.shift.includes('Shift E')) shiftClass = 'badge-shift-e';
-            else if (emp.shift.includes('Shift G')) shiftClass = 'badge-shift-g';
-
-            let shiftSelectOptionsHtml = shiftOptions.map(opt => {
-                const isSelected = emp.shift === opt;
-                return `<option value="${opt}" ${isSelected ? 'selected' : ''}>${opt.split(' (')[0]}</option>`;
-            }).join('');
-            
-            if (!shiftOptions.includes(emp.shift)) {
-                shiftSelectOptionsHtml = `<option value="${emp.shift}" selected>${emp.shift.split(' (')[0]} (Custom)</option>` + shiftSelectOptionsHtml;
-            }
-
-            let shiftBadgeHtml = isStaffView 
-                ? `<span class="status-badge ${shiftClass}">${emp.shift.split(' (')[0]}</span>`
-                : `<select class="dayoff-select" style="margin-bottom: 4px; font-size: 11px; padding: 4px; width: 100%;" onchange="window.updateShift(${index}, this.value)">
-                     ${shiftSelectOptionsHtml}
-                   </select>`;
-
-            if (isOffShift && !isOffToday) {
-                shiftBadgeHtml += ` <br><span style="font-size:10px; color:#EF4444; font-weight:700;">(OFF SHIFT)</span>`;
-            }
-
-            const overlapClass = emp.overlap === '2 Staff' ? 'badge-overlap' : 'badge-single';
-            
-            const selectOptionsHtml = dayOffOptions.map(opt => {
-                const label = opt === 'None' ? 'No Permanent Day Off' : `Perm Off: ${opt}`;
-                const isSelected = emp.assignedDayOff === opt;
-                return `<option value="${opt}" ${isSelected ? 'selected' : ''}>${label}</option>`;
-            }).join('');
-
-            const tr = document.createElement('tr');
-            if (isOffToday || isOffShift) tr.classList.add('row-off-duty');
-
-            let bStartMs = parseTimeToday(emp.timeStart).getTime();
-            let bEndMs = parseTimeToday(emp.timeEnd).getTime();
-            if (bStartMs > bEndMs) {
-                if (new Date(tzStr).getHours() < 12) bStartMs -= 24 * 3600 * 1000;
-            }
-            let diffMins = (bStartMs - nowTimeMs) / 60000;
-            if (diffMins > 0 && diffMins <= 5 && emp.clockInTime && !isOffToday && !isOffShift) {
-                tr.classList.add('row-on-deck');
-            }
-
-            if (isDraggableList) {
-                tr.setAttribute('draggable', 'true');
-                tr.classList.add('draggable');
-                tr.setAttribute('ondragstart', `window.handleDragStart(event, ${index})`);
-                tr.setAttribute('ondragend', `window.handleDragEnd(event)`);
-                tr.setAttribute('ondragover', `window.handleDragOver(event)`);
-                tr.setAttribute('ondragleave', `window.handleDragLeave(event)`);
-                tr.setAttribute('ondrop', `window.handleDrop(event, ${index})`);
-            }
-
-            const selectDisabled = isStaffView ? 'disabled' : '';
-            const breakDisabled = (isOffToday || isOffShift || !emp.clockInTime) ? 'disabled title="Employee is absent, off shift, or has not signed in"' : 'title="Request Break"';
-
-            const presentBtnStyle = isOffToday ? 'color: #F87171; border-color: #F87171;' : 'color: #10B981; border-color: #10B981;';
-            const presentBtnText = isOffToday ? '🔴 Absent Today' : '🟢 Present Today';
-
-            const q30Maxed = (emp.quota30 >= 1);
-            const q10Maxed = (emp.quota10 >= 3);
-            const q30Bg = q30Maxed ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)';
-            const q30Color = q30Maxed ? '#EF4444' : '#10B981';
-            const q30Border = q30Maxed ? 'rgba(239, 68, 68, 0.3)' : 'rgba(16, 185, 129, 0.3)';
-            
-            const q10Bg = q10Maxed ? 'rgba(239, 68, 68, 0.1)' : 'rgba(56, 189, 248, 0.1)';
-            const q10Color = q10Maxed ? '#EF4444' : '#38BDF8';
-            const q10Border = q10Maxed ? 'rgba(239, 68, 68, 0.3)' : 'rgba(56, 189, 248, 0.3)';
-
-            let clockInHtml = emp.clockInTime 
-                ? `<div style="font-size: 10px; color: #10B981; font-weight: 700; margin-top: 6px; ${!isStaffView ? 'cursor:pointer;' : ''}" ${!isStaffView ? `onclick="window.voidClockIn(${index})"` : ''} title="${!isStaffView ? 'Admin: Click to VOID this sign-in' : ''}">▶ In: ${emp.clockInTime}</div>` 
-                : `<div style="font-size: 10px; color: var(--text-muted); font-weight: 600; margin-top: 6px;">No Sign-In</div>`;
-
-            let canViewButtons = true;
-            if (isStaffView && localAuthUser !== emp.name) {
-                canViewButtons = false;
-            }
-            if (isStaffView && isMobile) {
-                canViewButtons = false;
-            }
-
-            let actionButtonsHtml = '';
-            if (canViewButtons) {
-                actionButtonsHtml = `
-                    <button class="btn-mini-break" onclick="window.startBreak('${emp.name.replace(/'/g, "\\'")}', ${index}, 'standard')" ${breakDisabled}>☕ Break</button>
-                    <button class="btn-mini-break" style="color: #38BDF8; border-color: rgba(56, 189, 248, 0.3);" onclick="window.startBreak('${emp.name.replace(/'/g, "\\'")}', ${index}, 'prayer')" ${breakDisabled}>🕌 Prayer</button>
-                `;
-            } else {
-                if (isStaffView && isMobile) {
-                    actionButtonsHtml = `<span style="font-size: 10px; color: var(--text-muted); padding: 4px;">📱 PC Sign-in Required</span>`;
-                } else {
-                    actionButtonsHtml = `<span style="font-size: 10px; color: var(--text-muted); padding: 4px;">🔒 Sign in to access</span>`;
-                }
-            }
-
-            if (!isStaffView) {
-                actionButtonsHtml += `<button class="btn-mini-break" style="${emp.isLocked ? 'border-color: #F59E0B; color: #F59E0B;' : 'opacity: 0.6;'}" onclick="window.toggleLock(${index})" title="Prevent from Reshuffling">${emp.isLocked ? '🔒 Locked' : '🔓 Unlock'}</button>`;
-            } else if (emp.isLocked && canViewButtons) {
-                actionButtonsHtml += '<span class="lock-badge">🔒 FIXED</span>';
-            }
-
-            let badgeHtml = gamificationBadges[emp.name] ? `<span title="Punctuality Level" style="cursor:help; font-size:16px;">${gamificationBadges[emp.name]}</span>` : '';
-
-            // Ensure no editable HTML structures exist in Staff View
-            const pcEdit = !isStaffView ? ` contenteditable="true" onblur="window.updatePC(${index}, this.innerText)"` : ``;
-            const nameEdit = !isStaffView ? ` contenteditable="true" onblur="window.updateName(${index}, this.innerText)"` : ``;
-            const teamEdit = !isStaffView ? ` contenteditable="true" onblur="window.updateTeam(${index}, this.innerText)"` : ``;
-
-            let permOffHtml = isStaffView 
-                ? `<span style="font-size: 11px; font-weight: 600; color: var(--text-muted);">${emp.assignedDayOff === 'None' ? 'No Perm Off' : 'Perm Off: ' + emp.assignedDayOff}</span>`
-                : `<select class="dayoff-select" onchange="window.updatePermanentDayOff(${index}, this.value)">
-                    ${selectOptionsHtml}
-                   </select>`;
-
-            let presentBtnHtml = isStaffView
-                ? `<span style="display:inline-block; margin-top:6px; padding:4px 8px; border-radius:4px; border:1px solid ${isOffToday ? 'rgba(248,113,113,0.3)' : 'rgba(16,185,129,0.3)'}; color:${isOffToday ? '#F87171' : '#10B981'}; font-size:11px; font-weight:700;">${presentBtnText}</span>`
-                : `<button class="btn-mini-break" style="margin-top:6px; text-align: center; ${presentBtnStyle}" onclick="window.toggleForceAbsent(${index})">${presentBtnText}</button>`;
-
-            tr.innerHTML = `
-                <td class="col-id">${index + 1}</td>
-                <td class="col-pc">
-                    <span class="editable-name" ${pcEdit}>${emp.pcNumber}</span>
-                    ${clockInHtml}
-                </td>
-                <td class="col-name">
-                    <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 6px;">
-                        <div>
-                            <span class="editable-name" ${nameEdit}>${emp.name}</span>
-                            ${badgeHtml}
-                        </div>
-                        <div style="display: flex; gap: 4px; flex-wrap: wrap; align-items: center;">
-                            ${actionButtonsHtml}
-                        </div>
-                    </div>
-                </td>
-                <td class="col-quotas">
-                    <div style="display: flex; flex-direction: column; gap: 4px;">
-                        <span style="background: ${q30Bg}; color: ${q30Color}; border: 1px solid ${q30Border}; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; cursor: ${isStaffView ? 'default' : 'pointer'};" ${!isStaffView ? `onclick="window.resetQuota(${index}, '30')"` : ''} title="Official 30-Min Breaks">
-                            30 Min: ${emp.quota30} / 1
-                        </span>
-                        <span style="background: ${q10Bg}; color: ${q10Color}; border: 1px solid ${q10Border}; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; cursor: ${isStaffView ? 'default' : 'pointer'};" ${!isStaffView ? `onclick="window.resetQuota(${index}, '10')"` : ''} title="Quick 10-Min Breaks">
-                            10 Min: ${emp.quota10} / 3
-                        </span>
-                    </div>
-                </td>
-                <td class="col-dayoff">
-                    <div style="display: flex; flex-direction: column;">
-                        ${permOffHtml}
-                        ${presentBtnHtml}
-                    </div>
-                </td>
-                <td class="col-shift">
-                    ${shiftBadgeHtml}
-                    <br>
-                    <span class="status-badge badge-team editable-name" ${teamEdit}>${emp.teamName || 'No Team'}</span>
-                </td>
-                <td class="col-time">${emp.timeStart}</td>
-                <td class="col-time">${emp.timeEnd}</td>
-                <td class="col-overlap"><span class="status-badge ${overlapClass}">${emp.overlap}</span></td>
-            `;
-            tbody.appendChild(tr);
-        });
-
-        updateAutomatedMetrics();
-        window.filterTable();
-    }
-
-    function renderActiveBreaks() {
-        const section = document.getElementById('breakTrackerSection');
-        const grid = document.getElementById('breakTrackerGrid');
-        const mobileFloor = document.getElementById('mobileFocusFloor'); 
-        
-        const breakKeys = Object.keys(currentBreaks);
-        const localAuthUser = sessionStorage.getItem('prestoStaffAuth');
-        
-        const visibleBreaks = breakKeys.filter(key => currentBreaks[key].status !== 'completed');
-
-        const pendingList = visibleBreaks
-            .filter(key => currentBreaks[key].status === 'pending')
-            .sort((a,b) => (currentBreaks[a].requestTime || 0) - (currentBreaks[b].requestTime || 0));
-
-        if (visibleBreaks.length === 0) {
-            section.style.display = 'none';
-            if(mobileFloor) mobileFloor.innerHTML = '<div style="color:var(--text-muted); font-size:13px; font-weight:600; text-transform:uppercase;">No one is on break right now. Floor is full.</div>';
-            if (timerInterval) clearInterval(timerInterval);
-            return;
-        }
-
-        section.style.display = 'block';
-        grid.innerHTML = '';
-        if(mobileFloor) mobileFloor.innerHTML = '';
-
-        visibleBreaks.forEach(key => {
-            const b = currentBreaks[key];
-            const card = document.createElement('div');
-            
-            const empMatch = currentEmployees.find(e => e.name === b.name);
-            const shiftBadge = empMatch ? `<span class="break-shift-badge">${empMatch.shift.split(' ')[0]} ${empMatch.shift.split(' ')[1] || ''}</span>` : '';
-            const pcBadge = empMatch && empMatch.pcNumber ? `<span class="break-shift-badge" style="background: rgba(251, 191, 36, 0.2); color: #FBBF24;">${empMatch.pcNumber}</span>` : '';
-            const teamBadge = empMatch && empMatch.teamName && empMatch.teamName !== 'No Team' ? `<span class="break-shift-badge" style="background: rgba(16, 185, 129, 0.15); color: #10B981;">${empMatch.teamName}</span>` : '';
-            
-            const isPrayer = b.type === 'Prayer';
-            const startedText = b.startTime ? `▶ Start: ${formatAMPM(b.startTime)}` : '▶ Start: --:--';
-            
-            const endTimeMs = b.endTime || (b.startTime && b.limit > 0 ? b.startTime + (b.limit * 60000) : 0);
-            const endText = isPrayer ? `⏱️ Open Return` : (endTimeMs ? `🎯 Due: ${formatAMPM(endTimeMs)}` : '🎯 Due: --:--');
-
-            if (b.status === 'pending') {
-                const pos = pendingList.indexOf(key) + 1;
-                const waitEst = pos * 10;
-
-                card.className = `break-card card-pending`;
-                let adminControls = '';
-                if (!isStaffView) {
-                    adminControls = `
-                    <div style="display: flex; gap: 8px;">
-                        <button class="btn btn-success" onclick="window.approveBreak('${key}')">Approve</button>
-                        <button class="btn btn-danger" onclick="window.denyBreak('${key}')">Deny</button>
-                    </div>`;
-                }
-                card.innerHTML = `
-                    <div class="break-info">
-                        <span class="break-name">${b.name} ${pcBadge} ${teamBadge} ${shiftBadge}</span>
-                        <span class="break-type" style="color: #EF4444;">🔴 QUEUE POSITION: #${pos} (Est Wait: ~${waitEst}m)</span>
-                        <div style="font-size:11px; color:#EF4444; margin-top:4px; font-weight:700;">Type: ${b.type}</div>
-                    </div>
-                    ${adminControls}
-                `;
-            } 
-            else if (b.status === 'return_pending') {
-                card.className = `break-card card-unofficial`; 
-                let adminControls = isStaffView ? 
-                    `<button class="btn btn-staff" disabled>Pending Admin Auth...</button>` : 
-                    `<button class="btn btn-success" onclick="window.approveReturn('${key}')">Approve Return</button>`;
-                
-                card.innerHTML = `
-                    <div class="break-info">
-                        <span class="break-name">${b.name} ${pcBadge} ${teamBadge} ${shiftBadge}</span>
-                        <span class="break-type" style="color: #F59E0B;">🟡 RETURN REQUESTED</span>
-                        <div class="break-meta">
-                            <span>${startedText}</span>
-                            <span>${endText}</span>
-                            <span style="color: #F59E0B;">🛑 Req: ${formatAMPM(b.returnRequestedTime)}</span>
-                        </div>
-                    </div>
-                    <div class="break-timer-group">
-                        <span class="break-timer" data-start="${b.startTime}" data-endtime="${endTimeMs}" data-end="${b.returnRequestedTime}"></span>
-                        ${adminControls}
-                    </div>
-                `;
-            }
-            else {
-                const isOfficial = b.limit === 30;
-                card.className = `break-card ${isOfficial ? 'card-official' : 'card-unofficial'}`;
-                
-                let returnBtnHtml = '';
-                let canReturn = true;
-
-                if (isStaffView && localAuthUser !== b.name) canReturn = false;
-                if (isStaffView && isMobile) canReturn = false; 
-
-                if (canReturn) {
-                    returnBtnHtml = `<button class="btn btn-primary" onclick="window.requestReturn('${key}')">Request Return</button>`;
-                } else if (!isStaffView) {
-                    returnBtnHtml = `<button class="btn btn-primary" style="background: #F59E0B; border-color: #F59E0B;" onclick="if(confirm('Admin Override: Force return for ${b.name}?')) window.requestReturn('${key}')" title="Admin Override">Force Return</button>`;
-                } else {
-                    if (isStaffView && isMobile) {
-                        returnBtnHtml = `<span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">📱 PC Sign-in Required</span>`;
-                    } else {
-                        returnBtnHtml = `<span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">🔒 Waiting for ${b.name.split(' ')[0]}</span>`;
-                    }
-                }
-
-                card.innerHTML = `
-                    <div class="break-info">
-                        <span class="break-name">${b.name} ${pcBadge} ${teamBadge} ${shiftBadge}</span>
-                        <span class="break-type" style="color: ${isOfficial ? '#10B981' : '#38BDF8'}">${b.type} (ON BREAK)</span>
-                        <div class="break-meta">
-                            <span>${startedText}</span>
-                            <span>${endText}</span>
-                        </div>
-                    </div>
-                    <div class="break-timer-group">
-                        <span class="break-timer" data-start="${b.startTime}" data-endtime="${endTimeMs}"></span>
-                        ${returnBtnHtml}
-                    </div>
-                `;
-            }
-            grid.appendChild(card);
-
-            if(mobileFloor) {
-                const mobCard = card.cloneNode(true);
-                let btn = mobCard.querySelector('.break-timer-group button');
-                if(btn) btn.remove();
-                mobCard.style.width = '100%';
-                mobileFloor.appendChild(mobCard);
-            }
-        });
-
-        if (timerInterval) clearInterval(timerInterval);
-        updateTimers(); 
-        timerInterval = setInterval(updateTimers, 1000);
-        updateAutomatedMetrics(); 
-    }
-
-    function updateTimers() {
-        const timers = document.querySelectorAll('.break-timer');
-        const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
-        const now = new Date(tzStr).getTime();
-        
-        timers.forEach(timerEl => {
-            const startStr = timerEl.getAttribute('data-start');
-            const endTargetStr = timerEl.getAttribute('data-endtime');
-            const frozenStr = timerEl.getAttribute('data-end');
-
-            const start = startStr ? parseInt(startStr) : 0;
-            const endTarget = endTargetStr ? parseInt(endTargetStr) : 0;
-            
-            const currentOrFrozen = (frozenStr && frozenStr !== "undefined") ? parseInt(frozenStr) : now;
-            
-            if (!start) return;
-
-            if (endTarget === 0) {
-                let elapsedSecs = Math.floor((currentOrFrozen - start) / 1000);
-                const mins = Math.floor(elapsedSecs / 60);
-                const secs = elapsedSecs % 60;
-                timerEl.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-                
-                if (mins >= 10) timerEl.classList.add('overtime');
-                else timerEl.classList.remove('overtime');
+        try {
+            const safeKey = empName.replace(/[.#$[\]]/g, '');
+            if (currentBreaks[safeKey] && currentBreaks[safeKey].status !== 'completed') {
+                alert(`🚨 BLOCK: ${empName} already has an active or pending break request.`);
                 return;
             }
 
-            let remainingSecs = Math.floor((endTarget - currentOrFrozen) / 1000);
-            let isOvertime = remainingSecs < 0;
-            let absSecs = Math.abs(remainingSecs);
+            const activeBreaksList = Object.values(currentBreaks).filter(b => b.status !== 'completed');
+            const currentPrayers = activeBreaksList.filter(b => b.type === 'Prayer').length;
+            const current10Mins = activeBreaksList.filter(b => b.type === 'Unscheduled (10m)').length;
 
-            const mins = Math.floor(absSecs / 60);
-            const secs = absSecs % 60;
-            
-            const sign = isOvertime ? "-" : "";
-            timerEl.innerText = `${sign}${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-            
-            if (isOvertime) timerEl.classList.add('overtime');
-            else timerEl.classList.remove('overtime');
-        });
+            const emp = currentEmployees[index];
+            const q30 = emp.quota30 || 0;
+            const q10 = emp.quota10 || 0;
+            const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
 
-        updateMobileFocusDashboard();
-    }
-
-    function updateAutomatedMetrics() {
-        let presentCount = 0;
-        let shiftAActive = 0;
-        let shiftBActive = 0;
-        let shiftCActive = 0;
-        let shiftDActive = 0;
-        let shiftEActive = 0;
-        let shiftGActive = 0;
-        let otherActive = 0;
-        let offCount = 0;
-
-        currentEmployees.forEach(e => {
-            if (e.dayOff !== 'None') {
-                offCount++;
-                return; 
+            if (requestedType === 'prayer') {
+                if (currentPrayers >= 4) {
+                    alert(`🚨 BLOCK: Maximum prayer capacity reached! (4 employees are currently on or waiting for prayer). Please wait until someone returns.`);
+                    return;
+                }
+                alert(`A request for a Prayer break has been sent to the Admin.`);
+                set(ref(db, `${FACTION_ID}/breaks/` + safeKey), {
+                    name: empName,
+                    startTime: 0,
+                    requestTime: Date.now(), 
+                    limit: 0, 
+                    type: "Prayer",
+                    status: "pending"
+                }).catch(err => alert("Error communicating with cloud: " + err.message));
+                return;
             }
-            if (!isCurrentlyOnShift(e.shift)) return; 
 
-            presentCount++;
-            if (e.shift.includes('Shift A')) shiftAActive++;
-            else if (e.shift.includes('Shift B')) shiftBActive++;
-            else if (e.shift.includes('Shift C')) shiftCActive++;
-            else if (e.shift.includes('Shift D')) shiftDActive++;
-            else if (e.shift.includes('Shift E')) shiftEActive++;
-            else if (e.shift.includes('Shift G')) shiftGActive++;
-            else otherActive++;
-        });
+            const isOfficial = isOfficialBreakTime(index);
 
-        const activeBreaksCount = Object.values(currentBreaks).filter(b => b.status === 'active' || b.status === 'return_pending').length;
-        const liveFloorStaff = Math.max(0, presentCount - activeBreaksCount);
-        const total = currentEmployees.length;
+            if (isOfficial) {
+                if (q30 >= 1) {
+                    alert(`🚨 BLOCK: ${empName} has already used their 1 official 30-minute break for today!`);
+                    return;
+                }
 
-        document.getElementById('metricStaffCount').innerText = `${presentCount} Present`;
-        let shiftStr = `${shiftAActive} A | ${shiftBActive} B`;
-        if (shiftCActive > 0) shiftStr += ` | ${shiftCActive} C`;
-        if (shiftDActive > 0) shiftStr += ` | ${shiftDActive} D`;
-        if (shiftEActive > 0) shiftStr += ` | ${shiftEActive} E`;
-        if (shiftGActive > 0) shiftStr += ` | ${shiftGActive} G`;
-        if (otherActive > 0) shiftStr += ` | ${otherActive} Oth`;
-        document.getElementById('metricShiftBreakdown').innerText = shiftStr;
+                emp.quota30 = q30 + 1;
+                set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
+
+                let bStart = parseTimeToday(emp.timeStart).getTime();
+                let bEnd = parseTimeToday(emp.timeEnd).getTime();
+                if (bStart > bEnd) {
+                    if (new Date(tzStr).getHours() >= 12) {
+                        bEnd += 24 * 3600 * 1000; 
+                    }
+                }
+                const endTimeMs = bEnd;
+
+                set(ref(db, `${FACTION_ID}/breaks/` + safeKey), {
+                    name: empName,
+                    startTime: new Date(tzStr).getTime(), 
+                    endTime: endTimeMs, 
+                    limit: 30, 
+                    type: "Scheduled Slot",
+                    status: "active"
+                }).catch(err => alert("Error communicating with cloud: " + err.message));
+            } else {
+                if (q10 >= 3) {
+                    alert(`🚨 BLOCK: ${empName} has already used all 3 of their 10-minute quick breaks today!`);
+                    return;
+                }
+
+                if (current10Mins >= 3) {
+                    alert(`🚨 BLOCK: Maximum 10-minute break capacity reached! (3 employees are currently on or waiting for a quick break). Please wait until they return.`);
+                    return;
+                }
+
+                alert(`It is currently not the scheduled break time for ${empName}.\n\nA request for a 10-minute quick break has been sent to the Admin.`);
+                set(ref(db, `${FACTION_ID}/breaks/` + safeKey), {
+                    name: empName,
+                    startTime: 0,
+                    requestTime: Date.now(), 
+                    limit: 10,
+                    type: "Unscheduled (10m)",
+                    status: "pending"
+                }).catch(err => alert("Error communicating with cloud: " + err.message));
+            }
+        } catch(err) {
+            alert("An unexpected error occurred while requesting break: " + err.message);
+        }
+    };
+
+    window.approveBreak = function(rawKey) {
+        if (!requireAdmin()) return;
+        try {
+            const key = rawKey.replace(/'/g, ""); 
+            const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
+            const nowMs = new Date(tzStr).getTime();
+            
+            const breakData = currentBreaks[key];
+            if(!breakData) { alert("Break request no longer exists."); return; }
+
+            breakData.status = 'active';
+            breakData.startTime = nowMs; 
+            
+            if (breakData.limit > 0) {
+                breakData.endTime = nowMs + (breakData.limit * 60000); 
+            } else {
+                breakData.endTime = 0; 
+            }
+            
+            if (breakData.limit === 10) {
+                const empIndex = currentEmployees.findIndex(e => e.name === breakData.name);
+                if (empIndex > -1) {
+                    currentEmployees[empIndex].quota10 = (currentEmployees[empIndex].quota10 || 0) + 1;
+                    set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
+                }
+            }
+            
+            set(ref(db, `${FACTION_ID}/breaks/` + key), breakData).catch(err => alert("Sync Error: " + err.message));
+        } catch(err) {
+            alert("Error approving break: " + err.message);
+        }
+    };
+
+    window.denyBreak = function(rawKey) {
+        if (!requireAdmin()) return;
+        const key = rawKey.replace(/'/g, "");
+        remove(ref(db, `${FACTION_ID}/breaks/` + key)); 
+    };
+
+    window.requestReturn = function(rawKey) {
+        if (enforcePCWorkstation()) return;
+        try {
+            const key = rawKey.replace(/'/g, "");
+            const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
+            const breakData = currentBreaks[key];
+            if (breakData) {
+                const now = new Date(tzStr).getTime();
+                if (breakData.endTime > 0) {
+                    const diffMs = now - breakData.endTime;
+                    const varianceMins = Math.round(diffMs / 60000);
+                    if (varianceMins === 0) window.shootConfetti(); 
+                }
+
+                breakData.status = 'return_pending'; 
+                breakData.returnRequestedTime = now; 
+                set(ref(db, `${FACTION_ID}/breaks/` + key), breakData);
+            }
+        } catch(err) {
+            alert("Error requesting return: " + err.message);
+        }
+    };
+
+    window.approveReturn = function(rawKey) {
+        if (!requireAdmin()) return;
+        setTimeout(() => {
+            try {
+                const key = rawKey.replace(/'/g, "");
+                const breakData = currentBreaks[key];
+                if (breakData) {
+                    const adminNote = prompt("Optional: Enter a note for this return (or leave blank):") || "";
+                    const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
+                    const businessDate = new Date(new Date(tzStr).getTime() - (3 * 3600 * 1000)).toISOString().split('T')[0];
+
+                    let variance = "N/A";
+                    let varianceMins = 0;
+
+                    if (breakData.endTime > 0) {
+                        const diffMs = breakData.returnRequestedTime - breakData.endTime;
+                        varianceMins = Math.round(diffMs / 60000);
+
+                        if (varianceMins > 0) variance = `LATE by ${varianceMins} min`;
+                        else if (varianceMins < 0) variance = `EARLY by ${Math.abs(varianceMins)} min`;
+                        else variance = "EXACT ON TIME";
+                    } else {
+                        varianceMins = Math.round((breakData.returnRequestedTime - breakData.startTime) / 60000);
+                        variance = `Took ${varianceMins} min total`;
+                    }
+
+                    if (variance === "EXACT ON TIME") window.shootConfetti();
+
+                    const emp = currentEmployees.find(e => e.name === breakData.name);
+                    const clockInToSave = (emp && emp.clockInTime) ? emp.clockInTime : "No Sign-In";
+
+                    const historyRef = ref(db, `${FACTION_ID}/history/${businessDate}`);
+                    push(historyRef, {
+                        name: breakData.name,
+                        clockInTime: clockInToSave,
+                        type: breakData.type,
+                        startTime: formatAMPM(breakData.startTime),
+                        expectedEnd: breakData.endTime > 0 ? formatAMPM(breakData.endTime) : "Open Return",
+                        actualReturn: formatAMPM(breakData.returnRequestedTime),
+                        variance: variance,
+                        adminNote: adminNote.replace(/"/g, "'"), 
+                        timestamp: new Date(tzStr).getTime()
+                    });
+
+                    breakData.status = 'completed'; 
+                    set(ref(db, `${FACTION_ID}/breaks/` + key), breakData);
+                }
+            } catch(err) {
+                alert("Error approving return: " + err.message);
+            }
+        }, 100);
+    };
+
+    // --- LEADERBOARD & EXPORT ---
+    window.openLeaderboard = async function() {
+        if (!requireAdmin()) return;
+        document.getElementById('leaderboardModal').style.display = 'flex';
+        const contentDiv = document.getElementById('leaderboardContent');
+        contentDiv.innerHTML = '<p style="text-align: center; color: var(--primary);">Fetching historical data...</p>';
+
+        try {
+            const snapshot = await get(ref(db, `${FACTION_ID}/history`));
+            if (!snapshot.exists()) {
+                contentDiv.innerHTML = '<p style="text-align: center; color: var(--text-muted);">No break history has been recorded yet.</p>';
+                return;
+            }
+
+            const allHistory = snapshot.val();
+            let stats = {};
+
+            Object.values(allHistory).forEach(dayRecord => {
+                Object.values(dayRecord).forEach(log => {
+                    if (!stats[log.name]) {
+                        stats[log.name] = { earlyMins: 0, lateMins: 0, perfectCount: 0 };
+                    }
+
+                    if (log.variance.includes('LATE by')) {
+                        const mins = parseInt(log.variance.replace(/[^0-9]/g, ''));
+                        if (!isNaN(mins)) stats[log.name].lateMins += mins;
+                    } else if (log.variance.includes('EARLY by')) {
+                        const mins = parseInt(log.variance.replace(/[^0-9]/g, ''));
+                        if (!isNaN(mins)) stats[log.name].earlyMins += mins;
+                    } else if (log.variance === 'EXACT ON TIME') {
+                        stats[log.name].perfectCount += 1;
+                    }
+                });
+            });
+
+            let sortedStaff = Object.keys(stats).map(name => {
+                const s = stats[name];
+                return {
+                    name: name,
+                    early: s.earlyMins,
+                    late: s.lateMins,
+                    perfect: s.perfectCount,
+                    score: s.earlyMins - s.lateMins
+                };
+            }).sort((a, b) => b.score - a.score);
+
+            let html = `
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Employee Name</th>
+                            <th>Net Balance</th>
+                            <th>Level</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            sortedStaff.forEach((emp, index) => {
+                let rankStr = `${index + 1}`;
+                if (index === 0) rankStr = '🥇 1';
+                
+                let scoreClass = 'score-neutral';
+                let scoreText = `${emp.score} min`;
+                if (emp.score > 0) { scoreClass = 'score-good'; scoreText = `+${emp.score} min`; }
+                if (emp.score < 0) { scoreClass = 'score-bad'; scoreText = `${emp.score} min`; }
+
+                let badge = 'Novice';
+                if(index === 0) badge = '👑 Champion';
+                else if (emp.score > 100) badge = '💎 Diamond';
+                else if (emp.score > 50) badge = '🥈 Silver';
+                else if (emp.score > 20) badge = '🥉 Bronze';
+
+                html += `
+                    <tr>
+                        <td style="font-weight: 800;">${rankStr}</td>
+                        <td style="font-weight: 700; color: var(--text-main);">${emp.name}</td>
+                        <td class="${scoreClass}">${scoreText}</td>
+                        <td style="color: var(--text-muted);">${badge}</td>
+                    </tr>
+                `;
+            });
+
+            html += `</tbody></table>`;
+            contentDiv.innerHTML = html;
+
+        } catch (e) {
+            contentDiv.innerHTML = `<p style="color: #EF4444;">Error loading leaderboard: ${e.message}</p>`;
+        }
+    };
+
+    window.closeLeaderboard = function() {
+        document.getElementById('leaderboardModal').style.display = 'none';
+    };
+
+    window.exportEmployeeHistory = async function() {
+        if (!requireAdmin()) return;
         
-        document.getElementById('metricOffCount').innerText = `${offCount} Staff Off`;
-        document.getElementById('metricOffSub').innerText = offCount === 0 ? '100% Floor Attendance' : `${((presentCount / (total - offCount || 1)) * 100).toFixed(1)}% Shift Fill`;
+        const empName = prompt("Enter the exact Employee Name to pull their 90-day report:");
+        if (!empName) return;
 
-        document.getElementById('metricFloorStaff').innerText = `${liveFloorStaff} Active`;
-        document.getElementById('metricFloorSub').innerText = `${activeBreaksCount} Currently on Break`;
+        try {
+            const snapshot = await get(ref(db, `${FACTION_ID}/history`));
+            if (!snapshot.exists()) {
+                alert("No history found in database.");
+                return;
+            }
 
-        const loadEl = document.getElementById('metricBreakLoad');
-        loadEl.innerText = `${activeBreaksCount} / 2 Slots`;
-        if (activeBreaksCount >= 2) loadEl.classList.add('break-load-warning');
-        else loadEl.classList.remove('break-load-warning');
+            const allHistory = snapshot.val();
+            let csv = ["Date,Employee Name,Clock In Time,Break Type,Start Time,Expected Return,Actual Return,Variance Log,Admin Notes"];
+            let matchCount = 0;
+            
+            const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
+            const today = new Date(tzStr);
+            const ninetyDaysAgo = new Date(today.getTime() - (90 * 24 * 60 * 60 * 1000));
 
-        document.getElementById('countAll').innerText = total;
-        document.getElementById('countPresent').innerText = presentCount;
-        document.getElementById('countDayOff').innerText = offCount;
-    }
+            const dates = Object.keys(allHistory).sort((a, b) => new Date(b) - new Date(a));
+
+            dates.forEach(dateStr => {
+                const recordDate = new Date(dateStr);
+                if (recordDate >= ninetyDaysAgo && recordDate <= today) {
+                    const dailyRecords = allHistory[dateStr];
+                    Object.values(dailyRecords).forEach(log => {
+                        if (log.name.toLowerCase().includes(empName.toLowerCase().trim())) {
+                            csv.push(`"${dateStr}","${log.name}","${log.clockInTime || 'N/A'}","${log.type}","${log.startTime}","${log.expectedEnd}","${log.actualReturn}","${log.variance}","${log.adminNote || ''}"`);
+                            matchCount++;
+                        }
+                    });
+                }
+            });
+
+            if (matchCount === 0) {
+                alert(`No records found for "${empName}" in the last 90 days.`);
+                return;
+            }
+
+            const csvFile = new Blob([csv.join('\n')], { type: 'text/csv' });
+            const downloadLink = document.createElement('a');
+            downloadLink.download = `Audit_${empName.replace(/\s+/g, '_')}_90Days.csv`;
+            downloadLink.href = window.URL.createObjectURL(csvFile);
+            downloadLink.style.display = 'none';
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+            
+            alert(`✅ Successfully exported ${matchCount} historical break records for ${empName}!`);
+            
+        } catch (e) {
+            alert("Error generating report: " + e.message);
+        }
+    };
+
+    window.exportHistory = async function() {
+        if (!requireAdmin()) return;
+        const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
+        const businessDate = new Date(new Date(tzStr).getTime() - (3 * 3600 * 1000)).toISOString().split('T')[0];
+
+        try {
+            const snapshot = await get(ref(db, `${FACTION_ID}/history/${businessDate}`));
+            if (!snapshot.exists()) {
+                alert("No break history logged for today yet!");
+                return;
+            }
+            
+            const data = snapshot.val();
+            let csv = ["Employee Name,Clock In Time,Break Type,Start Time,Expected Return,Actual Return,Variance Log,Admin Notes"];
+            
+            Object.values(data).forEach(log => {
+                csv.push(`"${log.name}","${log.clockInTime || 'N/A'}","${log.type}","${log.startTime}","${log.expectedEnd}","${log.actualReturn}","${log.variance}","${log.adminNote || ''}"`);
+            });
+            
+            const csvFile = new Blob([csv.join('\n')], { type: 'text/csv' });
+            const downloadLink = document.createElement('a');
+            downloadLink.download = `Presto_Break_History_${businessDate}.csv`;
+            downloadLink.href = window.URL.createObjectURL(csvFile);
+            downloadLink.style.display = 'none';
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+            
+        } catch (e) {
+            alert("Failed to export history: " + e.message);
+        }
+    };
+
+    window.exportCSV = function() {
+        let csv = [];
+        const rows = document.querySelectorAll('table tr');
+        for (let i = 0; i < rows.length; i++) {
+            let row = [], cols = rows[i].querySelectorAll('td, th');
+            for (let j = 0; j < cols.length; j++) {
+                let text = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, ' ')
+                    .replace('☕ Break', '')
+                    .replace('🕌 Prayer', '')
+                    .replace('🔒 FIXED', '')
+                    .replace('🔒 Locked', '')
+                    .replace('🔓 Unlock', '')
+                    .replace('🔴 Absent Today', 'Absent')
+                    .replace('🟢 Present Today', 'Present')
+                    .trim();
+                row.push('"' + text + '"');
+            }
+            csv.push(row.join(','));
+        }
+        const csvFile = new Blob([csv.join('\n')], { type: 'text/csv' });
+        const downloadLink = document.createElement('a');
+        downloadLink.download = `Presto_Eat_Live_Schedule_${FACTION_ID}.csv`;
+        downloadLink.href = window.URL.createObjectURL(csvFile);
+        downloadLink.style.display = 'none';
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+    };
+
 </script>
 </body>
 </html>
