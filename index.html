@@ -572,7 +572,7 @@
             <div class="rule-en">1. Loitering without a valid professional reason and engaging in side or personal conversations during official working hours are strictly prohibited.</div>
         </div>
         <div class="rule-item">
-            <div class="rule-ar">٢. مدة الاستراحة المجدولة هي ٣٠ دقيقة فقط. الاستراحات غير المجدولة تقتصر على ١٠ دقائق وتتطلب موافقة الاشراف.</div>
+            <div class="rule-ar">٢. مدة الاستراحة المجدولة هي ٣٠ دقيقة فقط. الاستراحات غير المجدولة تقتصر على ١0 دقائق وتتطلب موافقة الاشراف.</div>
             <div class="rule-en">2. Scheduled breaks are strictly 30 minutes. Unscheduled breaks are limited to 10 minutes and require management approval.</div>
         </div>
         <div class="rule-item">
@@ -646,6 +646,313 @@
             return true;
         }
         return false;
+    }
+
+    // --- ADMIN LOCK / UNLOCK TOGGLE ---
+    window.toggleAuth = function() {
+        if (isUnlocked) {
+            isUnlocked = false;
+            sessionStorage.removeItem('supervisorAuthed');
+            updateAdminUI();
+            renderTable();
+        } else {
+            const input = prompt("Enter Supervisor PIN to unlock administrative controls:");
+            if (input === SECRET_PIN) {
+                isUnlocked = true;
+                sessionStorage.setItem('supervisorAuthed', input);
+                updateAdminUI();
+                renderTable();
+                alert("🔓 Admin Controls Unlocked successfully.");
+            } else if (input !== null) {
+                alert("❌ Incorrect PIN. Access denied.");
+            }
+        }
+    };
+
+    function updateAdminUI() {
+        const dot = document.getElementById('statusDot');
+        const text = document.getElementById('statusText');
+        const authBtn = document.getElementById('authBtn');
+        const reshuffleBtn = document.getElementById('reshuffleBtn');
+
+        if (isUnlocked) {
+            if (dot) dot.classList.add('unlocked');
+            if (text) text.innerText = "Roster Controls: UNLOCKED (Admin Mode)";
+            if (authBtn) {
+                authBtn.innerText = "🔓 Lock Controls";
+                authBtn.classList.add('btn-danger');
+            }
+            if (reshuffleBtn) {
+                reshuffleBtn.disabled = false;
+                reshuffleBtn.style.opacity = '1';
+                reshuffleBtn.style.cursor = 'pointer';
+            }
+        } else {
+            if (dot) dot.classList.remove('unlocked');
+            if (text) text.innerText = "Roster Controls: Locked (PIN Protected)";
+            if (authBtn) {
+                authBtn.innerText = "🔒 Unlock Controls";
+                authBtn.classList.remove('btn-danger');
+            }
+            if (reshuffleBtn) {
+                reshuffleBtn.disabled = true;
+                reshuffleBtn.style.opacity = '0.5';
+                reshuffleBtn.style.cursor = 'not-allowed';
+            }
+        }
+    }
+
+    window.toggleLock = function(index) {
+        if (!requireAdmin()) return;
+        currentEmployees[index].isLocked = !currentEmployees[index].isLocked;
+        set(ref(db, getDBPath('roster')), currentEmployees);
+    };
+
+    window.updateShift = function(index, value) {
+        if (!requireAdmin()) return;
+        currentEmployees[index].shift = value;
+        set(ref(db, getDBPath('roster')), currentEmployees);
+    };
+
+    window.updateName = function(index, value) {
+        if (!requireAdmin()) return;
+        const cleaned = value.trim();
+        if (cleaned) {
+            currentEmployees[index].name = cleaned;
+            set(ref(db, getDBPath('roster')), currentEmployees);
+        }
+    };
+
+    window.updatePC = function(index, value) {
+        if (!requireAdmin()) return;
+        const cleaned = value.trim();
+        if (cleaned) {
+            currentEmployees[index].pcNumber = cleaned;
+            set(ref(db, getDBPath('roster')), currentEmployees);
+        }
+    };
+
+    window.updateTeam = function(index, value) {
+        if (!requireAdmin()) return;
+        const cleaned = value.trim();
+        if (cleaned) {
+            currentEmployees[index].teamName = cleaned;
+            set(ref(db, getDBPath('roster')), currentEmployees);
+        }
+    };
+
+    window.updatePermanentDayOff = function(index, value) {
+        if (!requireAdmin()) return;
+        currentEmployees[index].assignedDayOff = value;
+        const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
+        const businessTime = new Date(new Date(tzStr).getTime() - (3 * 3600 * 1000));
+        const todayDayStr = businessTime.toLocaleString('en-US', { weekday: 'long' });
+        currentEmployees[index].dayOff = (value === todayDayStr) ? todayDayStr : "None";
+        set(ref(db, getDBPath('roster')), currentEmployees);
+    };
+
+    window.toggleForceAbsent = function(index) {
+        if (!requireAdmin()) return;
+        const emp = currentEmployees[index];
+        const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
+        const businessTime = new Date(new Date(tzStr).getTime() - (3 * 3600 * 1000));
+        const todayDayStr = businessTime.toLocaleString('en-US', { weekday: 'long' });
+
+        if (emp.dayOff === 'None') {
+            emp.dayOff = todayDayStr;
+        } else {
+            emp.dayOff = 'None';
+        }
+        set(ref(db, getDBPath('roster')), currentEmployees);
+    };
+
+    window.resetQuota = function(index, type) {
+        if (!requireAdmin()) return;
+        if (type === '30') currentEmployees[index].quota30 = 0;
+        if (type === '10') currentEmployees[index].quota10 = 0;
+        set(ref(db, getDBPath('roster')), currentEmployees);
+    };
+
+    window.reshuffleSchedule = function() {
+        if (!requireAdmin()) return;
+        if (!confirm("Are you sure you want to reshuffle all unlocked employees?")) return;
+
+        let unlockedIndexes = [];
+        currentEmployees.forEach((emp, i) => {
+            if (!emp.isLocked) unlockedIndexes.push(i);
+        });
+
+        for (let i = unlockedIndexes.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const idx1 = unlockedIndexes[i];
+            const idx2 = unlockedIndexes[j];
+            
+            const tempStart = currentEmployees[idx1].timeStart;
+            const tempEnd = currentEmployees[idx1].timeEnd;
+            const tempOverlap = currentEmployees[idx1].overlap;
+
+            currentEmployees[idx1].timeStart = currentEmployees[idx2].timeStart;
+            currentEmployees[idx1].timeEnd = currentEmployees[idx2].timeEnd;
+            currentEmployees[idx1].overlap = currentEmployees[idx2].overlap;
+
+            currentEmployees[idx2].timeStart = tempStart;
+            currentEmployees[idx2].timeEnd = tempEnd;
+            currentEmployees[idx2].overlap = tempOverlap;
+        }
+
+        set(ref(db, getDBPath('roster')), currentEmployees);
+    };
+
+    window.openEmployeeManager = function() {
+        if (!requireAdmin()) return;
+        document.getElementById('employeeModal').style.display = 'flex';
+        renderEmployeeManagerList();
+    };
+
+    window.closeEmployeeManager = function() {
+        document.getElementById('employeeModal').style.display = 'none';
+    };
+
+    function renderEmployeeManagerList() {
+        const listContainer = document.getElementById('modalEmpList');
+        if (!listContainer) return;
+        listContainer.innerHTML = '';
+
+        currentEmployees.forEach((emp, i) => {
+            const item = document.createElement('div');
+            item.className = 'emp-list-item';
+            item.innerHTML = `
+                <div class="emp-list-info">
+                    <span class="emp-list-name">${emp.pcNumber} \vert{}${emp.name}</span>
+                    <span class="emp-list-meta">${emp.shift} | ${emp.teamName \vert{}\vert{} 'Main Team'} \vert{} Perm Off:${emp.assignedDayOff}</span>
+                </div>
+                <div style="display:flex; gap:6px;">
+                    <button class="btn btn-mini-break" onclick="window.toggleLock(${i})">${emp.isLocked ? '🔒 Locked' : '🔓 Unlock'}</button>
+                    <button class="btn btn-danger" style="padding:4px 8px; font-size:11px;" onclick="window.deleteEmployee(${i})">🗑️ Delete</button>
+                </div>
+            `;
+            listContainer.appendChild(item);
+        });
+    }
+
+    window.addEmployee = function() {
+        if (!requireAdmin()) return;
+        const name = document.getElementById('newEmpName').value.trim();
+        const pcNumber = document.getElementById('newEmpPC').value.trim() || ("PC-" + (currentEmployees.length + 1).toString().padStart(2, '0'));
+        const teamName = document.getElementById('newEmpTeam').value.trim() || "Main Team";
+        const shift = document.getElementById('newEmpShift').value;
+        const assignedDayOff = document.getElementById('newEmpDayOff').value;
+        let timeStart = document.getElementById('newEmpStart').value;
+        let timeEnd = document.getElementById('newEmpEnd').value;
+
+        if (!name) {
+            alert("Please enter the employee's name.");
+            return;
+        }
+
+        if (timeStart) timeStart = convertTimeFormat(timeStart);
+        else timeStart = "12:00 AM";
+
+        if (timeEnd) timeEnd = convertTimeFormat(timeEnd);
+        else timeEnd = "12:30 AM";
+
+        const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
+        const businessTime = new Date(new Date(tzStr).getTime() - (3 * 3600 * 1000));
+        const todayDayStr = businessTime.toLocaleString('en-US', { weekday: 'long' });
+
+        const newEmp = {
+            name: name,
+            pcNumber: pcNumber,
+            teamName: teamName,
+            shift: shift,
+            assignedDayOff: assignedDayOff,
+            dayOff: (assignedDayOff === todayDayStr) ? todayDayStr : "None",
+            timeStart: timeStart,
+            timeEnd: timeEnd,
+            overlap: "1 Staff",
+            isLocked: false,
+            quota30: 0,
+            quota10: 0,
+            clockInTime: null,
+            passkey: ""
+        };
+
+        currentEmployees.push(newEmp);
+        set(ref(db, getDBPath('roster')), currentEmployees).then(() => {
+            alert(`✅ ${name} added to cloud roster!`);
+            document.getElementById('newEmpName').value = '';
+            document.getElementById('newEmpPC').value = '';
+            document.getElementById('newEmpStart').value = '';
+            document.getElementById('newEmpEnd').value = '';
+            renderEmployeeManagerList();
+        });
+    };
+
+    window.deleteEmployee = function(index) {
+        if (!requireAdmin()) return;
+        const name = currentEmployees[index].name;
+        if (confirm(`Are you sure you want to permanently delete ${name} from the roster?`)) {
+            currentEmployees.splice(index, 1);
+            set(ref(db, getDBPath('roster')), currentEmployees).then(() => {
+                renderEmployeeManagerList();
+            });
+        }
+    };
+
+    window.copyStaffLink = function() {
+        const staffUrl = window.location.origin + window.location.pathname + '?view=staff';
+        navigator.clipboard.writeText(staffUrl).then(() => {
+            alert("📋 Staff Mode link copied to clipboard!\n\nSend this link to agents for PC workstations:\n" + staffUrl);
+        }).catch(() => {
+            prompt("Copy this Staff Mode link:", staffUrl);
+        });
+    };
+
+    window.filterTable = function() {
+        const query = document.getElementById('searchInput').value.toLowerCase().trim();
+        const rows = document.querySelectorAll('#scheduleTable tbody tr');
+
+        rows.forEach((row, idx) => {
+            if (!currentEmployees[idx]) return;
+            const emp = currentEmployees[idx];
+            const matchQuery = !query || 
+                emp.name.toLowerCase().includes(query) || 
+                emp.pcNumber.toLowerCase().includes(query) || 
+                (emp.teamName && emp.teamName.toLowerCase().includes(query)) || 
+                emp.shift.toLowerCase().includes(query);
+
+            let matchFilter = true;
+            if (activeShiftFilter === 'present') {
+                matchFilter = (emp.dayOff === 'None' && isCurrentlyOnShift(emp.shift));
+            } else if (activeShiftFilter === 'dayoff') {
+                matchFilter = (emp.dayOff !== 'None');
+            } else if (activeShiftFilter !== 'all') {
+                matchFilter = emp.shift.includes(activeShiftFilter);
+            }
+
+            if (matchQuery && matchFilter) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    };
+
+    window.filterShift = function(shiftFilter, btnEl) {
+        activeShiftFilter = shiftFilter;
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        if (btnEl) btnEl.classList.add('active');
+        window.filterTable();
+    };
+
+    function convertTimeFormat(time24) {
+        if(!time24) return "12:00 AM";
+        let [h, m] = time24.split(':');
+        let hours = parseInt(h);
+        let ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12;
+        return `${hours.toString().padStart(2, '0')}:${m}${ampm}`;
     }
 
     if (isStaffView) {
@@ -1301,7 +1608,6 @@
     }
     setTimeout(calculateCrownBadge, 2000);
 
-    // --- DAILY AUTOMATED FORCE SIGN-OUT RESET ---
     setInterval(() => {
         if (currentEmployees.length === 0) return; 
         const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
@@ -1321,7 +1627,7 @@
                     emp.dayOff = (permOff === businessDayStr) ? businessDayStr : "None";
                     emp.quota30 = 0;
                     emp.quota10 = 0;
-                    emp.clockInTime = null; // MANDATORY RESET EVERY NEW DAY
+                    emp.clockInTime = null;
                     return emp;
                 });
                 set(ref(db, getDBPath('roster')), resetRoster);
@@ -1490,7 +1796,6 @@
 
         const emp = currentEmployees[index];
 
-        // STRICT MANDATORY SIGN-IN ENFORCEMENT
         if (!emp.clockInTime) {
             alert(`🚨 MANDATORY SIGN-IN REQUIRED: ${empName} has not signed in for today's shift yet!\n\nPlease click the "Sign In" button at the top of the dashboard and enter your 4-digit PIN first.`);
             document.getElementById('clockInModal').style.display = 'flex';
@@ -1840,7 +2145,6 @@
                 tr.setAttribute('ondrop', `window.handleDrop(event, ${index})`);
             }
 
-            // STRICT SIGN-IN BUTTON DISABLE
             const breakDisabled = (isOffToday || isOffShift || !emp.clockInTime) ? 'disabled style="opacity:0.3; cursor:not-allowed;" title="MANDATORY: Must Sign In first"' : 'title="Request Break"';
 
             const presentBtnStyle = isOffToday ? 'color: #F87171; border-color: #F87171;' : 'color: #10B981; border-color: #10B981;';
@@ -1949,6 +2253,7 @@
             tbody.appendChild(tr);
         });
 
+        updateAdminUI();
         updateAutomatedMetrics();
         window.filterTable();
     }
