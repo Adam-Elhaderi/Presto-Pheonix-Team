@@ -557,7 +557,7 @@
                 </tr>
             </thead>
             <tbody id="tableBody">
-                <tr><td colspan="9" style="text-align: center; padding: 30px;">Connecting to Live Cloud...</td></tr>
+                <tr><td colspan="9" id="statusMessage" style="text-align: center; padding: 30px; font-weight: bold; color: var(--primary);">Connecting to Live Cloud...</td></tr>
             </tbody>
         </table>
     </main>
@@ -618,6 +618,24 @@
     } catch(err) {
         alert("CRITICAL ERROR: Failed to connect to Firebase. " + err.message);
     }
+
+    // --- CONNECTION DIAGNOSTIC MONITOR ---
+    const connectedRef = ref(db, ".info/connected");
+    onValue(connectedRef, (snap) => {
+        const msgEl = document.getElementById('statusMessage');
+        if (snap.val() === true) {
+            if(msgEl && msgEl.innerText.includes('Connecting')) {
+                msgEl.innerText = "Connection Established. Fetching Data...";
+            }
+        } else {
+            setTimeout(() => {
+                if(msgEl && (msgEl.innerText.includes('Connecting') || msgEl.innerText.includes('Fetching'))) {
+                    msgEl.innerText = "⚠️ DATABASE CONNECTION BLOCKED. Please check your browser's Ad-Blocker, VPN, or Brave Shields, then refresh the page.";
+                    msgEl.style.color = "#EF4444";
+                }
+            }, 6000);
+        }
+    });
     
     const SECRET_PIN = "9949";         
 
@@ -1607,6 +1625,87 @@
     }
     setTimeout(calculateCrownBadge, 2000);
 
+    // --- ROSTER DATA MATCHER WITH AUTO-HEAL ---
+    onValue(ref(db, getDBPath('roster')), (snapshot) => {
+        try {
+            const data = snapshot.val();
+            let isValidData = false;
+            
+            if (data && typeof data === 'object') { 
+                let dataArray = Array.isArray(data) ? data : Object.values(data);
+                dataArray = dataArray.filter(e => e !== null && e !== undefined && typeof e === 'object');
+                
+                if (dataArray.length > 0) {
+                    isValidData = true;
+                    currentEmployees = dataArray.map((emp, i) => {
+                        if (!emp.assignedDayOff) emp.assignedDayOff = (defaultEmployees[i] && defaultEmployees[i].assignedDayOff) || "None";
+                        if (!emp.timeStart) emp.timeStart = (fixedSlots[i] && fixedSlots[i].timeStart) || "12:00 AM";
+                        if (!emp.timeEnd) emp.timeEnd = (fixedSlots[i] && fixedSlots[i].timeEnd) || "12:30 AM";
+                        if (!emp.overlap) emp.overlap = "1 Staff";
+                        if (!emp.pcNumber) emp.pcNumber = "PC-" + (i+1).toString().padStart(2, '0');
+                        if (!emp.teamName) emp.teamName = "Main Team"; 
+                        if (typeof emp.isLocked === 'undefined') emp.isLocked = (defaultEmployees[i] && typeof defaultEmployees[i].isLocked !== 'undefined') ? defaultEmployees[i].isLocked : false;
+                        if (typeof emp.quota30 === 'undefined') emp.quota30 = 0;
+                        if (typeof emp.quota10 === 'undefined') emp.quota10 = 0;
+                        if (typeof emp.clockInTime === 'undefined') emp.clockInTime = null;
+                        if (typeof emp.passkey === 'undefined') emp.passkey = "";
+                        
+                        if (emp.shift === 'Shift A') emp.shift = 'Shift A (07:00 PM - 02:00 AM)';
+                        if (emp.shift === 'Shift B') emp.shift = 'Shift B (07:30 PM - 02:30 AM)';
+                        if (emp.shift === 'Shift C (08:00 AM - 04:00 PM)') emp.shift = 'Shift C (08:00 AM - 03:00 PM)';
+                        if (emp.shift === 'Shift D (04:00 PM - 12:00 AM)') emp.shift = 'Shift D (04:00 PM - 11:00 PM)';
+                        return emp;
+                    });
+                }
+            } 
+            
+            if (!isValidData) {
+                // Auto-Heal Corrupted/Dummy Data
+                console.warn("Corrupted or dummy roster data detected. Auto-healing to default structural layout.");
+                const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
+                const businessTime = new Date(new Date(tzStr).getTime() - (3 * 3600 * 1000));
+                const todayDayStr = businessTime.toLocaleString('en-US', { weekday: 'long' });
+                
+                currentEmployees = defaultEmployees.map((emp, i) => {
+                    emp.dayOff = (emp.assignedDayOff === todayDayStr) ? todayDayStr : "None";
+                    emp.timeStart = fixedSlots[i] ? fixedSlots[i].timeStart : "12:00 AM";
+                    emp.timeEnd = fixedSlots[i] ? fixedSlots[i].timeEnd : "12:30 AM";
+                    emp.overlap = "1 Staff";
+                    emp.pcNumber = "PC-" + (i+1).toString().padStart(2, '0');
+                    emp.teamName = "Main Team";
+                    emp.quota30 = 0;
+                    emp.quota10 = 0;
+                    emp.clockInTime = null;
+                    emp.passkey = "";
+                    return emp;
+                });
+                set(ref(db, getDBPath('roster')), currentEmployees);
+            }
+        } catch(e) {
+            console.error("Roster rendering failed: " + e.message);
+        }
+        
+        const clockInSelect = document.getElementById('clockInId');
+        if (clockInSelect) {
+            const currentSelection = clockInSelect.value;
+            clockInSelect.innerHTML = '<option value="">-- Select Your Name / PC --</option>';
+            currentEmployees.forEach(emp => {
+                const opt = document.createElement('option');
+                opt.value = emp.name; 
+                opt.innerText = `${emp.pcNumber} \vert{}${emp.name}`;
+                clockInSelect.appendChild(opt);
+            });
+            if (currentSelection) clockInSelect.value = currentSelection;
+        }
+
+        renderTable();
+    });
+
+    onValue(ref(db, getDBPath('breaks')), (snapshot) => {
+        currentBreaks = snapshot.val() || {};
+        renderActiveBreaks();
+    });
+
     setInterval(() => {
         if (currentEmployees.length === 0) return; 
         const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
@@ -1635,440 +1734,6 @@
             }
         }, { onlyOnce: true });
     }, 30000);
-
-    function parseTimeToday(timeStr) {
-        if(!timeStr || timeStr === '--:--') return new Date();
-        const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
-        let cleaned = timeStr.trim().replace(/\s+/g, ' ');
-        const parts = cleaned.split(' ');
-        if(parts.length < 2) return new Date(); 
-        const time = parts[0], modifier = parts[1].toUpperCase();
-        let timeParts = time.split(':');
-        let hours = parseInt(timeParts[0], 10), minutes = parseInt(timeParts[1], 10);
-        if (hours === 12) hours = modifier === 'AM' ? 0 : 12;
-        else if (modifier === 'PM') hours += 12;
-        let d = new Date(tzStr);
-        d.setHours(hours, minutes, 0, 0);
-        return d;
-    }
-
-    function isCurrentlyOnShift(shiftString) {
-        const regex = /([0-1]?[0-9]:[0-5][0-9]\s*(?:AM|PM|am|pm))/gi;
-        const times = shiftString.match(regex);
-        if (!times || times.length < 2) return true;
-        const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
-        const now = new Date(tzStr).getTime();
-        let tStart = parseTimeToday(times[0]).getTime();
-        let tEnd = parseTimeToday(times[1]).getTime();
-        if (tStart > tEnd) {
-            if (new Date(tzStr).getHours() < 12) tStart -= 24 * 3600 * 1000; 
-            else tEnd += 24 * 3600 * 1000; 
-        }
-        tStart -= (30 * 60000); 
-        return now >= tStart && now <= tEnd;
-    }
-
-    function isOfficialBreakTime(index) {
-        const emp = currentEmployees[index];
-        if (!emp.timeStart || emp.timeStart === '--:--') return false;
-        const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
-        const now = new Date(tzStr).getTime();
-        let bStart = parseTimeToday(emp.timeStart).getTime();
-        let bEnd = parseTimeToday(emp.timeEnd).getTime();
-        if (bStart > bEnd) {
-            if (new Date(tzStr).getHours() < 12) bStart -= 24 * 3600 * 1000; 
-            else bEnd += 24 * 3600 * 1000; 
-        }
-        bStart -= (15 * 60000); 
-        return now >= bStart && now <= bEnd;
-    }
-
-    window.processClockIn = function() {
-        if (enforcePCWorkstation()) return;
-
-        const inputId = document.getElementById('clockInId').value; 
-        const inputPin = document.getElementById('clockInPin').value.trim();
-
-        if (!inputId || !inputPin) {
-            alert("Please select your Name/PC from the list and enter your 4-digit PIN.");
-            return;
-        }
-
-        let empIndex = currentEmployees.findIndex(e => e.name === inputId);
-
-        if (empIndex === -1) {
-            alert("❌ Name not found in system.");
-            return;
-        }
-
-        let emp = currentEmployees[empIndex];
-        let isFirstTime = false;
-
-        if (!emp.passkey || emp.passkey === "") {
-            if (inputPin.length !== 4 || isNaN(inputPin)) {
-                alert("Please enter a valid 4-digit numeric PIN to setup your account.");
-                return;
-            }
-            emp.passkey = inputPin;
-            isFirstTime = true;
-        } else if (emp.passkey !== inputPin) {
-            alert("❌ Incorrect PIN. Please try again.");
-            return;
-        }
-
-        if (!isCurrentlyOnShift(emp.shift)) {
-            if (isFirstTime) {
-                set(ref(db, getDBPath('roster')), currentEmployees);
-                alert("✅ PIN successfully registered!\n\nHowever, you are outside your scheduled shift window, so you cannot fully sign in to the floor yet. Please return closer to your shift time.");
-            } else {
-                alert("❌ You cannot sign in right now. You are currently outside of your scheduled shift window.");
-            }
-            return; 
-        }
-
-        const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
-        const nowMs = new Date(tzStr).getTime();
-        const nowTime = formatAMPM(nowMs);
-        const businessDate = new Date(nowMs - (3 * 3600 * 1000)).toISOString().split('T')[0];
-
-        if (!emp.clockInTime) {
-            emp.clockInTime = nowTime;
-            
-            const historyRef = ref(db, getDBPath(`history/${businessDate}`));
-            push(historyRef, {
-                name: emp.name,
-                clockInTime: nowTime,
-                type: "Shift Sign-In",       
-                startTime: nowTime,
-                expectedEnd: "N/A",
-                actualReturn: "N/A",
-                variance: "N/A",
-                adminNote: "Staff Clocked In via PIN", 
-                timestamp: nowMs
-            });
-        }
-        
-        emp.dayOff = "None"; 
-
-        sessionStorage.setItem('prestoStaffAuth', emp.name);
-        updateHeaderAuthUI();
-
-        set(ref(db, getDBPath('roster')), currentEmployees).then(() => {
-            document.getElementById('clockInId').value = '';
-            document.getElementById('clockInPin').value = '';
-            document.getElementById('clockInModal').style.display = 'none';
-            
-            if (isFirstTime) {
-                alert(`✅ PIN Registered & Sign-In Successful!\n\nWelcome, ${emp.name}. You are now authenticated for today.`);
-            } else {
-                alert(`✅ Welcome back, ${emp.name}!\n\nYou are signed in for today's shift.`);
-            }
-            
-            renderTable();
-        }).catch(err => {
-            alert("Error saving clock-in data: " + err.message);
-        });
-    };
-
-    window.processClockOut = function() {
-        if (enforcePCWorkstation()) return;
-
-        if(confirm("Are you sure you want to sign out of this device?")) {
-            sessionStorage.removeItem('prestoStaffAuth');
-            updateHeaderAuthUI();
-            renderTable();
-        }
-    };
-
-    window.voidClockIn = function(index) {
-        if (isStaffView) return;
-        if (!requireAdmin()) return;
-        
-        if (confirm(`Are you sure you want to VOID the clock-in for ${currentEmployees[index].name}? This will mark them as not signed in and force them to re-enter their PIN.`)) {
-            currentEmployees[index].clockInTime = null;
-            set(ref(db, getDBPath('roster')), currentEmployees);
-        }
-    };
-
-    window.startBreak = function(empName, index, requestedType = 'standard') {
-        if (enforcePCWorkstation()) return;
-
-        const emp = currentEmployees[index];
-
-        if (!emp.clockInTime) {
-            alert(`🚨 MANDATORY SIGN-IN REQUIRED: ${empName} has not signed in for today's shift yet!\n\nPlease click the "Sign In" button at the top of the dashboard and enter your 4-digit PIN first.`);
-            document.getElementById('clockInModal').style.display = 'flex';
-            return;
-        }
-
-        try {
-            const safeKey = empName.replace(/[.#$[\]]/g, '');
-            if (currentBreaks[safeKey] && currentBreaks[safeKey].status !== 'completed') {
-                alert(`🚨 BLOCK: ${empName} already has an active or pending break request.`);
-                return;
-            }
-
-            const activeBreaksList = Object.values(currentBreaks).filter(b => b.status !== 'completed');
-            const currentPrayers = activeBreaksList.filter(b => b.type === 'Prayer').length;
-            const current10Mins = activeBreaksList.filter(b => b.type === 'Unscheduled (10m)').length;
-
-            const q30 = emp.quota30 || 0;
-            const q10 = emp.quota10 || 0;
-            const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
-
-            if (requestedType === 'prayer') {
-                if (currentPrayers >= 4) {
-                    alert(`🚨 BLOCK: Maximum prayer capacity reached! (4 employees are currently on or waiting for prayer). Please wait until someone returns.`);
-                    return;
-                }
-                alert(`A request for a Prayer break has been sent to the Admin.`);
-                set(ref(db, getDBPath(`breaks/${safeKey}`)), {
-                    name: empName,
-                    startTime: 0,
-                    requestTime: Date.now(), 
-                    limit: 0, 
-                    type: "Prayer",
-                    status: "pending"
-                }).catch(err => alert("Error communicating with cloud: " + err.message));
-                return;
-            }
-
-            const isOfficial = isOfficialBreakTime(index);
-
-            if (isOfficial) {
-                if (q30 >= 1) {
-                    alert(`🚨 BLOCK: ${empName} has already used their 1 official 30-minute break for today!`);
-                    return;
-                }
-
-                emp.quota30 = q30 + 1;
-                set(ref(db, getDBPath('roster')), currentEmployees);
-
-                let bStart = parseTimeToday(emp.timeStart).getTime();
-                let bEnd = parseTimeToday(emp.timeEnd).getTime();
-                if (bStart > bEnd) {
-                    if (new Date(tzStr).getHours() >= 12) {
-                        bEnd += 24 * 3600 * 1000; 
-                    }
-                }
-                const endTimeMs = bEnd;
-
-                set(ref(db, getDBPath(`breaks/${safeKey}`)), {
-                    name: empName,
-                    startTime: new Date(tzStr).getTime(), 
-                    endTime: endTimeMs, 
-                    limit: 30, 
-                    type: "Scheduled Slot",
-                    status: "active"
-                }).catch(err => alert("Error communicating with cloud: " + err.message));
-            } else {
-                if (q10 >= 3) {
-                    alert(`🚨 BLOCK: ${empName} has already used all 3 of their 10-minute quick breaks today!`);
-                    return;
-                }
-
-                if (current10Mins >= 3) {
-                    alert(`🚨 BLOCK: Maximum 10-minute break capacity reached! (3 employees are currently on or waiting for a quick break). Please wait until they return.`);
-                    return;
-                }
-
-                alert(`It is currently not the scheduled break time for ${empName}.\n\nA request for a 10-minute quick break has been sent to the Admin.`);
-                set(ref(db, getDBPath(`breaks/${safeKey}`)), {
-                    name: empName,
-                    startTime: 0,
-                    requestTime: Date.now(), 
-                    limit: 10,
-                    type: "Unscheduled (10m)",
-                    status: "pending"
-                }).catch(err => alert("Error communicating with cloud: " + err.message));
-            }
-        } catch(err) {
-            alert("An unexpected error occurred while requesting break: " + err.message);
-        }
-    };
-
-    window.approveBreak = function(rawKey) {
-        if (!requireAdmin()) return;
-        try {
-            const key = rawKey.replace(/'/g, ""); 
-            const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
-            const nowMs = new Date(tzStr).getTime();
-            
-            const breakData = currentBreaks[key];
-            if(!breakData) { alert("Break request no longer exists."); return; }
-
-            breakData.status = 'active';
-            breakData.startTime = nowMs; 
-            
-            if (breakData.limit > 0) {
-                breakData.endTime = nowMs + (breakData.limit * 60000); 
-            } else {
-                breakData.endTime = 0; 
-            }
-            
-            if (breakData.limit === 10) {
-                const empIndex = currentEmployees.findIndex(e => e.name === breakData.name);
-                if (empIndex > -1) {
-                    currentEmployees[empIndex].quota10 = (currentEmployees[empIndex].quota10 || 0) + 1;
-                    set(ref(db, getDBPath('roster')), currentEmployees);
-                }
-            }
-            
-            set(ref(db, getDBPath(`breaks/${key}`)), breakData).catch(err => alert("Sync Error: " + err.message));
-        } catch(err) {
-            alert("Error approving break: " + err.message);
-        }
-    };
-
-    window.denyBreak = function(rawKey) {
-        if (!requireAdmin()) return;
-        const key = rawKey.replace(/'/g, "");
-        remove(ref(db, getDBPath(`breaks/${key}`))); 
-    };
-
-    window.requestReturn = function(rawKey) {
-        if (enforcePCWorkstation()) return;
-        try {
-            const key = rawKey.replace(/'/g, "");
-            const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
-            const breakData = currentBreaks[key];
-            if (breakData) {
-                const now = new Date(tzStr).getTime();
-                if (breakData.endTime > 0) {
-                    const diffMs = now - breakData.endTime;
-                    const varianceMins = Math.round(diffMs / 60000);
-                    if (varianceMins === 0) window.shootConfetti(); 
-                }
-
-                breakData.status = 'return_pending'; 
-                breakData.returnRequestedTime = now; 
-                set(ref(db, getDBPath(`breaks/${key}`)), breakData);
-            }
-        } catch(err) {
-            alert("Error requesting return: " + err.message);
-        }
-    };
-
-    window.approveReturn = function(rawKey) {
-        if (!requireAdmin()) return;
-        setTimeout(() => {
-            try {
-                const key = rawKey.replace(/'/g, "");
-                const breakData = currentBreaks[key];
-                if (breakData) {
-                    const adminNote = prompt("Optional: Enter a note for this return (or leave blank):") || "";
-                    const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
-                    const businessDate = new Date(new Date(tzStr).getTime() - (3 * 3600 * 1000)).toISOString().split('T')[0];
-
-                    let variance = "N/A";
-                    let varianceMins = 0;
-
-                    if (breakData.endTime > 0) {
-                        const diffMs = breakData.returnRequestedTime - breakData.endTime;
-                        varianceMins = Math.round(diffMs / 60000);
-
-                        if (varianceMins > 0) variance = `LATE by ${varianceMins} min`;
-                        else if (varianceMins < 0) variance = `EARLY by ${Math.abs(varianceMins)} min`;
-                        else variance = "EXACT ON TIME";
-                    } else {
-                        varianceMins = Math.round((breakData.returnRequestedTime - breakData.startTime) / 60000);
-                        variance = `Took ${varianceMins} min total`;
-                    }
-
-                    if (variance === "EXACT ON TIME") window.shootConfetti();
-
-                    const emp = currentEmployees.find(e => e.name === breakData.name);
-                    const clockInToSave = (emp && emp.clockInTime) ? emp.clockInTime : "No Sign-In";
-
-                    const historyRef = ref(db, getDBPath(`history/${businessDate}`));
-                    push(historyRef, {
-                        name: breakData.name,
-                        clockInTime: clockInToSave,
-                        type: breakData.type,
-                        startTime: formatAMPM(breakData.startTime),
-                        expectedEnd: breakData.endTime > 0 ? formatAMPM(breakData.endTime) : "Open Return",
-                        actualReturn: formatAMPM(breakData.returnRequestedTime),
-                        variance: variance,
-                        adminNote: adminNote.replace(/"/g, "'"), 
-                        timestamp: new Date(tzStr).getTime()
-                    });
-
-                    breakData.status = 'completed'; 
-                    set(ref(db, getDBPath(`breaks/${key}`)), breakData);
-                }
-            } catch(err) {
-                alert("Error approving return: " + err.message);
-            }
-        }, 100);
-    };
-
-    onValue(ref(db, getDBPath('roster')), (snapshot) => {
-        const data = snapshot.val();
-        if (data) { 
-            let dataArray = Array.isArray(data) ? data : Object.values(data);
-            dataArray = dataArray.filter(e => e !== null && e !== undefined);
-            
-            currentEmployees = dataArray.map((emp, i) => {
-                if (!emp.assignedDayOff) emp.assignedDayOff = (defaultEmployees[i] && defaultEmployees[i].assignedDayOff) || "None";
-                if (!emp.timeStart) emp.timeStart = (fixedSlots[i] && fixedSlots[i].timeStart) || "12:00 AM";
-                if (!emp.timeEnd) emp.timeEnd = (fixedSlots[i] && fixedSlots[i].timeEnd) || "12:30 AM";
-                if (!emp.overlap) emp.overlap = "1 Staff";
-                if (!emp.pcNumber) emp.pcNumber = "PC-" + (i+1).toString().padStart(2, '0');
-                if (!emp.teamName) emp.teamName = "Main Team"; 
-                if (typeof emp.isLocked === 'undefined') emp.isLocked = (defaultEmployees[i] && typeof defaultEmployees[i].isLocked !== 'undefined') ? defaultEmployees[i].isLocked : false;
-                if (typeof emp.quota30 === 'undefined') emp.quota30 = 0;
-                if (typeof emp.quota10 === 'undefined') emp.quota10 = 0;
-                if (typeof emp.clockInTime === 'undefined') emp.clockInTime = null;
-                if (typeof emp.passkey === 'undefined') emp.passkey = "";
-                
-                if (emp.shift === 'Shift A') emp.shift = 'Shift A (07:00 PM - 02:00 AM)';
-                if (emp.shift === 'Shift B') emp.shift = 'Shift B (07:30 PM - 02:30 AM)';
-                if (emp.shift === 'Shift C (08:00 AM - 04:00 PM)') emp.shift = 'Shift C (08:00 AM - 03:00 PM)';
-                if (emp.shift === 'Shift D (04:00 PM - 12:00 AM)') emp.shift = 'Shift D (04:00 PM - 11:00 PM)';
-                return emp;
-            });
-        } 
-        else {
-            const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
-            const businessTime = new Date(new Date(tzStr).getTime() - (3 * 3600 * 1000));
-            const todayDayStr = businessTime.toLocaleString('en-US', { weekday: 'long' });
-            
-            currentEmployees = defaultEmployees.map((emp, i) => {
-                emp.dayOff = (emp.assignedDayOff === todayDayStr) ? todayDayStr : "None";
-                emp.timeStart = fixedSlots[i] ? fixedSlots[i].timeStart : "12:00 AM";
-                emp.timeEnd = fixedSlots[i] ? fixedSlots[i].timeEnd : "12:30 AM";
-                emp.overlap = "1 Staff";
-                emp.pcNumber = "PC-" + (i+1).toString().padStart(2, '0');
-                emp.teamName = "Main Team";
-                emp.quota30 = 0;
-                emp.quota10 = 0;
-                emp.clockInTime = null;
-                emp.passkey = "";
-                return emp;
-            });
-            set(ref(db, getDBPath('roster')), currentEmployees);
-        }
-        
-        const clockInSelect = document.getElementById('clockInId');
-        if (clockInSelect) {
-            const currentSelection = clockInSelect.value;
-            clockInSelect.innerHTML = '<option value="">-- Select Your Name / PC --</option>';
-            currentEmployees.forEach(emp => {
-                const opt = document.createElement('option');
-                opt.value = emp.name; 
-                opt.innerText = `${emp.pcNumber} \vert{}${emp.name}`;
-                clockInSelect.appendChild(opt);
-            });
-            if (currentSelection) clockInSelect.value = currentSelection;
-        }
-
-        renderTable();
-    });
-
-    onValue(ref(db, getDBPath('breaks')), (snapshot) => {
-        currentBreaks = snapshot.val() || {};
-        renderActiveBreaks();
-    });
 
     function renderTable() {
         if (!currentEmployees || currentEmployees.length === 0) return;
@@ -2546,220 +2211,37 @@
         document.getElementById('countDayOff').innerText = offCount;
     }
 
-    window.openLeaderboard = async function() {
-        if (!requireAdmin()) return;
-        document.getElementById('leaderboardModal').style.display = 'flex';
-        const contentDiv = document.getElementById('leaderboardContent');
-        contentDiv.innerHTML = '<p style="text-align: center; color: var(--primary);">Fetching historical data...</p>';
-
-        try {
-            const snapshot = await get(ref(db, getDBPath('history')));
-            if (!snapshot.exists()) {
-                contentDiv.innerHTML = '<p style="text-align: center; color: var(--text-muted);">No break history has been recorded yet.</p>';
-                return;
-            }
-
-            const allHistory = snapshot.val();
-            let stats = {};
-
-            Object.values(allHistory).forEach(dayRecord => {
-                Object.values(dayRecord).forEach(log => {
-                    if (!stats[log.name]) {
-                        stats[log.name] = { earlyMins: 0, lateMins: 0, perfectCount: 0 };
-                    }
-
-                    if (log.variance.includes('LATE by')) {
-                        const mins = parseInt(log.variance.replace(/[^0-9]/g, ''));
-                        if (!isNaN(mins)) stats[log.name].lateMins += mins;
-                    } else if (log.variance.includes('EARLY by')) {
-                        const mins = parseInt(log.variance.replace(/[^0-9]/g, ''));
-                        if (!isNaN(mins)) stats[log.name].earlyMins += mins;
-                    } else if (log.variance === 'EXACT ON TIME') {
-                        stats[log.name].perfectCount += 1;
-                    }
-                });
-            });
-
-            let sortedStaff = Object.keys(stats).map(name => {
-                const s = stats[name];
-                return {
-                    name: name,
-                    early: s.earlyMins,
-                    late: s.lateMins,
-                    perfect: s.perfectCount,
-                    score: s.earlyMins - s.lateMins
-                };
-            }).sort((a, b) => b.score - a.score);
-
-            let html = `
-                <table class="leaderboard-table">
-                    <thead>
-                        <tr>
-                            <th>Rank</th>
-                            <th>Employee Name</th>
-                            <th>Net Balance</th>
-                            <th>Level</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
-
-            sortedStaff.forEach((emp, index) => {
-                let rankStr = `${index + 1}`;
-                if (index === 0) rankStr = '🥇 1';
-                
-                let scoreClass = 'score-neutral';
-                let scoreText = `${emp.score} min`;
-                if (emp.score > 0) { scoreClass = 'score-good'; scoreText = `+${emp.score} min`; }
-                if (emp.score < 0) { scoreClass = 'score-bad'; scoreText = `${emp.score} min`; }
-
-                let badge = 'Novice';
-                if(index === 0) badge = '👑 Champion';
-                else if (emp.score > 100) badge = '💎 Diamond';
-                else if (emp.score > 50) badge = '🥈 Silver';
-                else if (emp.score > 20) badge = '🥉 Bronze';
-
-                html += `
-                    <tr>
-                        <td style="font-weight: 800;">${rankStr}</td>
-                        <td style="font-weight: 700; color: var(--text-main);">${emp.name}</td>
-                        <td class="${scoreClass}">${scoreText}</td>
-                        <td style="color: var(--text-muted);">${badge}</td>
-                    </tr>
-                `;
-            });
-
-            html += `</tbody></table>`;
-            contentDiv.innerHTML = html;
-
-        } catch (e) {
-            contentDiv.innerHTML = `<p style="color: #EF4444;">Error loading leaderboard: ${e.message}</p>`;
-        }
-    };
-
-    window.closeLeaderboard = function() {
-        document.getElementById('leaderboardModal').style.display = 'none';
-    };
-
-    window.exportEmployeeHistory = async function() {
-        if (!requireAdmin()) return;
-        
-        const empName = prompt("Enter the exact Employee Name to pull their 90-day report:");
-        if (!empName) return;
-
-        try {
-            const snapshot = await get(ref(db, getDBPath('history')));
-            if (!snapshot.exists()) {
-                alert("No history found in database.");
-                return;
-            }
-
-            const allHistory = snapshot.val();
-            let csv = ["Date,Employee Name,Clock In Time,Break Type,Start Time,Expected Return,Actual Return,Variance Log,Admin Notes"];
-            let matchCount = 0;
-            
-            const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
-            const today = new Date(tzStr);
-            const ninetyDaysAgo = new Date(today.getTime() - (90 * 24 * 60 * 60 * 1000));
-
-            const dates = Object.keys(allHistory).sort((a, b) => new Date(b) - new Date(a));
-
-            dates.forEach(dateStr => {
-                const recordDate = new Date(dateStr);
-                if (recordDate >= ninetyDaysAgo && recordDate <= today) {
-                    const dailyRecords = allHistory[dateStr];
-                    Object.values(dailyRecords).forEach(log => {
-                        if (log.name.toLowerCase().includes(empName.toLowerCase().trim())) {
-                            csv.push(`"${dateStr}","${log.name}","${log.clockInTime || 'N/A'}","${log.type}","${log.startTime}","${log.expectedEnd}","${log.actualReturn}","${log.variance}","${log.adminNote || ''}"`);
-                            matchCount++;
-                        }
-                    });
-                }
-            });
-
-            if (matchCount === 0) {
-                alert(`No records found for "${empName}" in the last 90 days.`);
-                return;
-            }
-
-            const csvFile = new Blob([csv.join('\n')], { type: 'text/csv' });
-            const downloadLink = document.createElement('a');
-            downloadLink.download = `Audit_${empName.replace(/\s+/g, '_')}_90Days.csv`;
-            downloadLink.href = window.URL.createObjectURL(csvFile);
-            downloadLink.style.display = 'none';
-            document.body.appendChild(downloadLink);
-            downloadLink.click();
-            document.body.removeChild(downloadLink);
-            
-            alert(`✅ Successfully exported ${matchCount} historical break records for ${empName}!`);
-            
-        } catch (e) {
-            alert("Error generating report: " + e.message);
-        }
-    };
-
-    window.exportHistory = async function() {
-        if (!requireAdmin()) return;
+    function parseTimeToday(timeStr) {
+        if(!timeStr || timeStr === '--:--') return new Date();
         const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
-        const businessDate = new Date(new Date(tzStr).getTime() - (3 * 3600 * 1000)).toISOString().split('T')[0];
+        let cleaned = timeStr.trim().replace(/\s+/g, ' ');
+        const parts = cleaned.split(' ');
+        if(parts.length < 2) return new Date(); 
+        const time = parts[0], modifier = parts[1].toUpperCase();
+        let timeParts = time.split(':');
+        let hours = parseInt(timeParts[0], 10), minutes = parseInt(timeParts[1], 10);
+        if (hours === 12) hours = modifier === 'AM' ? 0 : 12;
+        else if (modifier === 'PM') hours += 12;
+        let d = new Date(tzStr);
+        d.setHours(hours, minutes, 0, 0);
+        return d;
+    }
 
-        try {
-            const snapshot = await get(ref(db, getDBPath(`history/${businessDate}`)));
-            if (!snapshot.exists()) {
-                alert("No break history logged for today yet!");
-                return;
-            }
-            
-            const data = snapshot.val();
-            let csv = ["Employee Name,Clock In Time,Break Type,Start Time,Expected Return,Actual Return,Variance Log,Admin Notes"];
-            
-            Object.values(data).forEach(log => {
-                csv.push(`"${log.name}","${log.clockInTime || 'N/A'}","${log.type}","${log.startTime}","${log.expectedEnd}","${log.actualReturn}","${log.variance}","${log.adminNote || ''}"`);
-            });
-            
-            const csvFile = new Blob([csv.join('\n')], { type: 'text/csv' });
-            const downloadLink = document.createElement('a');
-            downloadLink.download = `Presto_Break_History_${businessDate}.csv`;
-            downloadLink.href = window.URL.createObjectURL(csvFile);
-            downloadLink.style.display = 'none';
-            document.body.appendChild(downloadLink);
-            downloadLink.click();
-            document.body.removeChild(downloadLink);
-            
-        } catch (e) {
-            alert("Failed to export history: " + e.message);
+    function isCurrentlyOnShift(shiftString) {
+        const regex = /([0-1]?[0-9]:[0-5][0-9]\s*(?:AM|PM|am|pm))/gi;
+        const times = shiftString.match(regex);
+        if (!times || times.length < 2) return true;
+        const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
+        const now = new Date(tzStr).getTime();
+        let tStart = parseTimeToday(times[0]).getTime();
+        let tEnd = parseTimeToday(times[1]).getTime();
+        if (tStart > tEnd) {
+            if (new Date(tzStr).getHours() < 12) tStart -= 24 * 3600 * 1000; 
+            else tEnd += 24 * 3600 * 1000; 
         }
-    };
-
-    window.exportCSV = function() {
-        let csv = [];
-        const rows = document.querySelectorAll('table tr');
-        for (let i = 0; i < rows.length; i++) {
-            let row = [], cols = rows[i].querySelectorAll('td, th');
-            for (let j = 0; j < cols.length; j++) {
-                let text = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, ' ')
-                    .replace('☕ Break', '')
-                    .replace('🕌 Prayer', '')
-                    .replace('🔒 FIXED', '')
-                    .replace('🔒 Locked', '')
-                    .replace('🔓 Unlock', '')
-                    .replace('🔴 Absent Today', 'Absent')
-                    .replace('🟢 Present Today', 'Present')
-                    .trim();
-                row.push('"' + text + '"');
-            }
-            csv.push(row.join(','));
-        }
-        const csvFile = new Blob([csv.join('\n')], { type: 'text/csv' });
-        const downloadLink = document.createElement('a');
-        downloadLink.download = `Presto_Eat_Live_Schedule.csv`;
-        downloadLink.href = window.URL.createObjectURL(csvFile);
-        downloadLink.style.display = 'none';
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
-    };
-
+        tStart -= (30 * 60000); 
+        return now >= tStart && now <= tEnd;
+    }
 </script>
 </body>
 </html>
