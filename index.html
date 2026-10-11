@@ -272,10 +272,10 @@
 <div id="clockInModal" class="modal-overlay">
     <div class="modal-card" style="max-width: 400px; text-align: center;">
         <div class="modal-header">
-            <h2 style="color: #10B981;">🕒 Staff Sign In</h2>
+            <h2 style="color: #10B981;">🕒 Daily Mandatory Sign In</h2>
             <button id="clockInCloseBtn" class="close-btn" onclick="document.getElementById('clockInModal').style.display='none'">×</button>
         </div>
-        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Select your assigned PC Number / Name, and enter your 4-digit PIN to sign in.</p>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Select your Name/PC, and enter your 4-digit PIN to sign in for today's shift.</p>
         
         <select id="clockInId" class="form-control" style="width: 100%; margin-bottom: 15px; font-size: 16px; text-align: center; cursor: pointer; background: rgba(0,0,0,0.5);">
             <option value="">-- Select Your Name / PC --</option>
@@ -283,7 +283,7 @@
         
         <input type="password" id="clockInPin" class="form-control" placeholder="4-Digit PIN" maxlength="4" style="width: 100%; margin-bottom: 10px; font-size: 18px; text-align: center; letter-spacing: 4px; background: rgba(0,0,0,0.5);" onkeypress="if(event.key === 'Enter') window.processClockIn()">
         
-        <p style="font-size: 10px; color: #38BDF8; margin-bottom: 20px; line-height: 1.4;">*If this is your very first time signing in, the PIN you enter above will be permanently saved as your passkey.</p>
+        <p style="font-size: 10px; color: #38BDF8; margin-bottom: 20px; line-height: 1.4;">*Sign-in is mandatory every single day to unlock your breaks on the floor.</p>
         
         <button class="btn btn-success" style="width: 100%; padding: 12px; font-size: 14px;" onclick="window.processClockIn()">Authenticate & Sign In</button>
     </div>
@@ -596,8 +596,6 @@
 </div>
 
 <script type="module">
-    localStorage.removeItem('prestoStaffAuth');
-
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
     import { getDatabase, ref, set, onValue, remove, push, get } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
@@ -611,7 +609,6 @@
         appId: "1:828847025710:web:72f00f90f45fe20f1f79bf"
     };
 
-    // FIXED: Empty string so it reads directly from the database root
     const FACTION_ID = ""; 
     
     let app, db;
@@ -855,24 +852,50 @@
     };
 
     const trafficLevels = [
-        [
-            { id: 0, x: 0, y: 2, len: 2, horiz: true, isRed: true },
-            { id: 1, x: 3, y: 1, len: 3, horiz: false }, 
-            { id: 2, x: 4, y: 4, len: 2, horiz: true }
-        ],
-        [
+        [ 
             { id: 0, x: 0, y: 2, len: 2, horiz: true, isRed: true },
             { id: 1, x: 2, y: 1, len: 2, horiz: false }, 
             { id: 2, x: 2, y: 3, len: 2, horiz: true }, 
             { id: 3, x: 5, y: 0, len: 3, horiz: false }
         ],
-        [
+        [ 
             { id: 0, x: 0, y: 2, len: 2, horiz: true, isRed: true },
             { id: 1, x: 2, y: 0, len: 3, horiz: false }, 
             { id: 2, x: 0, y: 3, len: 2, horiz: true },
             { id: 3, x: 3, y: 3, len: 3, horiz: false },
             { id: 4, x: 4, y: 2, len: 2, horiz: false },
             { id: 5, x: 4, y: 5, len: 2, horiz: true }
+        ],
+        [ 
+            { id: 0, x: 1, y: 2, len: 2, horiz: true, isRed: true },
+            { id: 1, x: 0, y: 0, len: 3, horiz: true },
+            { id: 2, x: 3, y: 0, len: 3, horiz: false },
+            { id: 3, x: 0, y: 1, len: 2, horiz: false },
+            { id: 4, x: 1, y: 3, len: 2, horiz: false },
+            { id: 5, x: 2, y: 4, len: 2, horiz: true },
+            { id: 6, x: 4, y: 2, len: 3, horiz: false }
+        ],
+        [ 
+            { id: 0, x: 0, y: 2, len: 2, horiz: true, isRed: true },
+            { id: 1, x: 2, y: 1, len: 3, horiz: false },
+            { id: 2, x: 3, y: 0, len: 2, horiz: true },
+            { id: 3, x: 3, y: 1, len: 2, horiz: false },
+            { id: 4, x: 0, y: 4, len: 2, horiz: true },
+            { id: 5, x: 2, y: 4, len: 2, horiz: false },
+            { id: 6, x: 4, y: 3, len: 2, horiz: true },
+            { id: 7, x: 5, y: 2, len: 3, horiz: false }
+        ],
+        [ 
+            { id: 0, x: 1, y: 2, len: 2, horiz: true, isRed: true },
+            { id: 1, x: 0, y: 0, len: 2, horiz: false },
+            { id: 2, x: 1, y: 0, len: 2, horiz: true },
+            { id: 3, x: 3, y: 0, len: 3, horiz: false },
+            { id: 4, x: 4, y: 0, len: 2, horiz: true },
+            { id: 5, x: 0, y: 3, len: 3, horiz: false },
+            { id: 6, x: 1, y: 4, len: 2, horiz: true },
+            { id: 7, x: 3, y: 3, len: 2, horiz: true },
+            { id: 8, x: 4, y: 2, len: 3, horiz: false },
+            { id: 9, x: 5, y: 1, len: 2, horiz: false }
         ]
     ];
     let currentLevelIndex = 0;
@@ -898,7 +921,7 @@
         trafficLevel.forEach((c) => {
             let el = document.createElement('div');
             el.className = 'game-car ' + (c.isRed ? 'car-presto' : 'car-normal');
-            el.innerText = c.isRed ? '' : '🚙';
+            el.innerText = c.isRed ? '' : (c.len === 3 ? '🚚' : '🚙');
             el.style.width = (c.horiz ? c.len * 50 : 50) + 'px';
             el.style.height = (c.horiz ? 50 : c.len * 50) + 'px';
             el.style.left = (c.x * 50) + 'px';
@@ -970,10 +993,10 @@
                 window.shootConfetti();
                 currentLevelIndex++;
                 if (currentLevelIndex >= trafficLevels.length) {
-                    alert("🎉 Incredible! You beat all the delivery rushes!");
+                    alert("🎉 Incredible! You beat all 5 rush levels!");
                     currentLevelIndex = 0;
                 } else {
-                    alert("🎉 Delivery Successful! Get ready for the next rush.");
+                    alert(`🎉 Level ${currentLevelIndex} Cleared! Get ready for the next delivery.`);
                 }
                 window.initTrafficGame(); 
             }, 100);
@@ -1192,7 +1215,7 @@
             authBtnContainer.innerHTML = `<button class="btn btn-warning" style="font-size: 14px; padding: 10px 20px;" onclick="window.processClockOut()">🚪 Sign Out (${localUser.split(' ')[0]})</button>`;
             if (clockInModal) clockInModal.style.display = 'none'; 
         } else {
-            authBtnContainer.innerHTML = `<button class="btn btn-success" style="font-size: 14px; padding: 10px 20px;" onclick="document.getElementById('clockInModal').style.display='flex'">🕒 Sign In</button>`;
+            authBtnContainer.innerHTML = `<button class="btn btn-success" style="font-size: 14px; padding: 10px 20px;" onclick="document.getElementById('clockInModal').style.display='flex'">🕒 Mandatory Daily Sign In</button>`;
             
             if (isStaffView && clockInModal) {
                 clockInModal.style.display = 'flex';
@@ -1278,8 +1301,9 @@
     }
     setTimeout(calculateCrownBadge, 2000);
 
+    // --- DAILY AUTOMATED FORCE SIGN-OUT RESET ---
     setInterval(() => {
-        if (isStaffView || currentEmployees.length === 0) return; 
+        if (currentEmployees.length === 0) return; 
         const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
         const now = new Date(tzStr);
         const businessTime = new Date(now.getTime() - (3 * 3600 * 1000));
@@ -1297,13 +1321,15 @@
                     emp.dayOff = (permOff === businessDayStr) ? businessDayStr : "None";
                     emp.quota30 = 0;
                     emp.quota10 = 0;
-                    emp.clockInTime = null;
+                    emp.clockInTime = null; // MANDATORY RESET EVERY NEW DAY
                     return emp;
                 });
                 set(ref(db, getDBPath('roster')), resetRoster);
+                sessionStorage.removeItem('prestoStaffAuth');
+                updateHeaderAuthUI();
             }
         }, { onlyOnce: true });
-    }, 60000);
+    }, 30000);
 
     function parseTimeToday(timeStr) {
         if(!timeStr || timeStr === '--:--') return new Date();
@@ -1428,9 +1454,9 @@
             document.getElementById('clockInModal').style.display = 'none';
             
             if (isFirstTime) {
-                alert(`✅ PIN Registered & Sign-In Successful!\n\nWelcome, ${emp.name}. You are now authenticated.`);
+                alert(`✅ PIN Registered & Sign-In Successful!\n\nWelcome, ${emp.name}. You are now authenticated for today.`);
             } else {
-                alert(`✅ Welcome back, ${emp.name}!\n\nYou are now authenticated on this device.`);
+                alert(`✅ Welcome back, ${emp.name}!\n\nYou are signed in for today's shift.`);
             }
             
             renderTable();
@@ -1462,6 +1488,15 @@
     window.startBreak = function(empName, index, requestedType = 'standard') {
         if (enforcePCWorkstation()) return;
 
+        const emp = currentEmployees[index];
+
+        // STRICT MANDATORY SIGN-IN ENFORCEMENT
+        if (!emp.clockInTime) {
+            alert(`🚨 MANDATORY SIGN-IN REQUIRED: ${empName} has not signed in for today's shift yet!\n\nPlease click the "Sign In" button at the top of the dashboard and enter your 4-digit PIN first.`);
+            document.getElementById('clockInModal').style.display = 'flex';
+            return;
+        }
+
         try {
             const safeKey = empName.replace(/[.#$[\]]/g, '');
             if (currentBreaks[safeKey] && currentBreaks[safeKey].status !== 'completed') {
@@ -1473,7 +1508,6 @@
             const currentPrayers = activeBreaksList.filter(b => b.type === 'Prayer').length;
             const current10Mins = activeBreaksList.filter(b => b.type === 'Unscheduled (10m)').length;
 
-            const emp = currentEmployees[index];
             const q30 = emp.quota30 || 0;
             const q10 = emp.quota10 || 0;
             const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
@@ -1806,8 +1840,8 @@
                 tr.setAttribute('ondrop', `window.handleDrop(event, ${index})`);
             }
 
-            const selectDisabled = isStaffView ? 'disabled' : '';
-            const breakDisabled = (isOffToday || isOffShift || !emp.clockInTime) ? 'disabled title="Employee is absent, off shift, or has not signed in"' : 'title="Request Break"';
+            // STRICT SIGN-IN BUTTON DISABLE
+            const breakDisabled = (isOffToday || isOffShift || !emp.clockInTime) ? 'disabled style="opacity:0.3; cursor:not-allowed;" title="MANDATORY: Must Sign In first"' : 'title="Request Break"';
 
             const presentBtnStyle = isOffToday ? 'color: #F87171; border-color: #F87171;' : 'color: #10B981; border-color: #10B981;';
             const presentBtnText = isOffToday ? '🔴 Absent Today' : '🟢 Present Today';
@@ -1824,7 +1858,7 @@
 
             let clockInHtml = emp.clockInTime 
                 ? `<div style="font-size: 10px; color: #10B981; font-weight: 700; margin-top: 6px; ${!isStaffView ? 'cursor:pointer;' : ''}" ${!isStaffView ? `onclick="window.voidClockIn(${index})"` : ''} title="${!isStaffView ? 'Admin: Click to VOID this sign-in' : ''}">▶ In: ${emp.clockInTime}</div>` 
-                : `<div style="font-size: 10px; color: var(--text-muted); font-weight: 600; margin-top: 6px;">No Sign-In</div>`;
+                : `<div style="font-size: 10px; color: #EF4444; font-weight: 700; margin-top: 6px;">❌ Not Signed In</div>`;
 
             let canViewButtons = true;
             if (isStaffView && localAuthUser !== emp.name) {
