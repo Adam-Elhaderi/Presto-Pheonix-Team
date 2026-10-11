@@ -10,16 +10,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&family=Tajawal:wght@400;500;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
     <style>
         :root { 
-            /* Circadian Variables (Updated by JS) */
             --primary: #06B6D4; 
             --primary-hover: #0891B2;
             --primary-glow: rgba(6, 182, 212, 0.15); 
-            
             --text-main: #F8FAFC; 
             --text-muted: #94A3B8; 
             --border-color: rgba(255, 255, 255, 0.1); 
             
-            /* SHIFT COLORS */
             --shift-a-bg: rgba(56, 189, 248, 0.1); --shift-a-border: rgba(56, 189, 248, 0.3); --shift-a-text: #38BDF8; 
             --shift-b-bg: rgba(244, 63, 94, 0.1); --shift-b-border: rgba(244, 63, 94, 0.3); --shift-b-text: #FB7185; 
             --shift-c-bg: rgba(16, 185, 129, 0.1); --shift-c-border: rgba(16, 185, 129, 0.3); --shift-c-text: #10B981; 
@@ -35,32 +32,16 @@
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', system-ui, sans-serif; }
 
-        /* LIQUID GLASSMORPHISM BACKGROUND */
         body { 
-            background: linear-gradient(135deg, #020617, #0F172A, #1E1B4B, #020617);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
-            color: var(--text-main); 
-            min-height: 100vh; 
-            padding: 30px 20px; 
-            display: flex; 
-            justify-content: center; 
+            background: linear-gradient(135deg, #020617, #0F172A, #1E1B4B, #020617); background-size: 400% 400%; animation: gradientBG 15s ease infinite;
+            color: var(--text-main); min-height: 100vh; padding: 30px 20px; display: flex; justify-content: center; 
         }
         @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
         .workspace-wrapper { width: 100%; max-width: 1450px; display: flex; flex-direction: column; gap: 20px; z-index: 2; position: relative; }
 
-        /* LIQUID GLASS PANELS */
-        .glass-panel {
-            background: rgba(30, 41, 59, 0.45);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-        }
+        .glass-panel { background: rgba(30, 41, 59, 0.45); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid var(--border-color); border-radius: 12px; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); }
 
-        /* --- HEADER & TICKER --- */
         .app-header { padding: 24px 30px; display: flex; justify-content: space-between; align-items: center; position: relative; overflow: hidden; flex-wrap: wrap; gap: 15px; }
         .app-header::before { content: ''; position: absolute; top: 0; left: 0; width: 6px; height: 100%; background: var(--primary); transition: background 1s ease; }
         .header-title-group h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px; }
@@ -72,6 +53,13 @@
         .orb-yellow { background: #FBBF24; box-shadow: 0 0 15px #FBBF24; animation: pulseYellow 2s infinite alternate; }
         .orb-red { background: #EF4444; box-shadow: 0 0 20px #EF4444; animation: pulseAlert 1s infinite alternate; }
         @keyframes pulseYellow { from { opacity: 1; box-shadow: 0 0 10px #FBBF24; } to { opacity: 0.6; box-shadow: 0 0 20px #FBBF24; } }
+
+        .big-orb { width: 80px; height: 80px; border-radius: 50%; margin: 0 auto; transition: all 0.5s ease; border: 4px solid rgba(255,255,255,0.1); }
+        .big-orb-green { background: #10B981; box-shadow: 0 0 40px #10B981; }
+        .big-orb-yellow { background: #FBBF24; box-shadow: 0 0 40px #FBBF24; animation: pulseYellowBig 2s infinite alternate; }
+        .big-orb-red { background: #EF4444; box-shadow: 0 0 50px #EF4444; animation: pulseAlertBig 1s infinite alternate; }
+        @keyframes pulseYellowBig { from { box-shadow: 0 0 20px #FBBF24; } to { box-shadow: 0 0 50px #FBBF24; } }
+        @keyframes pulseAlertBig { from { box-shadow: 0 0 20px #EF4444; } to { box-shadow: 0 0 70px #EF4444; } }
 
         .ticker-wrap { width: 100%; background: rgba(56, 189, 248, 0.05); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 8px; padding: 10px 15px; overflow: hidden; display: flex; align-items: center; cursor: pointer; position: relative; }
         .ticker-label { font-size: 10px; font-weight: 800; color: #38BDF8; text-transform: uppercase; letter-spacing: 1px; padding-right: 15px; border-right: 1px solid rgba(56,189,248,0.3); margin-right: 15px; white-space: nowrap; z-index: 2; background: rgba(15, 23, 42, 0.8); border-radius: 4px;}
@@ -94,12 +82,10 @@
         .btn-audit { background: #8B5CF6; border-color: #8B5CF6; color: white; }
         .btn-audit:hover { background: #7C3AED; box-shadow: 0 0 15px rgba(139, 92, 246, 0.3); }
 
-        /* --- MODERN HOLOGRAM CLOCK --- */
         .holo-clock-container { display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle, rgba(0, 30, 60, 0.2) 0%, rgba(0, 10, 25, 0.5) 100%); border: 1px solid rgba(0, 243, 255, 0.2); border-radius: 16px; padding: 12px 28px; box-shadow: inset 0 0 15px rgba(0, 243, 255, 0.05); position: relative; min-width: 240px; overflow: hidden; backdrop-filter: blur(10px); }
         .holo-time { font-family: 'Orbitron', sans-serif; font-size: 26px; font-weight: 700; color: #00f3ff; text-shadow: 0 0 10px rgba(0, 243, 255, 0.8), 0 0 20px rgba(0, 119, 255, 0.6); letter-spacing: 2px; line-height: 1; z-index: 1; }
         .holo-date { font-family: 'Orbitron', sans-serif; font-size: 10px; color: #88ccff; text-transform: uppercase; letter-spacing: 3px; margin-top: 8px; text-shadow: 0 0 5px rgba(0, 243, 255, 0.5); z-index: 1; }
 
-        /* --- METRICS GRID --- */
         .metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
         .metric-card { padding: 18px; display: flex; flex-direction: column; gap: 6px; position: relative; overflow: hidden; }
         .metric-label { font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--text-muted); letter-spacing: 0.5px; }
@@ -108,13 +94,11 @@
 
         .widget-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
 
-        /* --- ADMIN CLOUD BANNER --- */
         .admin-controls { padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; border-style: dashed; }
         .admin-status { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; }
         .status-dot { width: 10px; height: 10px; border-radius: 50%; background: #EF4444; }
         .status-dot.unlocked { background: #10B981; box-shadow: 0 0 10px #10B981; }
 
-        /* --- BREAK TRACKER SECTION --- */
         .tracker-section { display: none; padding: 20px; }
         .tracker-header { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 700; color: #FFFFFF; text-transform: uppercase; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 15px; }
         .tracker-grid { display: flex; flex-wrap: wrap; gap: 12px; }
@@ -137,11 +121,9 @@
         .break-timer.overtime { color: #EF4444; animation: pulseRed 1s infinite alternate; }
         .break-load-warning { color: #EF4444 !important; animation: pulseRed 1s infinite alternate; }
         
-        @keyframes pulse { from { opacity: 1; } to { opacity: 0.6; } }
         @keyframes pulseAlert { from { box-shadow: 0 0 5px rgba(239, 68, 68, 0.2); } to { box-shadow: 0 0 15px rgba(239, 68, 68, 0.6); } }
         @keyframes pulseRed { from { opacity: 1; text-shadow: 0 0 5px rgba(239,68,68,0.3); } to { opacity: 0.7; text-shadow: 0 0 15px rgba(239,68,68,0.8); } }
 
-        /* --- CONTROLS & TABLE --- */
         .controls-bar { padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; gap: 15px; }
         .search-input-wrapper { position: relative; flex-grow: 1; max-width: 380px; }
         .search-input { width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 8px; padding: 9px 14px; color: var(--text-main); font-size: 13px; outline: none; }
@@ -155,7 +137,6 @@
         thead { background: rgba(0, 0, 0, 0.3); border-bottom: 1px solid var(--border-color); }
         th { padding: 14px 18px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); }
         
-        /* DRAG AND DROP & WARNING GLOW STYLING */
         tbody tr { border-bottom: 1px solid var(--border-color); transition: background-color 0.15s ease, opacity 0.2s ease; }
         tbody tr.draggable { cursor: grab; }
         tbody tr.draggable:active { cursor: grabbing; }
@@ -234,6 +215,28 @@
         .confetti { position: fixed; width: 10px; height: 10px; z-index: 9999; animation: fall 4s linear forwards; }
         @keyframes fall { to { transform: translateY(105vh) rotate(720deg); opacity: 0; } }
 
+        /* --- PRESTO DELIVERY RUSH (GAME STYLES) --- */
+        .game-board { width: 300px; height: 300px; background: rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.1); position: relative; border-radius: 8px; margin: 0 auto; overflow: hidden; box-shadow: inset 0 0 20px rgba(0,0,0,0.8); }
+        .game-car { position: absolute; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: grab; user-select: none; touch-action: none; transition: transform 0.1s;}
+        .game-car:active { cursor: grabbing; transform: scale(0.95); }
+        
+        /* THE DRIVER */
+        .car-presto { 
+            background: url('images (1).jpg') no-repeat center center; 
+            background-size: cover; 
+            border: 2px solid #FF3B00; 
+            z-index: 10; 
+            box-shadow: 0 0 15px rgba(255, 59, 0, 0.6);
+        }
+        
+        .car-normal { 
+            background: #334155; 
+            border: 1px solid #0F172A; 
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+        }
+        
+        .game-exit { position: absolute; right: 0; top: 100px; height: 50px; width: 10px; background: rgba(16, 185, 129, 0.5); border-left: 2px dashed #10B981; }
+
         /* --- LEADERBOARD & RULES --- */
         .leaderboard-table { width: 100%; border-collapse: collapse; font-size: 13px; }
         .leaderboard-table th { background: rgba(0,0,0,0.2); padding: 10px; text-transform: uppercase; font-size: 10px; color: var(--text-muted); text-align: left; }
@@ -292,6 +295,25 @@
         <p style="font-size: 10px; color: #38BDF8; margin-bottom: 20px; line-height: 1.4;">*If this is your very first time signing in, the PIN you enter above will be permanently saved as your passkey.</p>
         
         <button class="btn btn-success" style="width: 100%; padding: 12px; font-size: 14px;" onclick="window.processClockIn()">Authenticate & Sign In</button>
+    </div>
+</div>
+
+<!-- PRESTO DELIVERY RUSH GAME MODAL -->
+<div id="gameModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 380px; text-align: center;">
+        <div class="modal-header">
+            <h2 style="color: #FF3B00;">🛵 Presto Delivery Rush</h2>
+            <button class="close-btn" onclick="window.closeTrafficGame()">×</button>
+        </div>
+        <h3 id="gameLevelDisplay" style="font-size: 14px; color: #38BDF8; margin-bottom: 5px;">Level 1</h3>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">Clear the path so our Presto driver can escape the traffic jam and deliver the order!</p>
+        
+        <div id="gameBoard" class="game-board">
+            <div class="game-exit"></div>
+            <!-- Cars rendered via JS -->
+        </div>
+        
+        <button class="btn btn-staff" style="width: 100%; margin-top: 15px;" onclick="window.initTrafficGame()">Reset Level</button>
     </div>
 </div>
 
@@ -386,7 +408,6 @@
         <div class="header-title-group">
             <h1>
                 Presto CS Operations 
-                <span id="queueOrb" class="queue-orb orb-green" onclick="window.cycleQueueStatus()" title="Admin: Cycle Floor Queue Status"></span>
             </h1>
             <p>Live Cloud Synchronized Roster & Smart Break Automation</p>
             <span class="brand-badge" id="viewBadge" style="margin-top: 8px; display: inline-block;">Admin Operations</span>
@@ -402,6 +423,7 @@
         </div>
 
         <div class="actions-group" id="headerActions">
+            <button class="btn" style="background: rgba(139, 92, 246, 0.1); border-color: #8B5CF6; color: #8B5CF6;" onclick="window.openTrafficGame()">🛵 Mini Game</button>
             <button class="btn btn-audit" onclick="window.exportEmployeeHistory()">📅 90-Day Audit</button>
             <button class="btn btn-warning" onclick="window.openLeaderboard()">🏆 Gamification</button>
             <button class="btn btn-staff" onclick="window.exportHistory()">📊 Export History</button>
@@ -414,6 +436,13 @@
     <div class="ticker-wrap glass-panel" onclick="window.updateTicker()">
         <div class="ticker-label">📢 LIVE DISPATCH</div>
         <div class="ticker-text" id="tickerText">Connecting to Presto live network...</div>
+    </div>
+
+    <!-- BIG STAFF QUEUE STATUS (ONLY SHOWN IN STAFF VIEW) -->
+    <div id="staffQueueStatusDisplay" class="glass-panel" style="display: none; text-align: center; padding: 40px 20px; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 10px;">
+        <h2 style="font-size: 14px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 3px; margin-bottom: 25px; font-weight: 800;">Current Floor Status</h2>
+        <div id="bigQueueOrb" class="big-orb big-orb-green"></div>
+        <h1 id="bigQueueText" style="margin-top: 25px; font-size: 32px; font-weight: 900; letter-spacing: 1px;">ALL CLEAR / NORMAL</h1>
     </div>
 
     <section class="metrics-grid">
@@ -451,7 +480,7 @@
         <div class="metric-card glass-panel" style="background: rgba(168, 85, 247, 0.05); border-color: rgba(168, 85, 247, 0.2);">
             <span class="metric-label" style="color: #A855F7;">🧠 Daily Brain Break</span>
             <span class="metric-value" id="triviaQ" style="font-size: 13px; line-height: 1.4; margin-top: 6px; flex-grow: 1;">Loading...</span>
-            <button class="btn btn-mini-break" style="margin-top: auto; color: #A855F7; border-color: rgba(168, 85, 247, 0.3);" onclick="window.revealTrivia()">Reveal Answer</button>
+            <button id="triviaBtn" class="btn btn-mini-break" style="margin-top: auto; color: #A855F7; border-color: rgba(168, 85, 247, 0.3);" onclick="window.handleTrivia()">Reveal Answer</button>
         </div>
     </section>
 
@@ -463,7 +492,7 @@
         
         <hr style="border: 0; height: 1px; background: rgba(255,255,255,0.1); margin: 15px 0;">
         
-        <div style="font-size: 12px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 15px;">Floor Status & Active Breaks</div>
+        <div style="font-size: 12px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 15px;">Floor Active Breaks</div>
         <div id="mobileFocusFloor" style="display:flex; flex-direction: column; gap: 10px; width: 100%;">
             <!-- Mirrored break cards render here -->
         </div>
@@ -487,6 +516,7 @@
         </div>
         <div class="actions-group">
             <div class="cloud-badge">🟢 Live Database Synced</div>
+            <span id="queueOrb" class="queue-orb orb-green" onclick="window.cycleQueueStatus()" title="Admin: Cycle Floor Queue Status" style="margin-right:10px;"></span>
             <button class="btn btn-staff" onclick="window.copyStaffLink()">📱 Copy Staff Link</button>
             <button class="btn" style="background: rgba(56, 189, 248, 0.1); border-color: #38BDF8; color: #38BDF8;" onclick="window.openEmployeeManager()">⚙️ Manage Roster & Shifts</button>
             <button id="reshuffleBtn" class="btn btn-success" onclick="window.reshuffleSchedule()" disabled style="opacity: 0.5; cursor: not-allowed;">🔄 Reshuffle Operations</button>
@@ -566,13 +596,11 @@
 </div>
 
 <script type="module">
-    // --- FORCE REMOVE OLD PERSISTENT LOGINS ---
     localStorage.removeItem('prestoStaffAuth');
 
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
     import { getDatabase, ref, set, onValue, remove, push, get } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
-    // --- ANTI UI-SNOOPING ---
     document.addEventListener('contextmenu', event => event.preventDefault());
     document.onkeydown = function(e) {
         if(e.keyCode == 123) return false; 
@@ -592,36 +620,19 @@
     };
 
     const FACTION_ID = "Phoenix_Team"; 
-
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     
-    // --- PIN CODES ---
     const SECRET_PIN = "2242";         
-    const GATEKEEPER_PIN = "9949";     
 
     let isUnlocked = false;
     let activeShiftFilter = 'all';
     let topAgent = ""; 
-    let gamificationBadges = {}; // Maps name to 💎, 🥈, 🥉, 👑
+    let gamificationBadges = {};
 
     const urlParams = new URLSearchParams(window.location.search);
     const isStaffView = urlParams.get('view') === 'staff';
-
-    // --- ADMIN GATEKEEPER ---
-    if (!isStaffView) {
-        const sessionAdmin = sessionStorage.getItem('adminAuthed');
-        if (sessionAdmin !== GATEKEEPER_PIN) {
-            const enteredPin = prompt("🔒 Restricted Access\nEnter Admin Gatekeeper PIN to load the Admin Dashboard:");
-            if (enteredPin === GATEKEEPER_PIN) {
-                sessionStorage.setItem('adminAuthed', GATEKEEPER_PIN);
-            } else {
-                window.location.replace(window.location.pathname + "?view=staff");
-            }
-        }
-    }
     
-    // --- ADVANCED ANTI-SPOOF MOBILE DETECTION ---
     const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     const isSpoofedMac = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
     const isSpoofedAndroid = navigator.maxTouchPoints > 0 && screen.height > screen.width;
@@ -645,21 +656,22 @@
         document.getElementById('viewBadge').style.background = "rgba(59, 130, 246, 0.15)";
         document.getElementById('viewBadge').style.color = "#3B82F6";
         document.getElementById('viewBadge').style.borderColor = "rgba(59, 130, 246, 0.3)";
+        
+        document.getElementById('staffQueueStatusDisplay').style.display = 'flex';
     }
 
-    // --- CIRCADIAN SHIFT THEMES (GLASSMORPHISM) ---
     function updateCircadianTheme() {
         const hour = new Date().getHours();
         const root = document.documentElement;
-        if (hour >= 6 && hour < 12) { // Morning: Cyan
+        if (hour >= 6 && hour < 12) { 
             root.style.setProperty('--primary', '#06B6D4');
             root.style.setProperty('--primary-hover', '#0891B2');
             root.style.setProperty('--primary-glow', 'rgba(6, 182, 212, 0.15)');
-        } else if (hour >= 12 && hour < 17) { // Afternoon: Orange/Gold
+        } else if (hour >= 12 && hour < 17) { 
             root.style.setProperty('--primary', '#F59E0B');
             root.style.setProperty('--primary-hover', '#D97706');
             root.style.setProperty('--primary-glow', 'rgba(245, 158, 11, 0.15)');
-        } else { // Night: Purple
+        } else { 
             root.style.setProperty('--primary', '#8B5CF6');
             root.style.setProperty('--primary-hover', '#7C3AED');
             root.style.setProperty('--primary-glow', 'rgba(139, 92, 246, 0.15)');
@@ -713,7 +725,6 @@
     let currentBreaks = {};
     let timerInterval = null;
 
-    // --- ZEN MODE (IDLE SCREENSAVER) ---
     let idleTime = 0;
     const zenDiv = document.getElementById('zenMode');
     const zenTimeEl = document.getElementById('zenTime');
@@ -733,14 +744,13 @@
     setInterval(() => {
         if (isStaffView && isMobile) return; 
         idleTime++;
-        if (idleTime >= 300) { // 5 minutes
+        if (idleTime >= 300) { 
             zenDiv.classList.add('active');
             const d = new Date().toLocaleTimeString('en-US', { timeZone: 'Africa/Tripoli', hour: '2-digit', minute:'2-digit' });
             zenTimeEl.innerText = d;
         }
     }, 1000);
 
-    // --- CONFETTI ENGINE ---
     window.shootConfetti = function() {
         const colors = ['#38BDF8', '#10B981', '#FBBF24', '#EF4444', '#A855F7'];
         for(let i=0; i<60; i++) {
@@ -755,7 +765,6 @@
         }
     };
 
-    // --- KUDOS WIDGET ENGINE ---
     let kudosList = ["Great teamwork today everyone!", "Keep pushing, you're doing amazing."];
     let kudosIndex = 0;
     
@@ -786,7 +795,150 @@
         }
     };
 
-    // --- PALATE CLEANSER TRIVIA ---
+    // --- PRESTO DELIVERY RUSH (GAME) ---
+    const trafficLevels = [
+        [ // Level 1 (Easy)
+            { id: 0, x: 1, y: 2, len: 2, horiz: true, isRed: true },
+            { id: 1, x: 0, y: 0, len: 3, horiz: false },
+            { id: 2, x: 1, y: 0, len: 2, horiz: true },
+            { id: 3, x: 3, y: 1, len: 2, horiz: false },
+            { id: 4, x: 4, y: 0, len: 2, horiz: false },
+            { id: 5, x: 4, y: 2, len: 2, horiz: true },
+            { id: 6, x: 2, y: 4, len: 2, horiz: false },
+            { id: 7, x: 3, y: 3, len: 2, horiz: true },
+            { id: 8, x: 4, y: 4, len: 2, horiz: true }
+        ],
+        [ // Level 2 (Medium)
+            { id: 0, x: 0, y: 2, len: 2, horiz: true, isRed: true },
+            { id: 1, x: 2, y: 1, len: 3, horiz: false },
+            { id: 2, x: 0, y: 0, len: 2, horiz: true },
+            { id: 3, x: 3, y: 0, len: 2, horiz: false },
+            { id: 4, x: 4, y: 0, len: 2, horiz: true },
+            { id: 5, x: 5, y: 1, len: 3, horiz: false },
+            { id: 6, x: 3, y: 3, len: 2, horiz: true },
+            { id: 7, x: 0, y: 5, len: 3, horiz: true },
+            { id: 8, x: 3, y: 4, len: 2, horiz: false }
+        ],
+        [ // Level 3 (Hard)
+            { id: 0, x: 1, y: 2, len: 2, horiz: true, isRed: true },
+            { id: 1, x: 0, y: 1, len: 3, horiz: false },
+            { id: 2, x: 1, y: 1, len: 2, horiz: true },
+            { id: 3, x: 3, y: 0, len: 3, horiz: false },
+            { id: 4, x: 4, y: 0, len: 2, horiz: true },
+            { id: 5, x: 5, y: 1, len: 2, horiz: false },
+            { id: 6, x: 4, y: 3, len: 2, horiz: true },
+            { id: 7, x: 3, y: 4, len: 2, horiz: false },
+            { id: 8, x: 0, y: 5, len: 3, horiz: true }
+        ]
+    ];
+    let currentLevelIndex = 0;
+    let trafficLevel = [];
+    let activeCar = null, startMouse = 0, bounds = {}, initialPos = 0;
+
+    window.openTrafficGame = function() {
+        document.getElementById('gameModal').style.display = 'flex';
+        window.initTrafficGame();
+    }
+
+    window.closeTrafficGame = function() {
+        document.getElementById('gameModal').style.display = 'none';
+    }
+
+    window.initTrafficGame = function() {
+        let board = document.getElementById('gameBoard');
+        board.innerHTML = '<div class="game-exit"></div>';
+        document.getElementById('gameLevelDisplay').innerText = `Level ${currentLevelIndex + 1}`;
+        
+        // Deep copy the level so restarting works
+        trafficLevel = JSON.parse(JSON.stringify(trafficLevels[currentLevelIndex]));
+
+        trafficLevel.forEach((c) => {
+            let el = document.createElement('div');
+            el.className = 'game-car ' + (c.isRed ? 'car-presto' : 'car-normal');
+            el.innerText = c.isRed ? '' : '🚙';
+            el.style.width = (c.horiz ? c.len * 50 : 50) + 'px';
+            el.style.height = (c.horiz ? 50 : c.len * 50) + 'px';
+            el.style.left = (c.x * 50) + 'px';
+            el.style.top = (c.y * 50) + 'px';
+            
+            el.onpointerdown = (e) => startDragCar(e, c, el);
+            c.el = el;
+            board.appendChild(el);
+        });
+    }
+
+    function getGameGrid(ignoreCar) {
+        let g = Array(6).fill(0).map(() => Array(6).fill(0));
+        trafficLevel.forEach(c => {
+            if (c === ignoreCar) return;
+            for(let i=0; i<c.len; i++) {
+                if (c.horiz) g[c.y][c.x + i] = 1;
+                else g[c.y + i][c.x] = 1;
+            }
+        });
+        return g;
+    }
+
+    function startDragCar(e, car, el) {
+        e.preventDefault();
+        activeCar = car;
+        startMouse = car.horiz ? e.clientX : e.clientY;
+        initialPos = car.horiz ? car.x : car.y;
+        
+        let g = getGameGrid(car);
+        let min = 0, max = 6 - car.len;
+        
+        if (car.horiz) {
+            for(let x = car.x - 1; x >= 0; x--) if(g[car.y][x]) { min = x + 1; break; }
+            for(let x = car.x + car.len; x < 6; x++) if(g[car.y][x]) { max = x - car.len; break; }
+        } else {
+            for(let y = car.y - 1; y >= 0; y--) if(g[y][car.x]) { min = y + 1; break; }
+            for(let y = car.y + car.len; y < 6; y++) if(g[y][car.x]) { max = y - car.len; break; }
+        }
+        bounds = { min, max };
+        el.style.zIndex = 100;
+        
+        window.addEventListener('pointermove', dragCar);
+        window.addEventListener('pointerup', endDragCar);
+    }
+
+    function dragCar(e) {
+        if (!activeCar) return;
+        let deltaPx = (activeCar.horiz ? e.clientX : e.clientY) - startMouse;
+        let deltaCells = deltaPx / 50;
+        let newVal = initialPos + deltaCells;
+        newVal = Math.max(bounds.min, Math.min(bounds.max, newVal));
+        activeCar.currentFloat = newVal;
+        activeCar.el.style[activeCar.horiz ? 'left' : 'top'] = (newVal * 50) + 'px';
+    }
+
+    function endDragCar(e) {
+        if (!activeCar) return;
+        window.removeEventListener('pointermove', dragCar);
+        window.removeEventListener('pointerup', endDragCar);
+        
+        let finalVal = Math.round(activeCar.currentFloat !== undefined ? activeCar.currentFloat : initialPos);
+        if (activeCar.horiz) activeCar.x = finalVal; else activeCar.y = finalVal;
+        activeCar.el.style[activeCar.horiz ? 'left' : 'top'] = (finalVal * 50) + 'px';
+        activeCar.el.style.zIndex = activeCar.isRed ? 10 : 1;
+        
+        if (activeCar.isRed && activeCar.x === 4) { 
+            setTimeout(() => {
+                window.shootConfetti();
+                currentLevelIndex++;
+                if (currentLevelIndex >= trafficLevels.length) {
+                    alert("🎉 Incredible! You beat all the delivery rushes!");
+                    currentLevelIndex = 0;
+                } else {
+                    alert("🎉 Delivery Successful! Get ready for the next rush.");
+                }
+                window.initTrafficGame(); 
+            }, 100);
+        }
+        activeCar = null;
+    }
+
+    // --- CYCLING TRIVIA WIDGET ---
     const triviaDB = [
         { q: "Customer Service Bingo: Who heard a dog barking on a call today?", a: "Free Space! Take a deep breath." },
         { q: "I speak without a mouth and hear without ears. What am I?", a: "An echo." },
@@ -796,13 +948,30 @@
         { q: "What has to be broken before you can use it?", a: "An egg." },
         { q: "I’m tall when I’m young, and I’m short when I’m old. What am I?", a: "A candle." }
     ];
-    const todayTrivia = triviaDB[new Date().getDate() % triviaDB.length];
-    document.getElementById('triviaQ').innerText = todayTrivia.q;
-    window.revealTrivia = function() {
-        document.getElementById('triviaQ').innerText = todayTrivia.a;
-        document.getElementById('triviaQ').style.color = "#F8FAFC";
-        document.getElementById('triviaQ').style.fontWeight = "800";
+    let currentTriviaIndex = 0;
+    let showingTriviaAnswer = false;
+
+    function loadTrivia() {
+        document.getElementById('triviaQ').innerText = triviaDB[currentTriviaIndex].q;
+        document.getElementById('triviaQ').style.color = "var(--text-main)";
+        document.getElementById('triviaQ').style.fontWeight = "normal";
+        document.getElementById('triviaBtn').innerText = "Reveal Answer";
+        showingTriviaAnswer = false;
+    }
+
+    window.handleTrivia = function() {
+        if (!showingTriviaAnswer) {
+            document.getElementById('triviaQ').innerText = triviaDB[currentTriviaIndex].a;
+            document.getElementById('triviaQ').style.color = "#F8FAFC";
+            document.getElementById('triviaQ').style.fontWeight = "800";
+            document.getElementById('triviaBtn').innerText = "Next Question ⏭️";
+            showingTriviaAnswer = true;
+        } else {
+            currentTriviaIndex = (currentTriviaIndex + 1) % triviaDB.length;
+            loadTrivia();
+        }
     };
+    loadTrivia(); // Init on start
 
     // --- FIREBASE LISTENERS FOR TICKER & ORB ---
     onValue(ref(db, `${FACTION_ID}/system/tickerMsg`), (snapshot) => {
@@ -813,14 +982,44 @@
 
     onValue(ref(db, `${FACTION_ID}/system/queueStatus`), (snapshot) => {
         let status = snapshot.val() || 'green';
+        
         const orb = document.getElementById('queueOrb');
-        orb.className = 'queue-orb';
-        orb.classList.add('orb-' + status);
-        orb.setAttribute('data-status', status);
+        if(orb) {
+            orb.className = 'queue-orb';
+            orb.classList.add('orb-' + status);
+            orb.setAttribute('data-status', status);
+        }
+
+        const bigOrb = document.getElementById('bigQueueOrb');
+        const bigText = document.getElementById('bigQueueText');
+        const staffDisplay = document.getElementById('staffQueueStatusDisplay');
+        
+        if (bigOrb && bigText) {
+            bigOrb.className = 'big-orb big-orb-' + status;
+            if (status === 'green') {
+                bigText.innerText = "ALL CLEAR / NORMAL";
+                bigText.style.color = "#10B981";
+                bigText.style.textShadow = "0 0 15px rgba(16,185,129,0.5)";
+                staffDisplay.style.borderColor = "rgba(16,185,129,0.3)";
+                staffDisplay.style.background = "rgba(16,185,129,0.05)";
+            } else if (status === 'yellow') {
+                bigText.innerText = "STEADY / ELEVATED VOLUME";
+                bigText.style.color = "#FBBF24";
+                bigText.style.textShadow = "0 0 15px rgba(251,191,36,0.5)";
+                staffDisplay.style.borderColor = "rgba(251,191,36,0.3)";
+                staffDisplay.style.background = "rgba(251,191,36,0.05)";
+            } else if (status === 'red') {
+                bigText.innerText = "HIGH VOLUME / ALL HANDS";
+                bigText.style.color = "#EF4444";
+                bigText.style.textShadow = "0 0 15px rgba(239,68,68,0.5)";
+                staffDisplay.style.borderColor = "rgba(239,68,68,0.3)";
+                staffDisplay.style.background = "rgba(239,68,68,0.05)";
+            }
+        }
     });
 
     window.updateTicker = function() {
-        if (isStaffView || !requireAdmin()) return;
+        if (!requireAdmin()) return;
         let newMsg = prompt("Enter a new live dispatch announcement:");
         if (newMsg !== null && newMsg.trim() !== "") {
             set(ref(db, `${FACTION_ID}/system/tickerMsg`), newMsg.trim());
@@ -828,7 +1027,7 @@
     };
 
     window.cycleQueueStatus = function() {
-        if (isStaffView || !requireAdmin()) return;
+        if (!requireAdmin()) return;
         const orb = document.getElementById('queueOrb');
         let current = orb.getAttribute('data-status');
         let next = 'green';
@@ -837,79 +1036,21 @@
         set(ref(db, `${FACTION_ID}/system/queueStatus`), next);
     };
 
-    // --- DRAG AND DROP GLOBALS ---
-    let dragStartIndex = null;
-
-    window.handleDragStart = function(e, index) {
-        if (!isUnlocked || isStaffView) return;
-        dragStartIndex = index;
-        e.currentTarget.style.opacity = '0.4';
-        e.dataTransfer.effectAllowed = 'move';
-        e.dataTransfer.setData('text/plain', index);
-    };
-
-    window.handleDragEnd = function(e) {
-        e.currentTarget.style.opacity = '1';
-        let rows = document.querySelectorAll('#scheduleTable tbody tr');
-        rows.forEach(r => r.classList.remove('drag-over'));
-    };
-
-    window.handleDragOver = function(e) {
-        if (!isUnlocked || isStaffView) return;
-        e.preventDefault(); 
-        e.dataTransfer.dropEffect = 'move';
-        let row = e.currentTarget;
-        if (!row.classList.contains('drag-over')) {
-            row.classList.add('drag-over');
-        }
-    };
-
-    window.handleDragLeave = function(e) {
-        e.currentTarget.classList.remove('drag-over');
-    };
-
-    window.handleDrop = function(e, targetIndex) {
-        e.stopPropagation();
-        e.preventDefault();
+    // --- ADMIN LAZY GATEKEEPER ---
+    function requireAdmin() {
+        if (isUnlocked) return true;
+        const sessionAdmin = sessionStorage.getItem('adminAuthed');
         
-        let rows = document.querySelectorAll('#scheduleTable tbody tr');
-        rows.forEach(r => r.classList.remove('drag-over'));
+        if (sessionAdmin === SECRET_PIN) return true;
 
-        if (!isUnlocked || isStaffView || dragStartIndex === null) return;
-        if (dragStartIndex === targetIndex) return;
-
-        if (activeShiftFilter !== 'all' || document.getElementById('searchInput').value.trim() !== '') {
-            alert("Drag and Drop is disabled while searching or filtering. Please switch back to 'All Staff'.");
-            return;
+        const pin = prompt("🔒 Restricted Access\nEnter Supervisor PIN to execute this operation:");
+        if (pin === SECRET_PIN) {
+            sessionStorage.setItem('adminAuthed', pin);
+            return true;
         }
-
-        let minIdx = Math.min(dragStartIndex, targetIndex);
-        let maxIdx = Math.max(dragStartIndex, targetIndex);
-        for(let i = minIdx; i <= maxIdx; i++) {
-            if(currentEmployees[i].isLocked) {
-                alert("Cannot drag here. One or more employees in the shifting range are LOCKED (🔒). Unlock them first to manually slide the schedule.");
-                return;
-            }
-        }
-
-        let timeSlots = currentEmployees.map(emp => ({
-            timeStart: emp.timeStart,
-            timeEnd: emp.timeEnd,
-            overlap: emp.overlap
-        }));
-
-        let draggedEmp = currentEmployees.splice(dragStartIndex, 1)[0];
-        currentEmployees.splice(targetIndex, 0, draggedEmp);
-
-        currentEmployees.forEach((emp, i) => {
-            emp.timeStart = timeSlots[i].timeStart;
-            emp.timeEnd = timeSlots[i].timeEnd;
-            emp.overlap = timeSlots[i].overlap;
-        });
-
-        set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
-        dragStartIndex = null;
-    };
+        if (pin !== null) alert("Incorrect PIN. Action denied.");
+        return false;
+    }
 
     // --- HEADER AUTH UI ---
     function updateHeaderAuthUI() {
@@ -941,7 +1082,6 @@
         }
     }
 
-    // --- HOLOGRAM CLOCK SCRIPT ---
     function updateHoloClock() {
         const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
         const now = new Date(tzStr);
@@ -1006,7 +1146,6 @@
                 const score = stats[name].earlyMins - stats[name].lateMins;
                 if(score > topScore) { topScore = score; leader = name; }
                 
-                // Assign RPG Badges
                 if(score > 100) gamificationBadges[name] = '💎';
                 else if(score > 50) gamificationBadges[name] = '🥈';
                 else if(score > 20) gamificationBadges[name] = '🥉';
@@ -1102,14 +1241,6 @@
         }
         bStart -= (15 * 60000); 
         return now >= bStart && now <= bEnd;
-    }
-
-    function requireAdmin() {
-        if (isUnlocked) return true;
-        const pin = prompt("Enter Supervisor PIN to Approve/Deny/Edit:");
-        if (pin === SECRET_PIN) return true;
-        if (pin !== null) alert("Incorrect PIN. Action denied.");
-        return false;
     }
 
     // --- CLOCK IN LOGIC & AUTH ---
@@ -1300,16 +1431,13 @@
             return;
         }
 
-        // Hide bulky admin panels
         document.querySelector('.table-card').style.display = 'none';
         document.querySelector('.controls-bar').style.display = 'none';
         document.querySelector('.rules-card').style.display = 'none';
         
-        // Show Focus View
         document.getElementById('mobileFocusDashboard').style.display = 'flex';
         document.getElementById('mobileFocusName').innerText = `Welcome, ${authUser.split(' ')[0]}`;
 
-        // 1. Calculate Countdown
         const emp = currentEmployees.find(e => e.name === authUser);
         if(emp && emp.timeStart && emp.timeStart !== '--:--') {
             const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
@@ -1524,14 +1652,13 @@
     function renderActiveBreaks() {
         const section = document.getElementById('breakTrackerSection');
         const grid = document.getElementById('breakTrackerGrid');
-        const mobileFloor = document.getElementById('mobileFocusFloor'); // For Mobile Mirror
+        const mobileFloor = document.getElementById('mobileFocusFloor'); 
         
         const breakKeys = Object.keys(currentBreaks);
         const localAuthUser = sessionStorage.getItem('prestoStaffAuth');
         
         const visibleBreaks = breakKeys.filter(key => currentBreaks[key].status !== 'completed');
 
-        // QUEUE POSITION MATH
         const pendingList = visibleBreaks
             .filter(key => currentBreaks[key].status === 'pending')
             .sort((a,b) => (currentBreaks[a].requestTime || 0) - (currentBreaks[b].requestTime || 0));
@@ -1645,10 +1772,8 @@
             }
             grid.appendChild(card);
 
-            // MIRROR TO MOBILE FOCUS DASHBOARD
             if(mobileFloor) {
                 const mobCard = card.cloneNode(true);
-                // Remove return buttons on mobile view
                 let btn = mobCard.querySelector('.break-timer-group button');
                 if(btn) btn.remove();
                 mobCard.style.width = '100%';
@@ -1704,11 +1829,9 @@
             else timerEl.classList.remove('overtime');
         });
 
-        // Trigger Mobile Focus Update seamlessly
         updateMobileFocusDashboard();
     }
 
-    // --- LIVE KPI LOGIC (STRICT SHIFT FILTERING) ---
     function updateAutomatedMetrics() {
         let presentCount = 0;
         let shiftAActive = 0;
@@ -1766,10 +1889,9 @@
         document.getElementById('countDayOff').innerText = offCount;
     }
 
-    // --- ADMIN QUOTA ADJUSTMENT ---
     window.resetQuota = function(index, type) {
         if(isStaffView) return;
-        if(!isUnlocked && !requireAdmin()) return;
+        if(!requireAdmin()) return;
         
         const emp = currentEmployees[index];
         if (type === '30') {
@@ -1787,7 +1909,6 @@
         }
     };
 
-    // --- GLOBAL ACTIONS ---
     window.startBreak = function(empName, index, requestedType = 'standard') {
         if (enforcePCWorkstation()) return;
 
@@ -1815,7 +1936,7 @@
             set(ref(db, `${FACTION_ID}/breaks/` + safeKey), {
                 name: empName,
                 startTime: 0,
-                requestTime: Date.now(), // For Queue Position
+                requestTime: Date.now(), 
                 limit: 0, 
                 type: "Prayer",
                 status: "pending"
@@ -1866,7 +1987,7 @@
             set(ref(db, `${FACTION_ID}/breaks/` + safeKey), {
                 name: empName,
                 startTime: 0,
-                requestTime: Date.now(), // For queue position
+                requestTime: Date.now(), 
                 limit: 10,
                 type: "Unscheduled (10m)",
                 status: "pending"
@@ -1974,7 +2095,6 @@
         }, 100);
     };
 
-    // --- LEADERBOARD & ANALYTICS ---
     window.openLeaderboard = async function() {
         if (!requireAdmin()) return;
         document.getElementById('leaderboardModal').style.display = 'flex';
@@ -2070,7 +2190,6 @@
         document.getElementById('leaderboardModal').style.display = 'none';
     };
 
-    // --- EMPLOYEE MANAGEMENT & MODAL ---
     window.openEmployeeManager = function() {
         if (!requireAdmin()) return;
         document.getElementById('employeeModal').style.display = 'flex';
@@ -2228,6 +2347,7 @@
     };
 
     window.deleteEmployee = function(index) {
+        if (!requireAdmin()) return;
         if(confirm(`Are you sure you want to completely remove ${currentEmployees[index].name} from the database?`)) {
             currentEmployees.splice(index, 1);
             set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
@@ -2237,11 +2357,13 @@
 
     window.toggleLock = function(index) {
         if (isStaffView) return;
+        if (!requireAdmin()) return; 
         currentEmployees[index].isLocked = !currentEmployees[index].isLocked;
         set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
     };
 
     window.resetPIN = function(index) {
+        if (!requireAdmin()) return;
         if(confirm(`Reset the 4-digit PIN for ${currentEmployees[index].name}? They will be prompted to create a new one on their next sign-in.`)) {
             currentEmployees[index].passkey = "";
             set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
@@ -2269,27 +2391,26 @@
         });
     }
 
-    // TABLE INLINE EDITS
     window.updateShift = function(index, newVal) {
-        if (isStaffView) return; 
+        if (isStaffView || !requireAdmin()) return; 
         currentEmployees[index].shift = newVal;
         set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
     };
 
     window.updatePC = function(index, newVal) {
-        if (isStaffView) return; 
+        if (isStaffView || !requireAdmin()) return; 
         currentEmployees[index].pcNumber = newVal.trim() || "PC-XX";
         set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
     };
 
     window.updateTeam = function(index, newVal) {
-        if (isStaffView) return; 
+        if (isStaffView || !requireAdmin()) return; 
         currentEmployees[index].teamName = newVal.trim() || "No Team";
         set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
     };
 
     window.updatePermanentDayOff = function(index, newStatus) {
-        if (isStaffView) return; 
+        if (isStaffView || !requireAdmin()) return; 
         currentEmployees[index].assignedDayOff = newStatus;
         const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
         const businessTime = new Date(new Date(tzStr).getTime() - (4 * 3600 * 1000));
@@ -2299,14 +2420,14 @@
     };
 
     window.toggleForceAbsent = function(index) {
-        if (isStaffView) return;
+        if (isStaffView || !requireAdmin()) return;
         if (currentEmployees[index].dayOff === "None") currentEmployees[index].dayOff = "Off Duty"; 
         else currentEmployees[index].dayOff = "None"; 
         set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
     };
 
     window.updateName = function(index, newName) {
-        if (isStaffView) return; 
+        if (isStaffView || !requireAdmin()) return; 
         const cleanedName = newName.trim();
         if (cleanedName && currentEmployees[index].name !== cleanedName) {
             currentEmployees[index].name = cleanedName;
@@ -2316,8 +2437,7 @@
 
     window.toggleAuth = function() {
         if (!isUnlocked) {
-            const pin = prompt("Enter Supervisor PIN to Unlock Reshuffle Controls:");
-            if (pin === SECRET_PIN) {
+            if (requireAdmin()) {
                 isUnlocked = true;
                 document.getElementById('statusDot').classList.add('unlocked');
                 document.getElementById('statusText').innerText = "Roster Controls: UNLOCKED (Drag & Drop to reorder breaks)";
@@ -2326,7 +2446,7 @@
                 const btn = document.getElementById('reshuffleBtn');
                 btn.disabled = false; btn.style.opacity = "1"; btn.style.cursor = "pointer";
                 renderTable(); 
-            } else if (pin !== null) alert("Incorrect PIN. Access Denied.");
+            }
         } else {
             isUnlocked = false;
             document.getElementById('statusDot').classList.remove('unlocked');
@@ -2340,7 +2460,7 @@
     };
 
     window.reshuffleSchedule = function() {
-        if (!isUnlocked || isStaffView) return;
+        if (!isUnlocked || isStaffView || !requireAdmin()) return;
         
         let shiftGroups = {};
         
