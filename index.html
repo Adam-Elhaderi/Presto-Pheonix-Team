@@ -3,90 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Presto Eat — Live Floor Operations</title>
+    <title>Presto CS — Live Floor Operations</title>
     <!-- GOOGLE FONTS -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&family=Tajawal:wght@400;500;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
     <style>
         :root { 
-            --primary: #FF3B00; 
-            --primary-hover: #E03400;
-            --primary-glow: rgba(255, 59, 0, 0.15); 
-            --bg-body: #0F172A; 
-            --bg-card: #1E293B; 
-            --bg-card-hover: #334155;
+            /* Circadian Variables (Updated by JS) */
+            --primary: #06B6D4; 
+            --primary-hover: #0891B2;
+            --primary-glow: rgba(6, 182, 212, 0.15); 
+            
             --text-main: #F8FAFC; 
             --text-muted: #94A3B8; 
-            --border-color: #334155; 
+            --border-color: rgba(255, 255, 255, 0.1); 
             
             /* SHIFT COLORS */
-            --shift-a-bg: rgba(56, 189, 248, 0.1);
-            --shift-a-border: rgba(56, 189, 248, 0.3);
-            --shift-a-text: #38BDF8; 
-            
-            --shift-b-bg: rgba(244, 63, 94, 0.1);
-            --shift-b-border: rgba(244, 63, 94, 0.3);
-            --shift-b-text: #FB7185; 
-            
-            --shift-c-bg: rgba(16, 185, 129, 0.1);
-            --shift-c-border: rgba(16, 185, 129, 0.3);
-            --shift-c-text: #10B981; 
-            
-            --shift-d-bg: rgba(245, 158, 11, 0.1);
-            --shift-d-border: rgba(245, 158, 11, 0.3);
-            --shift-d-text: #F59E0B; 
-            
-            --shift-e-bg: rgba(99, 102, 241, 0.1);
-            --shift-e-border: rgba(99, 102, 241, 0.3);
-            --shift-e-text: #818CF8; 
+            --shift-a-bg: rgba(56, 189, 248, 0.1); --shift-a-border: rgba(56, 189, 248, 0.3); --shift-a-text: #38BDF8; 
+            --shift-b-bg: rgba(244, 63, 94, 0.1); --shift-b-border: rgba(244, 63, 94, 0.3); --shift-b-text: #FB7185; 
+            --shift-c-bg: rgba(16, 185, 129, 0.1); --shift-c-border: rgba(16, 185, 129, 0.3); --shift-c-text: #10B981; 
+            --shift-d-bg: rgba(245, 158, 11, 0.1); --shift-d-border: rgba(245, 158, 11, 0.3); --shift-d-text: #F59E0B; 
+            --shift-e-bg: rgba(99, 102, 241, 0.1); --shift-e-border: rgba(99, 102, 241, 0.3); --shift-e-text: #818CF8; 
+            --shift-g-bg: rgba(236, 72, 153, 0.1); --shift-g-border: rgba(236, 72, 153, 0.3); --shift-g-text: #EC4899; 
+            --shift-custom-bg: rgba(168, 85, 247, 0.1); --shift-custom-border: rgba(168, 85, 247, 0.3); --shift-custom-text: #A855F7; 
 
-            --shift-g-bg: rgba(236, 72, 153, 0.1);
-            --shift-g-border: rgba(236, 72, 153, 0.3);
-            --shift-g-text: #EC4899; 
-            
-            --shift-custom-bg: rgba(168, 85, 247, 0.1);
-            --shift-custom-border: rgba(168, 85, 247, 0.3);
-            --shift-custom-text: #A855F7; 
-
-            --team-bg: rgba(255, 255, 255, 0.05);
-            --team-border: rgba(255, 255, 255, 0.2);
-            --team-text: #CBD5E1;
-            
-            --overlap-bg: rgba(251, 191, 36, 0.1);
-            --overlap-border: rgba(251, 191, 36, 0.3);
-            --overlap-text: #FBBF24;
-            --single-bg: rgba(52, 211, 153, 0.1);
-            --single-border: rgba(52, 211, 153, 0.3);
-            --single-text: #34D399;
-            --dayoff-bg: rgba(239, 68, 68, 0.12);
-            --dayoff-border: rgba(239, 68, 68, 0.35);
-            --dayoff-text: #F87171;
-            --warning-bg: rgba(245, 158, 11, 0.1);
-            --warning-border: rgba(245, 158, 11, 0.4);
-            --warning-text: #F59E0B;
-            --official-bg: rgba(16, 185, 129, 0.1);
-            --official-border: rgba(16, 185, 129, 0.4);
-            --pending-bg: rgba(239, 68, 68, 0.1);
-            --pending-border: rgba(239, 68, 68, 0.5);
+            --team-bg: rgba(255, 255, 255, 0.05); --team-border: rgba(255, 255, 255, 0.15); --team-text: #CBD5E1;
+            --overlap-bg: rgba(251, 191, 36, 0.1); --overlap-border: rgba(251, 191, 36, 0.3); --overlap-text: #FBBF24;
+            --single-bg: rgba(52, 211, 153, 0.1); --single-border: rgba(52, 211, 153, 0.3); --single-text: #34D399;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', system-ui, sans-serif; }
 
-        body { background-color: var(--bg-body); color: var(--text-main); min-height: 100vh; padding: 30px 20px; display: flex; justify-content: center; }
-        .workspace-wrapper { width: 100%; max-width: 1380px; display: flex; flex-direction: column; gap: 20px; }
+        /* LIQUID GLASSMORPHISM BACKGROUND */
+        body { 
+            background: linear-gradient(135deg, #020617, #0F172A, #1E1B4B, #020617);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: var(--text-main); 
+            min-height: 100vh; 
+            padding: 30px 20px; 
+            display: flex; 
+            justify-content: center; 
+        }
+        @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
-        /* --- HEADER --- */
-        .app-header { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); position: relative; overflow: hidden; flex-wrap: wrap; gap: 15px; }
-        .app-header::before { content: ''; position: absolute; top: 0; left: 0; width: 6px; height: 100%; background: var(--primary); }
+        .workspace-wrapper { width: 100%; max-width: 1450px; display: flex; flex-direction: column; gap: 20px; z-index: 2; position: relative; }
+
+        /* LIQUID GLASS PANELS */
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.45);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        /* --- HEADER & TICKER --- */
+        .app-header { padding: 24px 30px; display: flex; justify-content: space-between; align-items: center; position: relative; overflow: hidden; flex-wrap: wrap; gap: 15px; }
+        .app-header::before { content: ''; position: absolute; top: 0; left: 0; width: 6px; height: 100%; background: var(--primary); transition: background 1s ease; }
         .header-title-group h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px; }
         .header-title-group p { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
-        .brand-badge { background: rgba(255, 59, 0, 0.15); color: var(--primary); font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.8px; border: 1px solid rgba(255, 59, 0, 0.3); }
+        .brand-badge { background: var(--primary-glow); color: var(--primary); font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.8px; border: 1px solid var(--primary-glow); transition: all 1s ease; }
         
+        .queue-orb { width: 14px; height: 14px; border-radius: 50%; display: inline-block; cursor: pointer; transition: all 0.3s; margin-left: 8px; border: 2px solid rgba(255,255,255,0.2); }
+        .orb-green { background: #10B981; box-shadow: 0 0 15px #10B981; }
+        .orb-yellow { background: #FBBF24; box-shadow: 0 0 15px #FBBF24; animation: pulseYellow 2s infinite alternate; }
+        .orb-red { background: #EF4444; box-shadow: 0 0 20px #EF4444; animation: pulseAlert 1s infinite alternate; }
+        @keyframes pulseYellow { from { opacity: 1; box-shadow: 0 0 10px #FBBF24; } to { opacity: 0.6; box-shadow: 0 0 20px #FBBF24; } }
+
+        .ticker-wrap { width: 100%; background: rgba(56, 189, 248, 0.05); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 8px; padding: 10px 15px; overflow: hidden; display: flex; align-items: center; cursor: pointer; position: relative; }
+        .ticker-label { font-size: 10px; font-weight: 800; color: #38BDF8; text-transform: uppercase; letter-spacing: 1px; padding-right: 15px; border-right: 1px solid rgba(56,189,248,0.3); margin-right: 15px; white-space: nowrap; z-index: 2; background: rgba(15, 23, 42, 0.8); border-radius: 4px;}
+        .ticker-text { white-space: nowrap; animation: ticker 25s linear infinite; font-size: 14px; font-weight: 600; color: var(--text-main); display: inline-block; padding-left: 100%; }
+        @keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
+
         .actions-group { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-        .btn { background: var(--bg-card-hover); color: var(--text-main); border: 1px solid var(--border-color); padding: 9px 16px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .btn:hover { border-color: var(--text-muted); background: #475569; }
-        .btn-primary { background: var(--primary); border-color: var(--primary); color: #FFFFFF; }
+        .btn { background: rgba(255,255,255,0.05); color: var(--text-main); border: 1px solid var(--border-color); padding: 9px 16px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn:hover { border-color: var(--text-muted); background: rgba(255,255,255,0.1); }
+        .btn-primary { background: var(--primary); border-color: var(--primary); color: #FFFFFF; transition: all 1s ease;}
         .btn-primary:hover { background: var(--primary-hover); border-color: var(--primary-hover); box-shadow: 0 0 15px var(--primary-glow); }
         .btn-success { background: #10B981; border-color: #10B981; color: #FFFFFF; }
         .btn-success:hover { background: #059669; box-shadow: 0 0 15px rgba(16, 185, 129, 0.3); }
@@ -100,76 +95,34 @@
         .btn-audit:hover { background: #7C3AED; box-shadow: 0 0 15px rgba(139, 92, 246, 0.3); }
 
         /* --- MODERN HOLOGRAM CLOCK --- */
-        .holo-clock-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: radial-gradient(circle, rgba(0, 30, 60, 0.6) 0%, rgba(0, 10, 25, 0.9) 100%);
-            border: 1px solid rgba(0, 243, 255, 0.3);
-            border-radius: 16px;
-            padding: 12px 28px;
-            box-shadow: 0 0 20px rgba(0, 243, 255, 0.15), inset 0 0 15px rgba(0, 243, 255, 0.1);
-            position: relative;
-            min-width: 240px;
-            overflow: hidden;
-        }
-        .holo-clock-container::before {
-            content: '';
-            position: absolute;
-            top: -50%; left: -50%; width: 200%; height: 200%;
-            background: conic-gradient(transparent, rgba(0, 243, 255, 0.15), transparent 30%);
-            animation: holo-radar 4s linear infinite;
-        }
-        @keyframes holo-radar {
-            100% { transform: rotate(360deg); }
-        }
-        .holo-time {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 26px;
-            font-weight: 700;
-            color: #00f3ff;
-            text-shadow: 0 0 10px rgba(0, 243, 255, 0.8), 0 0 20px rgba(0, 119, 255, 0.6);
-            letter-spacing: 2px;
-            line-height: 1;
-            z-index: 1;
-        }
-        .holo-date {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 10px;
-            color: #88ccff;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            margin-top: 8px;
-            text-shadow: 0 0 5px rgba(0, 243, 255, 0.5);
-            z-index: 1;
-        }
+        .holo-clock-container { display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle, rgba(0, 30, 60, 0.2) 0%, rgba(0, 10, 25, 0.5) 100%); border: 1px solid rgba(0, 243, 255, 0.2); border-radius: 16px; padding: 12px 28px; box-shadow: inset 0 0 15px rgba(0, 243, 255, 0.05); position: relative; min-width: 240px; overflow: hidden; backdrop-filter: blur(10px); }
+        .holo-time { font-family: 'Orbitron', sans-serif; font-size: 26px; font-weight: 700; color: #00f3ff; text-shadow: 0 0 10px rgba(0, 243, 255, 0.8), 0 0 20px rgba(0, 119, 255, 0.6); letter-spacing: 2px; line-height: 1; z-index: 1; }
+        .holo-date { font-family: 'Orbitron', sans-serif; font-size: 10px; color: #88ccff; text-transform: uppercase; letter-spacing: 3px; margin-top: 8px; text-shadow: 0 0 5px rgba(0, 243, 255, 0.5); z-index: 1; }
 
         /* --- METRICS GRID --- */
         .metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
-        .metric-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 6px; }
+        .metric-card { padding: 18px; display: flex; flex-direction: column; gap: 6px; position: relative; overflow: hidden; }
         .metric-label { font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--text-muted); letter-spacing: 0.5px; }
         .metric-value { font-size: 20px; font-weight: 700; color: var(--text-main); }
-        .metric-sub { font-size: 11px; color: var(--primary); font-weight: 600; line-height: 1.4; }
+        .metric-sub { font-size: 11px; color: var(--primary); font-weight: 600; line-height: 1.4; transition: color 1s ease; }
+
+        .widget-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
 
         /* --- ADMIN CLOUD BANNER --- */
-        .admin-controls { background: rgba(30, 41, 59, 0.7); border: 1px dashed var(--border-color); border-radius: 12px; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .admin-controls { padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; border-style: dashed; }
         .admin-status { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; }
         .status-dot { width: 10px; height: 10px; border-radius: 50%; background: #EF4444; }
         .status-dot.unlocked { background: #10B981; box-shadow: 0 0 10px #10B981; }
-        
-        .cloud-badge { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); color: #10B981; font-size: 12px; font-weight: 600; padding: 8px 16px; border-radius: 8px; display: flex; align-items: center; gap: 8px; }
-        .cloud-badge::before { content: ''; width: 8px; height: 8px; background: #10B981; border-radius: 50%; box-shadow: 0 0 8px #10B981; animation: pulse 2s infinite alternate; }
 
         /* --- BREAK TRACKER SECTION --- */
-        .tracker-section { display: none; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
+        .tracker-section { display: none; padding: 20px; }
         .tracker-header { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 700; color: #FFFFFF; text-transform: uppercase; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 15px; }
         .tracker-grid { display: flex; flex-wrap: wrap; gap: 12px; }
         
-        .break-card { background: var(--bg-body); border: 1px solid var(--border-color); border-radius: 8px; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; gap: 15px; min-width: 380px; flex-grow: 1; max-width: 500px; box-shadow: inset 0 0 20px rgba(0,0,0,0.2); }
-        .break-card.card-official { border-color: var(--official-border); background: var(--official-bg); }
-        .break-card.card-unofficial { border-color: var(--warning-border); background: var(--warning-bg); }
-        .break-card.card-pending { border-color: var(--pending-border); background: var(--pending-bg); animation: pulseAlert 1.5s infinite alternate; }
+        .break-card { background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-color); border-radius: 8px; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; gap: 15px; min-width: 380px; flex-grow: 1; max-width: 500px; box-shadow: inset 0 0 20px rgba(0,0,0,0.2); backdrop-filter: blur(5px); }
+        .break-card.card-official { border-color: var(--official-border); background: rgba(16, 185, 129, 0.05); }
+        .break-card.card-unofficial { border-color: var(--warning-border); background: rgba(245, 158, 11, 0.05); }
+        .break-card.card-pending { border-color: var(--pending-border); background: rgba(239, 68, 68, 0.05); animation: pulseAlert 1.5s infinite alternate; }
         
         .break-info { display: flex; flex-direction: column; gap: 4px; flex-grow: 1; }
         .break-name { font-size: 15px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
@@ -189,28 +142,31 @@
         @keyframes pulseRed { from { opacity: 1; text-shadow: 0 0 5px rgba(239,68,68,0.3); } to { opacity: 0.7; text-shadow: 0 0 15px rgba(239,68,68,0.8); } }
 
         /* --- CONTROLS & TABLE --- */
-        .controls-bar { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; gap: 15px; }
+        .controls-bar { padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; gap: 15px; }
         .search-input-wrapper { position: relative; flex-grow: 1; max-width: 380px; }
-        .search-input { width: 100%; background: var(--bg-body); border: 1px solid var(--border-color); border-radius: 8px; padding: 9px 14px; color: var(--text-main); font-size: 13px; outline: none; }
+        .search-input { width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 8px; padding: 9px 14px; color: var(--text-main); font-size: 13px; outline: none; }
         .search-input:focus { border-color: var(--primary); }
-        .filter-tabs { display: flex; background: var(--bg-body); padding: 4px; border-radius: 8px; border: 1px solid var(--border-color); gap: 4px; flex-wrap: wrap; }
+        .filter-tabs { display: flex; background: rgba(0,0,0,0.3); padding: 4px; border-radius: 8px; border: 1px solid var(--border-color); gap: 4px; flex-wrap: wrap; }
         .tab-btn { background: transparent; border: none; color: var(--text-muted); padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; }
-        .tab-btn.active { background: var(--bg-card-hover); color: var(--text-main); }
+        .tab-btn.active { background: rgba(255,255,255,0.1); color: var(--text-main); }
 
-        .table-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .table-card { overflow: hidden; }
         table { width: 100%; border-collapse: collapse; text-align: left; }
-        thead { background: rgba(15, 23, 42, 0.6); border-bottom: 1px solid var(--border-color); }
+        thead { background: rgba(0, 0, 0, 0.3); border-bottom: 1px solid var(--border-color); }
         th { padding: 14px 18px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); }
         
-        /* DRAG AND DROP STYLING */
+        /* DRAG AND DROP & WARNING GLOW STYLING */
         tbody tr { border-bottom: 1px solid var(--border-color); transition: background-color 0.15s ease, opacity 0.2s ease; }
         tbody tr.draggable { cursor: grab; }
         tbody tr.draggable:active { cursor: grabbing; }
-        tbody tr.drag-over { border-top: 3px dashed var(--primary) !important; background-color: rgba(255, 59, 0, 0.05) !important; }
+        tbody tr.drag-over { border-top: 3px dashed var(--primary) !important; background-color: rgba(255, 255, 255, 0.05) !important; }
         
+        tbody tr.row-on-deck { animation: pulseGold 2s infinite alternate !important; background: rgba(251, 191, 36, 0.15) !important; border-left: 3px solid #FBBF24; }
+        @keyframes pulseGold { from { box-shadow: inset 0 0 5px rgba(251, 191, 36, 0.1); } to { box-shadow: inset 0 0 30px rgba(251, 191, 36, 0.4); } }
+
         tbody tr:last-child { border-bottom: none; }
-        tbody tr:hover { background: var(--bg-card-hover); }
-        tbody tr.row-off-duty { opacity: 0.45; background-color: rgba(15, 23, 42, 0.45); }
+        tbody tr:hover { background: rgba(255,255,255,0.03); }
+        tbody tr.row-off-duty { opacity: 0.45; background-color: rgba(0, 0, 0, 0.3); }
         td { padding: 12px 18px; font-size: 13px; }
 
         .col-pc { width: 70px; text-align: center; color: var(--shift-a-text); font-weight: 700; }
@@ -219,7 +175,7 @@
         .col-quotas { width: 110px; text-align: center; }
         .col-dayoff { width: 170px; }
         .col-shift { width: 230px; }
-        .col-time { width: 110px; font-weight: 700; color: var(--primary); }
+        .col-time { width: 110px; font-weight: 700; color: var(--primary); transition: color 1s ease; }
         .col-overlap { width: 100px; text-align: center; }
 
         .btn-mini-break { background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); border-radius: 6px; padding: 6px 10px; font-size: 12px; font-weight: 600; cursor: pointer; color: var(--text-main); transition: all 0.2s; }
@@ -227,10 +183,10 @@
         .btn-mini-break:disabled { opacity: 0.2; cursor: not-allowed; border-color: transparent; }
         
         .editable-name { display: inline-block; padding: 4px 8px; border-radius: 6px; border: 1px transparent solid; outline: none; transition: all 0.2s ease; }
-        .editable-name[contenteditable="true"]:hover { background: rgba(255, 255, 255, 0.05); border-color: var(--border-color); cursor: pointer; }
-        .editable-name[contenteditable="true"]:focus { background: var(--bg-body); border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary-glow); color: #FFFFFF; }
+        .editable-name[contenteditable="true"]:hover { background: rgba(255, 255, 255, 0.1); border-color: var(--border-color); cursor: pointer; }
+        .editable-name[contenteditable="true"]:focus { background: rgba(0,0,0,0.5); border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary-glow); color: #FFFFFF; }
         
-        .dayoff-select { background: var(--bg-body); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 6px; padding: 6px 10px; font-size: 12px; font-weight: 600; outline: none; cursor: pointer; }
+        .dayoff-select { background: rgba(0,0,0,0.4); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 6px; padding: 6px 10px; font-size: 12px; font-weight: 600; outline: none; cursor: pointer; }
         .dayoff-select:focus { border-color: var(--primary); }
         .dayoff-select:disabled { cursor: not-allowed; opacity: 0.8; border-color: transparent; }
 
@@ -248,9 +204,9 @@
         .badge-overlap { background: var(--overlap-bg); border-color: var(--overlap-border); color: var(--overlap-text); }
         .badge-single { background: var(--single-bg); border-color: var(--single-border); color: var(--single-text); }
         
-        /* --- MODALS --- */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
-        .modal-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; width: 95%; max-width: 650px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        /* --- MODALS & EXTRAS --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+        .modal-card { background: rgba(30, 41, 59, 0.85); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; padding: 24px; width: 95%; max-width: 650px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
         .modal-card-large { max-width: 850px; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; }
         .modal-header h2 { font-size: 18px; font-weight: 700; color: var(--text-main); margin: 0; }
@@ -260,16 +216,25 @@
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
         .form-group { display: flex; flex-direction: column; gap: 6px; }
         .form-group label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700; }
-        .form-control { background: var(--bg-body); border: 1px solid var(--border-color); color: var(--text-main); padding: 10px; border-radius: 8px; font-size: 13px; outline: none; }
+        .form-control { background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); color: var(--text-main); padding: 10px; border-radius: 8px; font-size: 13px; outline: none; }
         .form-control:focus { border-color: var(--primary); }
         
         .emp-list-container { margin-top: 25px; border-top: 1px solid var(--border-color); padding-top: 20px; }
-        .emp-list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: var(--bg-body); border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 8px; }
+        .emp-list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 8px; }
         .emp-list-info { display: flex; flex-direction: column; gap: 4px; }
         .emp-list-name { font-weight: 600; font-size: 14px; color: var(--text-main); }
         .emp-list-meta { font-size: 11px; color: var(--text-muted); font-weight: 600; }
 
-        /* --- LEADERBOARD SPECIFIC --- */
+        /* --- ZEN MODE & CONFETTI --- */
+        #zenMode { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #020617; z-index: 10000; display: none; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transition: opacity 1s ease-in-out; cursor: pointer; backdrop-filter: blur(20px); }
+        #zenMode.active { display: flex; opacity: 1; }
+        .zen-time { font-family: 'Orbitron', sans-serif; font-size: 140px; color: var(--primary); text-shadow: 0 0 40px var(--primary-glow); margin-bottom: 20px; transition: color 1s ease, text-shadow 1s ease;}
+        .zen-msg { font-size: 16px; color: var(--text-muted); font-weight: 300; letter-spacing: 4px; text-transform: uppercase; animation: pulse 3s infinite alternate; }
+        
+        .confetti { position: fixed; width: 10px; height: 10px; z-index: 9999; animation: fall 4s linear forwards; }
+        @keyframes fall { to { transform: translateY(105vh) rotate(720deg); opacity: 0; } }
+
+        /* --- LEADERBOARD & RULES --- */
         .leaderboard-table { width: 100%; border-collapse: collapse; font-size: 13px; }
         .leaderboard-table th { background: rgba(0,0,0,0.2); padding: 10px; text-transform: uppercase; font-size: 10px; color: var(--text-muted); text-align: left; }
         .leaderboard-table td { padding: 10px; border-bottom: 1px solid var(--border-color); }
@@ -277,19 +242,22 @@
         .score-bad { color: #EF4444; font-weight: 700; }
         .score-neutral { color: var(--text-muted); font-weight: 700; }
 
-        /* --- FULL RULES SECTION --- */
-        .rules-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 12px; margin-top: 10px;}
+        .rules-card { padding: 24px; display: flex; flex-direction: column; gap: 12px; margin-top: 10px;}
         .rules-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 8px;}
-        .rules-header h2 { font-size: 14px; font-weight: 700; text-transform: uppercase; color: var(--primary); }
+        .rules-header h2 { font-size: 14px; font-weight: 700; text-transform: uppercase; color: var(--primary); transition: color 1s ease; }
         .rules-header span.ar-title { font-family: 'Cairo', sans-serif; font-size: 15px; font-weight: 700; color: #CBD5E1; }
         
-        .rule-item { background: var(--bg-body); border: 1px solid var(--border-color); border-radius: 8px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; border-left: 3px solid #475569; }
-        .rule-item.featured { border-left-color: var(--primary); background: linear-gradient(90deg, rgba(255,59,0,0.05) 0%, var(--bg-body) 100%); }
+        .rule-item { background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 8px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; border-left: 3px solid #475569; }
+        .rule-item.featured { border-left-color: var(--primary); background: linear-gradient(90deg, var(--primary-glow) 0%, rgba(0,0,0,0.3) 100%); transition: border-color 1s ease, background 1s ease;}
         .rule-ar { direction: rtl; text-align: right; font-family: 'Cairo', 'Tajawal', sans-serif; font-size: 13px; font-weight: 600; color: #F1F5F9; line-height: 1.5; }
         .rule-en { direction: ltr; text-align: left; font-size: 11.5px; color: var(--text-muted); line-height: 1.4; }
 
-        @media (max-width: 900px) {
+        /* --- MOBILE FOCUS DASHBOARD --- */
+        #mobileFocusDashboard { display: none; flex-direction: column; gap: 20px; padding: 30px; border-radius: 16px; text-align: center; margin-top: 20px; }
+        
+        @media (max-width: 1000px) {
             .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+            .widget-grid { grid-template-columns: 1fr; }
             .app-header { flex-direction: column; text-align: center; }
             .holo-clock-container { order: -1; margin-bottom: 10px; width: 100%; }
             .controls-bar, .admin-controls { flex-direction: column; align-items: stretch; gap: 12px; }
@@ -300,6 +268,12 @@
 </head>
 <body>
 
+<!-- ZEN MODE SCREENSAVER -->
+<div id="zenMode" onclick="window.wakeUp()">
+    <div class="zen-time" id="zenTime">--:--</div>
+    <div class="zen-msg">Take a deep breath. Click anywhere to resume.</div>
+</div>
+
 <!-- CLOCK IN MODAL -->
 <div id="clockInModal" class="modal-overlay">
     <div class="modal-card" style="max-width: 400px; text-align: center;">
@@ -309,11 +283,11 @@
         </div>
         <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Select your assigned PC Number / Name, and enter your 4-digit PIN to sign in.</p>
         
-        <select id="clockInId" class="form-control" style="width: 100%; margin-bottom: 15px; font-size: 16px; text-align: center; cursor: pointer;">
+        <select id="clockInId" class="form-control" style="width: 100%; margin-bottom: 15px; font-size: 16px; text-align: center; cursor: pointer; background: rgba(0,0,0,0.5);">
             <option value="">-- Select Your Name / PC --</option>
         </select>
         
-        <input type="password" id="clockInPin" class="form-control" placeholder="4-Digit PIN" maxlength="4" style="width: 100%; margin-bottom: 10px; font-size: 18px; text-align: center; letter-spacing: 4px;" onkeypress="if(event.key === 'Enter') window.processClockIn()">
+        <input type="password" id="clockInPin" class="form-control" placeholder="4-Digit PIN" maxlength="4" style="width: 100%; margin-bottom: 10px; font-size: 18px; text-align: center; letter-spacing: 4px; background: rgba(0,0,0,0.5);" onkeypress="if(event.key === 'Enter') window.processClockIn()">
         
         <p style="font-size: 10px; color: #38BDF8; margin-bottom: 20px; line-height: 1.4;">*If this is your very first time signing in, the PIN you enter above will be permanently saved as your passkey.</p>
         
@@ -325,11 +299,12 @@
 <div id="leaderboardModal" class="modal-overlay">
     <div class="modal-card modal-card-large">
         <div class="modal-header">
-            <h2>🏆 Break Punctuality Rankings (All-Time)</h2>
+            <h2>🏆 Break Gamification Rankings</h2>
             <button class="close-btn" onclick="window.closeLeaderboard()">×</button>
         </div>
         <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">
-            The Punctuality Score represents their <strong>Net Balance</strong> (Minutes Early - Minutes Late). Positive scores mean they give time back to the floor. Negative scores mean they are stealing time.
+            Agents level up and earn badges based on their <strong>Net Balance</strong> (Minutes Early - Minutes Late). <br>
+            <span style="color:#A855F7;">💎 Diamond (+100m)</span> | <span style="color:#94A3B8;">🥈 Silver (+50m)</span> | <span style="color:#D97706;">🥉 Bronze (+20m)</span>
         </p>
         <div id="leaderboardContent">
             <p style="text-align: center; color: var(--primary);">Loading Analytics from Cloud...</p>
@@ -341,18 +316,17 @@
 <div id="employeeModal" class="modal-overlay">
     <div class="modal-card">
         <div class="modal-header">
-            <h2>⚙️ Manage Roster & Shifts</h2>
+            <h2>⚙ Manage Roster & Shifts</h2>
             <button class="close-btn" onclick="window.closeEmployeeManager()">×</button>
         </div>
         
-        <!-- Auto-Schedule Break Engine -->
         <div style="background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.2); padding: 16px; border-radius: 8px; margin-bottom: 20px;">
             <h3 style="font-size: 13px; text-transform: uppercase; color: #10B981; margin-bottom: 10px; font-weight: 700;">⏱️ Auto-Schedule Shift Breaks</h3>
             <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 15px; line-height: 1.4;">Select a shift and set when the very first break starts. The system will automatically stagger 30-minute breaks every 15 minutes for everyone assigned to that shift.</p>
             <div class="form-grid">
                 <div class="form-group">
                     <label>Target Shift Preset</label>
-                    <select id="autoShiftName" class="form-control">
+                    <select id="autoShiftName" class="form-control" style="background: rgba(0,0,0,0.5);">
                         <option value="Shift A (07:00 PM - 02:00 AM)">Shift A (07:00 PM - 02:00 AM)</option>
                         <option value="Shift B (07:30 PM - 02:30 AM)">Shift B (07:30 PM - 02:30 AM)</option>
                         <option value="Shift C (08:00 AM - 03:00 PM)">Shift C (08:00 AM - 03:00 PM)</option>
@@ -363,31 +337,21 @@
                 </div>
                 <div class="form-group">
                     <label>First Break Starts At</label>
-                    <input type="time" id="autoShiftStart" class="form-control">
+                    <input type="time" id="autoShiftStart" class="form-control" style="background: rgba(0,0,0,0.5);">
                 </div>
             </div>
             <button class="btn btn-success" style="width: 100%; margin-top: 5px;" onclick="window.autoAssignBreaks()">Auto-Assign Breaks for Shift</button>
         </div>
 
-        <!-- Add New Employee Form -->
         <div style="background: rgba(56, 189, 248, 0.05); border: 1px solid rgba(56, 189, 248, 0.2); padding: 16px; border-radius: 8px; margin-bottom: 20px;">
             <h3 style="font-size: 13px; text-transform: uppercase; color: #38BDF8; margin-bottom: 15px; font-weight: 700;">➕ Add New Employee</h3>
             <div class="form-grid">
-                <div class="form-group">
-                    <label>Employee Name</label>
-                    <input type="text" id="newEmpName" class="form-control" placeholder="e.g. Ali Hassan">
-                </div>
-                <div class="form-group">
-                    <label>PC Number</label>
-                    <input type="text" id="newEmpPC" class="form-control" placeholder="e.g. PC-14">
-                </div>
-                <div class="form-group">
-                    <label>Team Name</label>
-                    <input type="text" id="newEmpTeam" class="form-control" placeholder="e.g. Phoenix Team" value="Main Team">
-                </div>
+                <div class="form-group"><label>Employee Name</label><input type="text" id="newEmpName" class="form-control" placeholder="e.g. Ali Hassan" style="background: rgba(0,0,0,0.5);"></div>
+                <div class="form-group"><label>PC Number</label><input type="text" id="newEmpPC" class="form-control" placeholder="e.g. PC-14" style="background: rgba(0,0,0,0.5);"></div>
+                <div class="form-group"><label>Team Name</label><input type="text" id="newEmpTeam" class="form-control" placeholder="e.g. Phoenix Team" value="Main Team" style="background: rgba(0,0,0,0.5);"></div>
                 <div class="form-group">
                     <label>Assigned Shift Preset</label>
-                    <select id="newEmpShift" class="form-control">
+                    <select id="newEmpShift" class="form-control" style="background: rgba(0,0,0,0.5);">
                         <option value="Shift A (07:00 PM - 02:00 AM)">Shift A (07:00 PM - 02:00 AM)</option>
                         <option value="Shift B (07:30 PM - 02:30 AM)">Shift B (07:30 PM - 02:30 AM)</option>
                         <option value="Shift C (08:00 AM - 03:00 PM)">Shift C (08:00 AM - 03:00 PM)</option>
@@ -398,31 +362,18 @@
                 </div>
                 <div class="form-group">
                     <label>Permanent Day Off</label>
-                    <select id="newEmpDayOff" class="form-control">
-                        <option value="None">None</option>
-                        <option value="Sunday">Sunday</option>
-                        <option value="Monday">Monday</option>
-                        <option value="Tuesday">Tuesday</option>
-                        <option value="Wednesday">Wednesday</option>
-                        <option value="Thursday">Thursday</option>
-                        <option value="Friday">Friday</option>
-                        <option value="Saturday">Saturday</option>
+                    <select id="newEmpDayOff" class="form-control" style="background: rgba(0,0,0,0.5);">
+                        <option value="None">None</option><option value="Sunday">Sunday</option><option value="Monday">Monday</option><option value="Tuesday">Tuesday</option>
+                        <option value="Wednesday">Wednesday</option><option value="Thursday">Thursday</option><option value="Friday">Friday</option><option value="Saturday">Saturday</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label>Break Start Time</label>
-                    <input type="time" id="newEmpStart" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>Break End Time</label>
-                    <input type="time" id="newEmpEnd" class="form-control">
-                </div>
+                <div class="form-group"><label>Break Start Time</label><input type="time" id="newEmpStart" class="form-control" style="background: rgba(0,0,0,0.5);"></div>
+                <div class="form-group"><label>Break End Time</label><input type="time" id="newEmpEnd" class="form-control" style="background: rgba(0,0,0,0.5);"></div>
             </div>
             <p style="font-size: 10px; color: var(--text-muted); margin-bottom: 10px;">*If you leave break times blank, the system will automatically stagger them 15 mins after the latest break currently assigned in their shift.</p>
             <button class="btn btn-staff" style="width: 100%;" onclick="window.addEmployee()">Save New Employee to Cloud</button>
         </div>
 
-        <!-- Remove Employees List -->
         <div class="emp-list-container">
             <h3 style="font-size: 13px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 15px; font-weight: 700;">🗑️ Current Roster (Lock / Reset / Delete)</h3>
             <div id="modalEmpList"></div>
@@ -431,13 +382,14 @@
 </div>
 
 <div class="workspace-wrapper">
-    <header class="app-header">
+    <header class="app-header glass-panel">
         <div class="header-title-group">
             <h1>
-                Presto Eat Roster
-                <span class="brand-badge" id="viewBadge">Admin Operations</span>
+                Presto CS Operations 
+                <span id="queueOrb" class="queue-orb orb-green" onclick="window.cycleQueueStatus()" title="Admin: Cycle Floor Queue Status"></span>
             </h1>
             <p>Live Cloud Synchronized Roster & Smart Break Automation</p>
+            <span class="brand-badge" id="viewBadge" style="margin-top: 8px; display: inline-block;">Admin Operations</span>
         </div>
 
         <div class="holo-clock-container">
@@ -451,38 +403,74 @@
 
         <div class="actions-group" id="headerActions">
             <button class="btn btn-audit" onclick="window.exportEmployeeHistory()">📅 90-Day Audit</button>
-            <button class="btn btn-warning" onclick="window.openLeaderboard()">🏆 Break Rankings</button>
+            <button class="btn btn-warning" onclick="window.openLeaderboard()">🏆 Gamification</button>
             <button class="btn btn-staff" onclick="window.exportHistory()">📊 Export History</button>
             <button class="btn" onclick="window.exportCSV()">Export Roster</button>
             <button class="btn btn-primary" onclick="window.print()">Print PDF</button>
         </div>
     </header>
 
+    <!-- LIVE DISPATCH TICKER -->
+    <div class="ticker-wrap glass-panel" onclick="window.updateTicker()">
+        <div class="ticker-label">📢 LIVE DISPATCH</div>
+        <div class="ticker-text" id="tickerText">Connecting to Presto live network...</div>
+    </div>
+
     <section class="metrics-grid">
-        <div class="metric-card">
+        <div class="metric-card glass-panel">
             <span class="metric-label">Staff Presence</span>
             <span class="metric-value" id="metricStaffCount">...</span>
             <span class="metric-sub" id="metricShiftBreakdown">Loading...</span>
         </div>
-        <div class="metric-card">
+        <div class="metric-card glass-panel">
             <span class="metric-label">Off Duty / Day Off</span>
             <span class="metric-value" id="metricOffCount">...</span>
             <span class="metric-sub" id="metricOffSub">Loading...</span>
         </div>
-        <div class="metric-card">
+        <div class="metric-card glass-panel">
             <span class="metric-label">Live Floor Coverage</span>
             <span class="metric-value" id="metricFloorStaff">...</span>
             <span class="metric-sub" id="metricFloorSub" style="color: #10B981;">Loading...</span>
         </div>
-        <div class="metric-card">
+        <div class="metric-card glass-panel">
             <span class="metric-label">Active Break Load</span>
             <span class="metric-value" id="metricBreakLoad">...</span>
             <span class="metric-sub">Max 2 Concurrent Allowed</span>
         </div>
     </section>
 
+    <!-- WIDGET GRID (Kudos + Trivia) -->
+    <section class="widget-grid">
+        <div class="metric-card glass-panel" style="background: rgba(236, 72, 153, 0.05); border-color: rgba(236, 72, 153, 0.2);">
+            <span class="metric-label" style="color: #EC4899; display: flex; justify-content: space-between; align-items: center;">
+                💖 Team Kudos Board
+                <button class="btn" style="padding: 2px 8px; font-size: 10px; background: rgba(236, 72, 153, 0.1); color: #EC4899; border-color: transparent;" onclick="window.addKudo()">+ Add</button>
+            </span>
+            <span class="metric-value" id="kudosText" style="font-size: 15px; font-weight: 500; font-style: italic; margin-top: 8px; flex-grow: 1; display:flex; align-items:center;">Loading positive vibes...</span>
+        </div>
+        <div class="metric-card glass-panel" style="background: rgba(168, 85, 247, 0.05); border-color: rgba(168, 85, 247, 0.2);">
+            <span class="metric-label" style="color: #A855F7;">🧠 Daily Brain Break</span>
+            <span class="metric-value" id="triviaQ" style="font-size: 13px; line-height: 1.4; margin-top: 6px; flex-grow: 1;">Loading...</span>
+            <button class="btn btn-mini-break" style="margin-top: auto; color: #A855F7; border-color: rgba(168, 85, 247, 0.3);" onclick="window.revealTrivia()">Reveal Answer</button>
+        </div>
+    </section>
+
+    <!-- MOBILE FOCUS DASHBOARD (Only visible on phones for logged-in staff) -->
+    <div id="mobileFocusDashboard" class="glass-panel">
+        <h2 id="mobileFocusName" style="color: var(--primary); transition: color 1s ease;">Welcome</h2>
+        <div style="font-size: 14px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-top: 10px;">Your Next Scheduled Break In:</div>
+        <div id="mobileFocusTimer" style="font-family: 'Orbitron', sans-serif; font-size: 52px; font-weight: 700; color: #FFFFFF; text-shadow: 0 0 20px var(--primary-glow); margin: 10px 0; transition: text-shadow 1s ease;">--:--:--</div>
+        
+        <hr style="border: 0; height: 1px; background: rgba(255,255,255,0.1); margin: 15px 0;">
+        
+        <div style="font-size: 12px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 15px;">Floor Status & Active Breaks</div>
+        <div id="mobileFocusFloor" style="display:flex; flex-direction: column; gap: 10px; width: 100%;">
+            <!-- Mirrored break cards render here -->
+        </div>
+    </div>
+
     <!-- ACTIVE CLOUD BREAK TRACKER -->
-    <section id="breakTrackerSection" class="tracker-section">
+    <section id="breakTrackerSection" class="tracker-section glass-panel">
         <div class="tracker-header">
             ⚡ Live Active Break Queue
         </div>
@@ -492,7 +480,7 @@
     </section>
 
     <!-- ADMIN CONTROLS -->
-    <div class="admin-controls" id="adminControlsArea">
+    <div class="admin-controls glass-panel" id="adminControlsArea">
         <div class="admin-status">
             <span id="statusDot" class="status-dot"></span>
             <span id="statusText">Roster Controls: Locked (PIN Protected)</span>
@@ -506,7 +494,7 @@
         </div>
     </div>
 
-    <div class="controls-bar">
+    <div class="controls-bar glass-panel">
         <div class="search-input-wrapper">
             <input type="text" id="searchInput" class="search-input" placeholder="Search employee by name, PC, team or shift..." onkeyup="window.filterTable()">
         </div>
@@ -523,7 +511,7 @@
         </div>
     </div>
 
-    <main class="table-card">
+    <main class="table-card glass-panel">
         <table id="scheduleTable">
             <thead>
                 <tr>
@@ -544,18 +532,17 @@
         </table>
     </main>
 
-    <section class="rules-card">
+    <section class="rules-card glass-panel">
         <div class="rules-header">
             <h2>Operational Conduct & Policy Rules</h2>
             <span class="ar-title">تعليمات وإرشادات العمل الرسمية</span>
         </div>
-        
         <div class="rule-item">
             <div class="rule-ar">١. يُحظر التوقف بدون سبب مهني وجيه، أو إجراء المحادثات الجانبية والشخصية خلال أوقات العمل الرسمية.</div>
             <div class="rule-en">1. Loitering without a valid professional reason and engaging in side or personal conversations during official working hours are strictly prohibited.</div>
         </div>
         <div class="rule-item">
-            <div class="rule-ar">٢. مدة الاستراحة المجدولة هي ٣٠ دقيقة فقط. الاستراحات غير المجدولة تقتصر على ١٠ ভাগে دقائق وتتطلب موافقة الاشراف.</div>
+            <div class="rule-ar">٢. مدة الاستراحة المجدولة هي ٣٠ دقيقة فقط. الاستراحات غير المجدولة تقتصر على ١٠ دقائق وتتطلب موافقة الاشراف.</div>
             <div class="rule-en">2. Scheduled breaks are strictly 30 minutes. Unscheduled breaks are limited to 10 minutes and require management approval.</div>
         </div>
         <div class="rule-item">
@@ -579,6 +566,9 @@
 </div>
 
 <script type="module">
+    // --- FORCE REMOVE OLD PERSISTENT LOGINS ---
+    localStorage.removeItem('prestoStaffAuth');
+
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
     import { getDatabase, ref, set, onValue, remove, push, get } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
@@ -601,24 +591,24 @@
         appId: "1:828847025710:web:72f00f90f45fe20f1f79bf"
     };
 
-    // --- FACTION ROUTER (CHANGE THIS FOR NEW TEAMS) ---
     const FACTION_ID = "Phoenix_Team"; 
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     
     // --- PIN CODES ---
-    const SECRET_PIN = "2242";         // For Reshuffling and Approve/Deny buttons
-    const GATEKEEPER_PIN = "9949";     // Initial Admin Page Load PIN
+    const SECRET_PIN = "2242";         
+    const GATEKEEPER_PIN = "9949";     
 
     let isUnlocked = false;
     let activeShiftFilter = 'all';
+    let topAgent = ""; 
+    let gamificationBadges = {}; // Maps name to 💎, 🥈, 🥉, 👑
 
-    // Staff View UI Toggle
     const urlParams = new URLSearchParams(window.location.search);
     const isStaffView = urlParams.get('view') === 'staff';
 
-    // --- NEW: ADMIN GATEKEEPER ---
+    // --- ADMIN GATEKEEPER ---
     if (!isStaffView) {
         const sessionAdmin = sessionStorage.getItem('adminAuthed');
         if (sessionAdmin !== GATEKEEPER_PIN) {
@@ -630,7 +620,6 @@
             }
         }
     }
-    // -----------------------------
     
     // --- ADVANCED ANTI-SPOOF MOBILE DETECTION ---
     const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -638,10 +627,8 @@
     const isSpoofedAndroid = navigator.maxTouchPoints > 0 && screen.height > screen.width;
     const isTouchOnly = window.matchMedia("(pointer: coarse)").matches && !window.matchMedia("(pointer: fine)").matches;
     const isSmallScreen = Math.min(window.screen.width, window.screen.height) < 700; 
-    
     const isMobile = isMobileUA || isSpoofedMac || isSpoofedAndroid || isTouchOnly || isSmallScreen || window.innerWidth < 800;
 
-    // Hard-blocker function to prevent console command hacking
     function enforcePCWorkstation() {
         if (isStaffView && isMobile) {
             alert("📱 Mobile Blocked: You must physically use your designated PC workstation to sign in, request breaks, or return from breaks.");
@@ -660,34 +647,42 @@
         document.getElementById('viewBadge').style.borderColor = "rgba(59, 130, 246, 0.3)";
     }
 
+    // --- CIRCADIAN SHIFT THEMES (GLASSMORPHISM) ---
+    function updateCircadianTheme() {
+        const hour = new Date().getHours();
+        const root = document.documentElement;
+        if (hour >= 6 && hour < 12) { // Morning: Cyan
+            root.style.setProperty('--primary', '#06B6D4');
+            root.style.setProperty('--primary-hover', '#0891B2');
+            root.style.setProperty('--primary-glow', 'rgba(6, 182, 212, 0.15)');
+        } else if (hour >= 12 && hour < 17) { // Afternoon: Orange/Gold
+            root.style.setProperty('--primary', '#F59E0B');
+            root.style.setProperty('--primary-hover', '#D97706');
+            root.style.setProperty('--primary-glow', 'rgba(245, 158, 11, 0.15)');
+        } else { // Night: Purple
+            root.style.setProperty('--primary', '#8B5CF6');
+            root.style.setProperty('--primary-hover', '#7C3AED');
+            root.style.setProperty('--primary-glow', 'rgba(139, 92, 246, 0.15)');
+        }
+    }
+    setInterval(updateCircadianTheme, 60000);
+    updateCircadianTheme();
+
     const shiftOptions = [
-        "Shift A (07:00 PM - 02:00 AM)",
-        "Shift B (07:30 PM - 02:30 AM)",
-        "Shift C (08:00 AM - 03:00 PM)",
-        "Shift D (04:00 PM - 11:00 PM)",
-        "Shift E (09:00 AM - 03:00 PM)",
-        "Shift G (12:00 PM - 07:00 PM)"
+        "Shift A (07:00 PM - 02:00 AM)", "Shift B (07:30 PM - 02:30 AM)", "Shift C (08:00 AM - 03:00 PM)",
+        "Shift D (04:00 PM - 11:00 PM)", "Shift E (09:00 AM - 03:00 PM)", "Shift G (12:00 PM - 07:00 PM)"
     ];
 
     const fixedSlots = [
-        { timeStart: "08:30 PM", timeEnd: "09:00 PM", overlap: "2 Staff" },
-        { timeStart: "08:45 PM", timeEnd: "09:15 PM", overlap: "2 Staff" },
-        { timeStart: "09:00 PM", timeEnd: "09:30 PM", overlap: "2 Staff" },
-        { timeStart: "09:15 PM", timeEnd: "09:45 PM", overlap: "2 Staff" },
-        { timeStart: "09:30 PM", timeEnd: "10:00 PM", overlap: "2 Staff" },
-        { timeStart: "09:45 PM", timeEnd: "10:15 PM", overlap: "2 Staff" },
-        { timeStart: "10:00 PM", timeEnd: "10:30 PM", overlap: "2 Staff" },
-        { timeStart: "10:15 PM", timeEnd: "10:45 PM", overlap: "2 Staff" },
-        { timeStart: "10:30 PM", timeEnd: "11:00 PM", overlap: "2 Staff" },
-        { timeStart: "10:45 PM", timeEnd: "11:15 PM", overlap: "2 Staff" },
-        { timeStart: "11:00 PM", timeEnd: "11:30 PM", overlap: "2 Staff" },
-        { timeStart: "11:15 PM", timeEnd: "11:45 PM", overlap: "2 Staff" },
-        { timeStart: "11:30 PM", timeEnd: "12:00 AM", overlap: "2 Staff" },
-        { timeStart: "11:45 PM", timeEnd: "12:15 AM", overlap: "2 Staff" },
-        { timeStart: "12:00 AM", timeEnd: "12:30 AM", overlap: "2 Staff" },
-        { timeStart: "12:15 AM", timeEnd: "12:45 AM", overlap: "2 Staff" },
-        { timeStart: "12:30 AM", timeEnd: "01:00 AM", overlap: "2 Staff" },
-        { timeStart: "12:45 AM", timeEnd: "01:15 AM", overlap: "2 Staff" },
+        { timeStart: "08:30 PM", timeEnd: "09:00 PM", overlap: "2 Staff" }, { timeStart: "08:45 PM", timeEnd: "09:15 PM", overlap: "2 Staff" },
+        { timeStart: "09:00 PM", timeEnd: "09:30 PM", overlap: "2 Staff" }, { timeStart: "09:15 PM", timeEnd: "09:45 PM", overlap: "2 Staff" },
+        { timeStart: "09:30 PM", timeEnd: "10:00 PM", overlap: "2 Staff" }, { timeStart: "09:45 PM", timeEnd: "10:15 PM", overlap: "2 Staff" },
+        { timeStart: "10:00 PM", timeEnd: "10:30 PM", overlap: "2 Staff" }, { timeStart: "10:15 PM", timeEnd: "10:45 PM", overlap: "2 Staff" },
+        { timeStart: "10:30 PM", timeEnd: "11:00 PM", overlap: "2 Staff" }, { timeStart: "10:45 PM", timeEnd: "11:15 PM", overlap: "2 Staff" },
+        { timeStart: "11:00 PM", timeEnd: "11:30 PM", overlap: "2 Staff" }, { timeStart: "11:15 PM", timeEnd: "11:45 PM", overlap: "2 Staff" },
+        { timeStart: "11:30 PM", timeEnd: "12:00 AM", overlap: "2 Staff" }, { timeStart: "11:45 PM", timeEnd: "12:15 AM", overlap: "2 Staff" },
+        { timeStart: "12:00 AM", timeEnd: "12:30 AM", overlap: "2 Staff" }, { timeStart: "12:15 AM", timeEnd: "12:45 AM", overlap: "2 Staff" },
+        { timeStart: "12:30 AM", timeEnd: "01:00 AM", overlap: "2 Staff" }, { timeStart: "12:45 AM", timeEnd: "01:15 AM", overlap: "2 Staff" },
         { timeStart: "01:00 AM", timeEnd: "01:30 AM", overlap: "1 Staff" }
     ];
 
@@ -717,6 +712,130 @@
     let currentEmployees = [];
     let currentBreaks = {};
     let timerInterval = null;
+
+    // --- ZEN MODE (IDLE SCREENSAVER) ---
+    let idleTime = 0;
+    const zenDiv = document.getElementById('zenMode');
+    const zenTimeEl = document.getElementById('zenTime');
+    
+    function resetIdle() {
+        idleTime = 0;
+        if (zenDiv.classList.contains('active')) {
+            zenDiv.classList.remove('active');
+        }
+    }
+    window.wakeUp = resetIdle;
+    window.addEventListener('mousemove', resetIdle);
+    window.addEventListener('keydown', resetIdle);
+    window.addEventListener('touchstart', resetIdle);
+    window.addEventListener('click', resetIdle);
+
+    setInterval(() => {
+        if (isStaffView && isMobile) return; 
+        idleTime++;
+        if (idleTime >= 300) { // 5 minutes
+            zenDiv.classList.add('active');
+            const d = new Date().toLocaleTimeString('en-US', { timeZone: 'Africa/Tripoli', hour: '2-digit', minute:'2-digit' });
+            zenTimeEl.innerText = d;
+        }
+    }, 1000);
+
+    // --- CONFETTI ENGINE ---
+    window.shootConfetti = function() {
+        const colors = ['#38BDF8', '#10B981', '#FBBF24', '#EF4444', '#A855F7'];
+        for(let i=0; i<60; i++) {
+            let conf = document.createElement('div');
+            conf.className = 'confetti';
+            conf.style.left = Math.random() * 100 + 'vw';
+            conf.style.top = '-10px';
+            conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            conf.style.animationDuration = (Math.random() * 2 + 2) + 's';
+            document.body.appendChild(conf);
+            setTimeout(() => conf.remove(), 5000);
+        }
+    };
+
+    // --- KUDOS WIDGET ENGINE ---
+    let kudosList = ["Great teamwork today everyone!", "Keep pushing, you're doing amazing."];
+    let kudosIndex = 0;
+    
+    onValue(ref(db, `${FACTION_ID}/system/kudos`), (snapshot) => {
+        const data = snapshot.val();
+        if (data) kudosList = Object.values(data);
+    });
+
+    setInterval(() => {
+        if(kudosList.length > 0) {
+            kudosIndex = (kudosIndex + 1) % kudosList.length;
+            const el = document.getElementById('kudosText');
+            if(el) {
+                el.style.opacity = 0;
+                setTimeout(() => {
+                    el.innerText = `"${kudosList[kudosIndex]}"`;
+                    el.style.opacity = 1;
+                }, 500);
+            }
+        }
+    }, 8000);
+
+    window.addKudo = function() {
+        if (!requireAdmin()) return;
+        const note = prompt("Submit a quick shoutout or kudo for the team:");
+        if (note && note.trim() !== "") {
+            push(ref(db, `${FACTION_ID}/system/kudos`), note.trim());
+        }
+    };
+
+    // --- PALATE CLEANSER TRIVIA ---
+    const triviaDB = [
+        { q: "Customer Service Bingo: Who heard a dog barking on a call today?", a: "Free Space! Take a deep breath." },
+        { q: "I speak without a mouth and hear without ears. What am I?", a: "An echo." },
+        { q: "What has hands but cannot clap?", a: "A clock." },
+        { q: "I have keys but no locks. I have space but no room. What am I?", a: "A keyboard." },
+        { q: "What belongs to you, but other people use it more than you do?", a: "Your name." },
+        { q: "What has to be broken before you can use it?", a: "An egg." },
+        { q: "I’m tall when I’m young, and I’m short when I’m old. What am I?", a: "A candle." }
+    ];
+    const todayTrivia = triviaDB[new Date().getDate() % triviaDB.length];
+    document.getElementById('triviaQ').innerText = todayTrivia.q;
+    window.revealTrivia = function() {
+        document.getElementById('triviaQ').innerText = todayTrivia.a;
+        document.getElementById('triviaQ').style.color = "#F8FAFC";
+        document.getElementById('triviaQ').style.fontWeight = "800";
+    };
+
+    // --- FIREBASE LISTENERS FOR TICKER & ORB ---
+    onValue(ref(db, `${FACTION_ID}/system/tickerMsg`), (snapshot) => {
+        let msg = snapshot.val();
+        if(!msg) msg = "Welcome to Presto CS Operations. Have a great shift!";
+        document.getElementById('tickerText').innerText = msg;
+    });
+
+    onValue(ref(db, `${FACTION_ID}/system/queueStatus`), (snapshot) => {
+        let status = snapshot.val() || 'green';
+        const orb = document.getElementById('queueOrb');
+        orb.className = 'queue-orb';
+        orb.classList.add('orb-' + status);
+        orb.setAttribute('data-status', status);
+    });
+
+    window.updateTicker = function() {
+        if (isStaffView || !requireAdmin()) return;
+        let newMsg = prompt("Enter a new live dispatch announcement:");
+        if (newMsg !== null && newMsg.trim() !== "") {
+            set(ref(db, `${FACTION_ID}/system/tickerMsg`), newMsg.trim());
+        }
+    };
+
+    window.cycleQueueStatus = function() {
+        if (isStaffView || !requireAdmin()) return;
+        const orb = document.getElementById('queueOrb');
+        let current = orb.getAttribute('data-status');
+        let next = 'green';
+        if(current === 'green') next = 'yellow';
+        else if(current === 'yellow') next = 'red';
+        set(ref(db, `${FACTION_ID}/system/queueStatus`), next);
+    };
 
     // --- DRAG AND DROP GLOBALS ---
     let dragStartIndex = null;
@@ -759,13 +878,11 @@
         if (!isUnlocked || isStaffView || dragStartIndex === null) return;
         if (dragStartIndex === targetIndex) return;
 
-        // Prevent dragging if the table is currently filtered
         if (activeShiftFilter !== 'all' || document.getElementById('searchInput').value.trim() !== '') {
             alert("Drag and Drop is disabled while searching or filtering. Please switch back to 'All Staff'.");
             return;
         }
 
-        // Lock protection loop
         let minIdx = Math.min(dragStartIndex, targetIndex);
         let maxIdx = Math.max(dragStartIndex, targetIndex);
         for(let i = minIdx; i <= maxIdx; i++) {
@@ -775,20 +892,15 @@
             }
         }
 
-        // 1. Extract the exact time slots of the current board layout
         let timeSlots = currentEmployees.map(emp => ({
             timeStart: emp.timeStart,
             timeEnd: emp.timeEnd,
             overlap: emp.overlap
         }));
 
-        // 2. Remove the dragged employee
         let draggedEmp = currentEmployees.splice(dragStartIndex, 1)[0];
-
-        // 3. Insert them at the new target index
         currentEmployees.splice(targetIndex, 0, draggedEmp);
 
-        // 4. Re-assign the static time slots back to the newly ordered employees
         currentEmployees.forEach((emp, i) => {
             emp.timeStart = timeSlots[i].timeStart;
             emp.timeEnd = timeSlots[i].timeEnd;
@@ -799,7 +911,6 @@
         dragStartIndex = null;
     };
 
-
     // --- HEADER AUTH UI ---
     function updateHeaderAuthUI() {
         const authBtnContainer = document.getElementById('staffAuthContainer');
@@ -808,26 +919,24 @@
 
         if (!authBtnContainer) return;
 
-        // If Staff View AND on a Mobile Phone -> Block Sign-In completely (View Only)
         if (isStaffView && isMobile) {
-            authBtnContainer.innerHTML = `<span class="brand-badge" style="background: rgba(148, 163, 184, 0.15); color: #94A3B8; border-color: rgba(148, 163, 184, 0.3); padding: 8px 16px; font-size: 13px;">📱 Mobile View Only</span>`;
+            authBtnContainer.innerHTML = `<span class="brand-badge" style="background: rgba(148, 163, 184, 0.15); color: #94A3B8; border-color: rgba(148, 163, 184, 0.3); padding: 8px 16px; font-size: 13px;">📱 Mobile Mode Active</span>`;
             if (clockInModal) clockInModal.style.display = 'none';
             return;
         }
 
-        const localUser = localStorage.getItem('prestoStaffAuth');
+        const localUser = sessionStorage.getItem('prestoStaffAuth');
         if (localUser) {
-            authBtnContainer.innerHTML = `<button class="btn btn-warning" style="font-size: 14px; padding: 10px 20px;" onclick="window.processClockOut()">🚪 Sign Out (${localUser})</button>`;
-            if (clockInModal) clockInModal.style.display = 'none'; // Keep hidden if logged in
+            authBtnContainer.innerHTML = `<button class="btn btn-warning" style="font-size: 14px; padding: 10px 20px;" onclick="window.processClockOut()">🚪 Sign Out (${localUser.split(' ')[0]})</button>`;
+            if (clockInModal) clockInModal.style.display = 'none'; 
         } else {
             authBtnContainer.innerHTML = `<button class="btn btn-success" style="font-size: 14px; padding: 10px 20px;" onclick="document.getElementById('clockInModal').style.display='flex'">🕒 Sign In</button>`;
             
-            // IF STAFF VIEW AND NOT LOGGED IN (AND NOT ON MOBILE) -> FORCE MODAL AND REMOVE CLOSE BUTTON
             if (isStaffView && clockInModal) {
                 clockInModal.style.display = 'flex';
-                if (closeBtn) closeBtn.style.display = 'none'; // Cannot exit without signing in
+                if (closeBtn) closeBtn.style.display = 'none'; 
             } else {
-                if (closeBtn) closeBtn.style.display = 'block'; // Admin view can close it
+                if (closeBtn) closeBtn.style.display = 'block'; 
             }
         }
     }
@@ -866,6 +975,50 @@
         return hours + ':' + minutes + ' ' + ampm;
     }
 
+    // --- RPG GAMIFICATION ENGINE ---
+    async function calculateCrownBadge() {
+        try {
+            const snapshot = await get(ref(db, `${FACTION_ID}/history`));
+            if (!snapshot.exists()) return;
+
+            const allHistory = snapshot.val();
+            let stats = {};
+
+            Object.values(allHistory).forEach(dayRecord => {
+                Object.values(dayRecord).forEach(log => {
+                    if (!stats[log.name]) stats[log.name] = { earlyMins: 0, lateMins: 0 };
+                    
+                    if (log.variance.includes('LATE by')) {
+                        const mins = parseInt(log.variance.replace(/[^0-9]/g, ''));
+                        if (!isNaN(mins)) stats[log.name].lateMins += mins;
+                    } else if (log.variance.includes('EARLY by')) {
+                        const mins = parseInt(log.variance.replace(/[^0-9]/g, ''));
+                        if (!isNaN(mins)) stats[log.name].earlyMins += mins;
+                    }
+                });
+            });
+
+            let topScore = -9999;
+            let leader = "";
+            gamificationBadges = {};
+
+            Object.keys(stats).forEach(name => {
+                const score = stats[name].earlyMins - stats[name].lateMins;
+                if(score > topScore) { topScore = score; leader = name; }
+                
+                // Assign RPG Badges
+                if(score > 100) gamificationBadges[name] = '💎';
+                else if(score > 50) gamificationBadges[name] = '🥈';
+                else if(score > 20) gamificationBadges[name] = '🥉';
+            });
+            
+            topAgent = leader;
+            if(topAgent) gamificationBadges[topAgent] = '👑';
+            renderTable(); 
+        } catch(e) { console.log("Leaderboard badge calc skipped."); }
+    }
+    setTimeout(calculateCrownBadge, 2000);
+
     // --- DAILY AUTO-RESET LOGIC ---
     setInterval(() => {
         if (isStaffView || currentEmployees.length === 0) return; 
@@ -894,25 +1047,17 @@
         }, { onlyOnce: true });
     }, 60000);
 
-    // --- REBUILT BULLETPROOF TIME PARSER ---
     function parseTimeToday(timeStr) {
         if(!timeStr || timeStr === '--:--') return new Date();
         const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
-        
         let cleaned = timeStr.trim().replace(/\s+/g, ' ');
         const parts = cleaned.split(' ');
         if(parts.length < 2) return new Date(); 
-        
-        const time = parts[0];
-        const modifier = parts[1].toUpperCase();
-        
+        const time = parts[0], modifier = parts[1].toUpperCase();
         let timeParts = time.split(':');
-        let hours = parseInt(timeParts[0], 10);
-        let minutes = parseInt(timeParts[1], 10);
-        
+        let hours = parseInt(timeParts[0], 10), minutes = parseInt(timeParts[1], 10);
         if (hours === 12) hours = modifier === 'AM' ? 0 : 12;
         else if (modifier === 'PM') hours += 12;
-        
         let d = new Date(tzStr);
         d.setHours(hours, minutes, 0, 0);
         return d;
@@ -932,44 +1077,29 @@
         const regex = /([0-1]?[0-9]:[0-5][0-9]\s*(?:AM|PM|am|pm))/gi;
         const times = shiftString.match(regex);
         if (!times || times.length < 2) return true;
-
         const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
         const now = new Date(tzStr).getTime();
-        
         let tStart = parseTimeToday(times[0]).getTime();
         let tEnd = parseTimeToday(times[1]).getTime();
-        
         if (tStart > tEnd) {
-            if (new Date(tzStr).getHours() < 12) {
-                tStart -= 24 * 3600 * 1000; 
-            } else {
-                tEnd += 24 * 3600 * 1000; 
-            }
+            if (new Date(tzStr).getHours() < 12) tStart -= 24 * 3600 * 1000; 
+            else tEnd += 24 * 3600 * 1000; 
         }
-        
         tStart -= (30 * 60000); 
-        
         return now >= tStart && now <= tEnd;
     }
 
     function isOfficialBreakTime(index) {
         const emp = currentEmployees[index];
         if (!emp.timeStart || emp.timeStart === '--:--') return false;
-        
         const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
         const now = new Date(tzStr).getTime();
-
         let bStart = parseTimeToday(emp.timeStart).getTime();
         let bEnd = parseTimeToday(emp.timeEnd).getTime();
-
         if (bStart > bEnd) {
-            if (new Date(tzStr).getHours() < 12) {
-                bStart -= 24 * 3600 * 1000; 
-            } else {
-                bEnd += 24 * 3600 * 1000; 
-            }
+            if (new Date(tzStr).getHours() < 12) bStart -= 24 * 3600 * 1000; 
+            else bEnd += 24 * 3600 * 1000; 
         }
-        
         bStart -= (15 * 60000); 
         return now >= bStart && now <= bEnd;
     }
@@ -986,7 +1116,7 @@
     window.processClockIn = function() {
         if (enforcePCWorkstation()) return;
 
-        const inputId = document.getElementById('clockInId').value; // Now reads from Dropdown
+        const inputId = document.getElementById('clockInId').value; 
         const inputPin = document.getElementById('clockInPin').value.trim();
 
         if (!inputId || !inputPin) {
@@ -1002,22 +1132,28 @@
         }
 
         let emp = currentEmployees[empIndex];
+        let isFirstTime = false;
 
-        if (!emp.passkey) {
+        if (!emp.passkey || emp.passkey === "") {
             if (inputPin.length !== 4 || isNaN(inputPin)) {
                 alert("Please enter a valid 4-digit numeric PIN to setup your account.");
                 return;
             }
             emp.passkey = inputPin;
-            alert("✅ PIN successfully registered! Please remember this 4-digit PIN for future sign-ins.");
+            isFirstTime = true;
         } else if (emp.passkey !== inputPin) {
             alert("❌ Incorrect PIN. Please try again.");
             return;
         }
 
         if (!isCurrentlyOnShift(emp.shift)) {
-            alert("❌ You cannot sign in right now. You are currently outside of your scheduled shift window.");
-            return;
+            if (isFirstTime) {
+                set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
+                alert("✅ PIN successfully registered!\n\nHowever, you are outside your scheduled shift window, so you cannot fully sign in to the floor yet. Please return closer to your shift time.");
+            } else {
+                alert("❌ You cannot sign in right now. You are currently outside of your scheduled shift window.");
+            }
+            return; 
         }
 
         const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
@@ -1042,17 +1178,22 @@
             });
         }
         
-        emp.dayOff = "None"; // Ensure they are marked present
+        emp.dayOff = "None"; 
 
-        // Set Local Browser Session
-        localStorage.setItem('prestoStaffAuth', emp.name);
+        sessionStorage.setItem('prestoStaffAuth', emp.name);
         updateHeaderAuthUI();
 
         set(ref(db, `${FACTION_ID}/roster`), currentEmployees).then(() => {
             document.getElementById('clockInId').value = '';
             document.getElementById('clockInPin').value = '';
             document.getElementById('clockInModal').style.display = 'none';
-            alert(`✅ Welcome, ${emp.name}!\n\nYou are now authenticated on this device.`);
+            
+            if (isFirstTime) {
+                alert(`✅ PIN Registered & Sign-In Successful!\n\nWelcome, ${emp.name}. You are now authenticated.`);
+            } else {
+                alert(`✅ Welcome back, ${emp.name}!\n\nYou are now authenticated on this device.`);
+            }
+            
             renderTable();
         }).catch(err => {
             alert("Error saving clock-in data: " + err.message);
@@ -1063,7 +1204,7 @@
         if (enforcePCWorkstation()) return;
 
         if(confirm("Are you sure you want to sign out of this device?")) {
-            localStorage.removeItem('prestoStaffAuth');
+            sessionStorage.removeItem('prestoStaffAuth');
             updateHeaderAuthUI();
             renderTable();
         }
@@ -1093,7 +1234,6 @@
                 if (!emp.overlap) emp.overlap = "1 Staff";
                 if (!emp.pcNumber) emp.pcNumber = "PC-" + (i+1).toString().padStart(2, '0');
                 if (!emp.teamName) emp.teamName = "Main Team"; 
-                
                 if (typeof emp.isLocked === 'undefined') emp.isLocked = (defaultEmployees[i] && typeof defaultEmployees[i].isLocked !== 'undefined') ? defaultEmployees[i].isLocked : false;
                 if (typeof emp.quota30 === 'undefined') emp.quota30 = 0;
                 if (typeof emp.quota10 === 'undefined') emp.quota10 = 0;
@@ -1128,7 +1268,6 @@
             set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
         }
         
-        // Auto-populate the Sign-In Dropdown
         const clockInSelect = document.getElementById('clockInId');
         if (clockInSelect) {
             const currentSelection = clockInSelect.value;
@@ -1150,14 +1289,69 @@
         renderActiveBreaks();
     });
 
+    // --- MOBILE FOCUS DASHBOARD LOGIC ---
+    function updateMobileFocusDashboard() {
+        if (!isStaffView || !isMobile) return;
+        const authUser = sessionStorage.getItem('prestoStaffAuth');
+        
+        if (!authUser) {
+            document.getElementById('mobileFocusDashboard').style.display = 'none';
+            if(document.querySelector('.table-card')) document.querySelector('.table-card').style.display = '';
+            return;
+        }
+
+        // Hide bulky admin panels
+        document.querySelector('.table-card').style.display = 'none';
+        document.querySelector('.controls-bar').style.display = 'none';
+        document.querySelector('.rules-card').style.display = 'none';
+        
+        // Show Focus View
+        document.getElementById('mobileFocusDashboard').style.display = 'flex';
+        document.getElementById('mobileFocusName').innerText = `Welcome, ${authUser.split(' ')[0]}`;
+
+        // 1. Calculate Countdown
+        const emp = currentEmployees.find(e => e.name === authUser);
+        if(emp && emp.timeStart && emp.timeStart !== '--:--') {
+            const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
+            let startMs = parseTimeToday(emp.timeStart).getTime();
+            let endMs = parseTimeToday(emp.timeEnd).getTime();
+            if (startMs > endMs) {
+                if (new Date(tzStr).getHours() < 12) startMs -= 24 * 3600 * 1000;
+            }
+            let now = Date.now();
+            
+            if(startMs > now) {
+                let diff = Math.floor((startMs - now)/1000);
+                let h = Math.floor(diff/3600);
+                let m = Math.floor((diff%3600)/60);
+                let s = diff%60;
+                document.getElementById('mobileFocusTimer').innerText = `${h>0?h+':':''}${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+                document.getElementById('mobileFocusTimer').style.color = '#FFFFFF';
+                document.getElementById('mobileFocusTimer').style.textShadow = '0 0 20px var(--primary-glow)';
+            } else if(now >= startMs && now <= endMs) {
+                document.getElementById('mobileFocusTimer').innerText = "IT'S TIME!";
+                document.getElementById('mobileFocusTimer').style.color = '#10B981';
+                document.getElementById('mobileFocusTimer').style.textShadow = '0 0 20px rgba(16, 185, 129, 0.4)';
+            } else {
+                document.getElementById('mobileFocusTimer').innerText = "COMPLETED";
+                document.getElementById('mobileFocusTimer').style.color = 'var(--text-muted)';
+                document.getElementById('mobileFocusTimer').style.textShadow = 'none';
+            }
+        } else {
+            document.getElementById('mobileFocusTimer').innerText = "NO BREAK";
+        }
+    }
+
     // --- RENDERING ---
     function renderTable() {
         if (!currentEmployees || currentEmployees.length === 0) return;
         const tbody = document.getElementById('tableBody');
         tbody.innerHTML = '';
 
-        const localAuthUser = localStorage.getItem('prestoStaffAuth');
+        const localAuthUser = sessionStorage.getItem('prestoStaffAuth');
         const isDraggableList = !isStaffView && isUnlocked && activeShiftFilter === 'all' && document.getElementById('searchInput').value.trim() === '';
+        const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
+        const nowTimeMs = new Date(tzStr).getTime();
 
         currentEmployees.forEach((emp, index) => {
             const isOffToday = emp.dayOff !== 'None';
@@ -1203,7 +1397,16 @@
             const tr = document.createElement('tr');
             if (isOffToday || isOffShift) tr.classList.add('row-off-duty');
 
-            // DRAG & DROP ENABLE
+            let bStartMs = parseTimeToday(emp.timeStart).getTime();
+            let bEndMs = parseTimeToday(emp.timeEnd).getTime();
+            if (bStartMs > bEndMs) {
+                if (new Date(tzStr).getHours() < 12) bStartMs -= 24 * 3600 * 1000;
+            }
+            let diffMins = (bStartMs - nowTimeMs) / 60000;
+            if (diffMins > 0 && diffMins <= 5 && emp.clockInTime && !isOffToday && !isOffShift) {
+                tr.classList.add('row-on-deck');
+            }
+
             if (isDraggableList) {
                 tr.setAttribute('draggable', 'true');
                 tr.classList.add('draggable');
@@ -1235,7 +1438,6 @@
                 ? `<div style="font-size: 10px; color: #10B981; font-weight: 700; margin-top: 6px; ${!isStaffView ? 'cursor:pointer;' : ''}" ${!isStaffView ? `onclick="window.voidClockIn(${index})"` : ''} title="${!isStaffView ? 'Admin: Click to VOID this sign-in' : ''}">▶ In: ${emp.clockInTime}</div>` 
                 : `<div style="font-size: 10px; color: var(--text-muted); font-weight: 600; margin-top: 6px;">No Sign-In</div>`;
 
-            // STAFF VIEW AUTH LOGIC
             let canViewButtons = true;
             if (isStaffView && localAuthUser !== emp.name) {
                 canViewButtons = false;
@@ -1264,6 +1466,8 @@
                 actionButtonsHtml += '<span class="lock-badge">🔒 FIXED</span>';
             }
 
+            let badgeHtml = gamificationBadges[emp.name] ? `<span title="Punctuality Level" style="cursor:help; font-size:16px;">${gamificationBadges[emp.name]}</span>` : '';
+
             tr.innerHTML = `
                 <td class="col-id">${index + 1}</td>
                 <td class="col-pc">
@@ -1272,7 +1476,10 @@
                 </td>
                 <td class="col-name">
                     <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 6px;">
-                        <span class="editable-name" ${editableAttr} onblur="window.updateName(${index}, this.innerText)">${emp.name}</span>
+                        <div>
+                            <span class="editable-name" ${editableAttr} onblur="window.updateName(${index}, this.innerText)">${emp.name}</span>
+                            ${badgeHtml}
+                        </div>
                         <div style="display: flex; gap: 4px; flex-wrap: wrap; align-items: center;">
                             ${actionButtonsHtml}
                         </div>
@@ -1317,19 +1524,28 @@
     function renderActiveBreaks() {
         const section = document.getElementById('breakTrackerSection');
         const grid = document.getElementById('breakTrackerGrid');
+        const mobileFloor = document.getElementById('mobileFocusFloor'); // For Mobile Mirror
+        
         const breakKeys = Object.keys(currentBreaks);
-        const localAuthUser = localStorage.getItem('prestoStaffAuth');
+        const localAuthUser = sessionStorage.getItem('prestoStaffAuth');
         
         const visibleBreaks = breakKeys.filter(key => currentBreaks[key].status !== 'completed');
 
+        // QUEUE POSITION MATH
+        const pendingList = visibleBreaks
+            .filter(key => currentBreaks[key].status === 'pending')
+            .sort((a,b) => (currentBreaks[a].requestTime || 0) - (currentBreaks[b].requestTime || 0));
+
         if (visibleBreaks.length === 0) {
             section.style.display = 'none';
+            if(mobileFloor) mobileFloor.innerHTML = '<div style="color:var(--text-muted); font-size:13px; font-weight:600; text-transform:uppercase;">No one is on break right now. Floor is full.</div>';
             if (timerInterval) clearInterval(timerInterval);
             return;
         }
 
         section.style.display = 'block';
         grid.innerHTML = '';
+        if(mobileFloor) mobileFloor.innerHTML = '';
 
         visibleBreaks.forEach(key => {
             const b = currentBreaks[key];
@@ -1347,6 +1563,9 @@
             const endText = isPrayer ? `⏱️ Open Return` : (endTimeMs ? `🎯 Due: ${formatAMPM(endTimeMs)}` : '🎯 Due: --:--');
 
             if (b.status === 'pending') {
+                const pos = pendingList.indexOf(key) + 1;
+                const waitEst = pos * 10;
+
                 card.className = `break-card card-pending`;
                 let adminControls = '';
                 if (!isStaffView) {
@@ -1359,7 +1578,7 @@
                 card.innerHTML = `
                     <div class="break-info">
                         <span class="break-name">${b.name} ${pcBadge} ${teamBadge} ${shiftBadge}</span>
-                        <span class="break-type" style="color: #EF4444;">🔴 PENDING ADMIN APPROVAL ${b.limit > 0 ? `(${b.limit}m)` : ''}</span>
+                        <span class="break-type" style="color: #EF4444;">🔴 QUEUE POSITION: #${pos} (Est Wait: ~${waitEst}m)</span>
                         <div style="font-size:11px; color:#EF4444; margin-top:4px; font-weight:700;">Type: ${b.type}</div>
                     </div>
                     ${adminControls}
@@ -1391,7 +1610,6 @@
                 const isOfficial = b.limit === 30;
                 card.className = `break-card ${isOfficial ? 'card-official' : 'card-unofficial'}`;
                 
-                // CONDITIONAL RETURN BUTTON LOGIC WITH MOBILE TRAP
                 let returnBtnHtml = '';
                 let canReturn = true;
 
@@ -1401,7 +1619,6 @@
                 if (canReturn) {
                     returnBtnHtml = `<button class="btn btn-primary" onclick="window.requestReturn('${key}')">Request Return</button>`;
                 } else if (!isStaffView) {
-                    // Failsafe override for Admins
                     returnBtnHtml = `<button class="btn btn-primary" style="background: #F59E0B; border-color: #F59E0B;" onclick="if(confirm('Admin Override: Force return for ${b.name}?')) window.requestReturn('${key}')" title="Admin Override">Force Return</button>`;
                 } else {
                     if (isStaffView && isMobile) {
@@ -1427,6 +1644,16 @@
                 `;
             }
             grid.appendChild(card);
+
+            // MIRROR TO MOBILE FOCUS DASHBOARD
+            if(mobileFloor) {
+                const mobCard = card.cloneNode(true);
+                // Remove return buttons on mobile view
+                let btn = mobCard.querySelector('.break-timer-group button');
+                if(btn) btn.remove();
+                mobCard.style.width = '100%';
+                mobileFloor.appendChild(mobCard);
+            }
         });
 
         if (timerInterval) clearInterval(timerInterval);
@@ -1476,6 +1703,9 @@
             if (isOvertime) timerEl.classList.add('overtime');
             else timerEl.classList.remove('overtime');
         });
+
+        // Trigger Mobile Focus Update seamlessly
+        updateMobileFocusDashboard();
     }
 
     // --- LIVE KPI LOGIC (STRICT SHIFT FILTERING) ---
@@ -1585,6 +1815,7 @@
             set(ref(db, `${FACTION_ID}/breaks/` + safeKey), {
                 name: empName,
                 startTime: 0,
+                requestTime: Date.now(), // For Queue Position
                 limit: 0, 
                 type: "Prayer",
                 status: "pending"
@@ -1635,6 +1866,7 @@
             set(ref(db, `${FACTION_ID}/breaks/` + safeKey), {
                 name: empName,
                 startTime: 0,
+                requestTime: Date.now(), // For queue position
                 limit: 10,
                 type: "Unscheduled (10m)",
                 status: "pending"
@@ -1679,8 +1911,16 @@
         const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
         const breakData = currentBreaks[key];
         if (breakData) {
+            
+            const now = new Date(tzStr).getTime();
+            if (breakData.endTime > 0) {
+                const diffMs = now - breakData.endTime;
+                const varianceMins = Math.round(diffMs / 60000);
+                if (varianceMins === 0) window.shootConfetti(); 
+            }
+
             breakData.status = 'return_pending'; 
-            breakData.returnRequestedTime = new Date(tzStr).getTime(); 
+            breakData.returnRequestedTime = now; 
             set(ref(db, `${FACTION_ID}/breaks/` + key), breakData);
         }
     };
@@ -1688,7 +1928,6 @@
     window.approveReturn = function(key) {
         if (!requireAdmin()) return;
         
-        // Timeout to bypass modern browser popup blockers on consecutive prompts
         setTimeout(() => {
             const breakData = currentBreaks[key];
             if (breakData) {
@@ -1710,6 +1949,8 @@
                     varianceMins = Math.round((breakData.returnRequestedTime - breakData.startTime) / 60000);
                     variance = `Took ${varianceMins} min total`;
                 }
+
+                if (variance === "EXACT ON TIME") window.shootConfetti();
 
                 const emp = currentEmployees.find(e => e.name === breakData.name);
                 const clockInToSave = (emp && emp.clockInTime) ? emp.clockInTime : "No Sign-In";
@@ -1786,9 +2027,7 @@
                             <th>Rank</th>
                             <th>Employee Name</th>
                             <th>Net Balance</th>
-                            <th>Total Late</th>
-                            <th>Total Early</th>
-                            <th>Perfect Returns</th>
+                            <th>Level</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1797,22 +2036,24 @@
             sortedStaff.forEach((emp, index) => {
                 let rankStr = `${index + 1}`;
                 if (index === 0) rankStr = '🥇 1';
-                if (index === 1) rankStr = '🥈 2';
-                if (index === 2) rankStr = '🥉 3';
-
+                
                 let scoreClass = 'score-neutral';
                 let scoreText = `${emp.score} min`;
                 if (emp.score > 0) { scoreClass = 'score-good'; scoreText = `+${emp.score} min`; }
                 if (emp.score < 0) { scoreClass = 'score-bad'; scoreText = `${emp.score} min`; }
+
+                let badge = 'Novice';
+                if(index === 0) badge = '👑 Champion';
+                else if (emp.score > 100) badge = '💎 Diamond';
+                else if (emp.score > 50) badge = '🥈 Silver';
+                else if (emp.score > 20) badge = '🥉 Bronze';
 
                 html += `
                     <tr>
                         <td style="font-weight: 800;">${rankStr}</td>
                         <td style="font-weight: 700; color: var(--text-main);">${emp.name}</td>
                         <td class="${scoreClass}">${scoreText}</td>
-                        <td style="color: #EF4444;">${emp.late > 0 ? emp.late + ' min' : '-'}</td>
-                        <td style="color: #10B981;">${emp.early > 0 ? emp.early + ' min' : '-'}</td>
-                        <td style="color: var(--text-main);">${emp.perfect}</td>
+                        <td style="color: var(--text-muted);">${badge}</td>
                     </tr>
                 `;
             });
@@ -1875,7 +2116,6 @@
             }
         });
 
-        // Re-sort global roster chronologically
         currentEmployees.sort((a, b) => {
             if (a.shift !== b.shift) return a.shift.localeCompare(b.shift);
             const getSortTime = (t) => {
@@ -1961,7 +2201,6 @@
         try {
             currentEmployees.push(newEmp);
             
-            // Re-sort global roster chronologically
             currentEmployees.sort((a, b) => {
                 if (a.shift !== b.shift) return a.shift.localeCompare(b.shift);
                 const getSortTime = (t) => {
@@ -2126,7 +2365,6 @@
         Object.keys(shiftGroups).forEach(shift => {
             let group = shiftGroups[shift];
             
-            // Sort extracted time slots chronologically
             group.timeSlots.sort((a, b) => {
                 const getSortTime = (t) => {
                     if (!t || t === '--:--') return 9999999999999;
@@ -2137,13 +2375,11 @@
                 return getSortTime(a.timeStart) - getSortTime(b.timeStart);
             });
             
-            // Shuffle ALL unlocked employees within this shift
             for (let i = group.unlockedIndices.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [group.unlockedIndices[i], group.unlockedIndices[j]] = [group.unlockedIndices[j], group.unlockedIndices[i]];
             }
             
-            // Re-deal the sorted time slots back to the shuffled employees
             group.unlockedIndices.forEach((idx, i) => {
                 currentEmployees[idx].timeStart = group.timeSlots[i].timeStart;
                 currentEmployees[idx].timeEnd = group.timeSlots[i].timeEnd;
@@ -2151,7 +2387,6 @@
             });
         });
         
-        // Final Global Sort to keep the UI table clean
         currentEmployees.sort((a, b) => {
             if (a.shift !== b.shift) return a.shift.localeCompare(b.shift);
             const getSortTime = (t) => {
