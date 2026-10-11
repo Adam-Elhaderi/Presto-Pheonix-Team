@@ -10,13 +10,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&family=Tajawal:wght@400;500;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
     <style>
         :root { 
+            /* Circadian Variables (Updated by JS) */
             --primary: #06B6D4; 
             --primary-hover: #0891B2;
             --primary-glow: rgba(6, 182, 212, 0.15); 
+            
             --text-main: #F8FAFC; 
             --text-muted: #94A3B8; 
             --border-color: rgba(255, 255, 255, 0.1); 
             
+            /* SHIFT COLORS */
             --shift-a-bg: rgba(56, 189, 248, 0.1); --shift-a-border: rgba(56, 189, 248, 0.3); --shift-a-text: #38BDF8; 
             --shift-b-bg: rgba(244, 63, 94, 0.1); --shift-b-border: rgba(244, 63, 94, 0.3); --shift-b-text: #FB7185; 
             --shift-c-bg: rgba(16, 185, 129, 0.1); --shift-c-border: rgba(16, 185, 129, 0.3); --shift-c-text: #10B981; 
@@ -32,16 +35,32 @@
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', system-ui, sans-serif; }
 
+        /* LIQUID GLASSMORPHISM BACKGROUND */
         body { 
-            background: linear-gradient(135deg, #020617, #0F172A, #1E1B4B, #020617); background-size: 400% 400%; animation: gradientBG 15s ease infinite;
-            color: var(--text-main); min-height: 100vh; padding: 30px 20px; display: flex; justify-content: center; 
+            background: linear-gradient(135deg, #020617, #0F172A, #1E1B4B, #020617);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: var(--text-main); 
+            min-height: 100vh; 
+            padding: 30px 20px; 
+            display: flex; 
+            justify-content: center; 
         }
         @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
         .workspace-wrapper { width: 100%; max-width: 1450px; display: flex; flex-direction: column; gap: 20px; z-index: 2; position: relative; }
 
-        .glass-panel { background: rgba(30, 41, 59, 0.45); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid var(--border-color); border-radius: 12px; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); }
+        /* LIQUID GLASS PANELS */
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.45);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
 
+        /* --- HEADER & TICKER --- */
         .app-header { padding: 24px 30px; display: flex; justify-content: space-between; align-items: center; position: relative; overflow: hidden; flex-wrap: wrap; gap: 15px; }
         .app-header::before { content: ''; position: absolute; top: 0; left: 0; width: 6px; height: 100%; background: var(--primary); transition: background 1s ease; }
         .header-title-group h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px; }
@@ -54,6 +73,7 @@
         .orb-red { background: #EF4444; box-shadow: 0 0 20px #EF4444; animation: pulseAlert 1s infinite alternate; }
         @keyframes pulseYellow { from { opacity: 1; box-shadow: 0 0 10px #FBBF24; } to { opacity: 0.6; box-shadow: 0 0 20px #FBBF24; } }
 
+        /* BIG STAFF ORB STYLES */
         .big-orb { width: 80px; height: 80px; border-radius: 50%; margin: 0 auto; transition: all 0.5s ease; border: 4px solid rgba(255,255,255,0.1); }
         .big-orb-green { background: #10B981; box-shadow: 0 0 40px #10B981; }
         .big-orb-yellow { background: #FBBF24; box-shadow: 0 0 40px #FBBF24; animation: pulseYellowBig 2s infinite alternate; }
@@ -82,10 +102,12 @@
         .btn-audit { background: #8B5CF6; border-color: #8B5CF6; color: white; }
         .btn-audit:hover { background: #7C3AED; box-shadow: 0 0 15px rgba(139, 92, 246, 0.3); }
 
+        /* --- MODERN HOLOGRAM CLOCK --- */
         .holo-clock-container { display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle, rgba(0, 30, 60, 0.2) 0%, rgba(0, 10, 25, 0.5) 100%); border: 1px solid rgba(0, 243, 255, 0.2); border-radius: 16px; padding: 12px 28px; box-shadow: inset 0 0 15px rgba(0, 243, 255, 0.05); position: relative; min-width: 240px; overflow: hidden; backdrop-filter: blur(10px); }
         .holo-time { font-family: 'Orbitron', sans-serif; font-size: 26px; font-weight: 700; color: #00f3ff; text-shadow: 0 0 10px rgba(0, 243, 255, 0.8), 0 0 20px rgba(0, 119, 255, 0.6); letter-spacing: 2px; line-height: 1; z-index: 1; }
         .holo-date { font-family: 'Orbitron', sans-serif; font-size: 10px; color: #88ccff; text-transform: uppercase; letter-spacing: 3px; margin-top: 8px; text-shadow: 0 0 5px rgba(0, 243, 255, 0.5); z-index: 1; }
 
+        /* --- METRICS GRID --- */
         .metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
         .metric-card { padding: 18px; display: flex; flex-direction: column; gap: 6px; position: relative; overflow: hidden; }
         .metric-label { font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--text-muted); letter-spacing: 0.5px; }
@@ -94,11 +116,13 @@
 
         .widget-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
 
+        /* --- ADMIN CLOUD BANNER --- */
         .admin-controls { padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; border-style: dashed; }
         .admin-status { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; }
         .status-dot { width: 10px; height: 10px; border-radius: 50%; background: #EF4444; }
         .status-dot.unlocked { background: #10B981; box-shadow: 0 0 10px #10B981; }
 
+        /* --- BREAK TRACKER SECTION --- */
         .tracker-section { display: none; padding: 20px; }
         .tracker-header { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 700; color: #FFFFFF; text-transform: uppercase; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 15px; }
         .tracker-grid { display: flex; flex-wrap: wrap; gap: 12px; }
@@ -121,9 +145,11 @@
         .break-timer.overtime { color: #EF4444; animation: pulseRed 1s infinite alternate; }
         .break-load-warning { color: #EF4444 !important; animation: pulseRed 1s infinite alternate; }
         
+        @keyframes pulse { from { opacity: 1; } to { opacity: 0.6; } }
         @keyframes pulseAlert { from { box-shadow: 0 0 5px rgba(239, 68, 68, 0.2); } to { box-shadow: 0 0 15px rgba(239, 68, 68, 0.6); } }
         @keyframes pulseRed { from { opacity: 1; text-shadow: 0 0 5px rgba(239,68,68,0.3); } to { opacity: 0.7; text-shadow: 0 0 15px rgba(239,68,68,0.8); } }
 
+        /* --- CONTROLS & TABLE --- */
         .controls-bar { padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; gap: 15px; }
         .search-input-wrapper { position: relative; flex-grow: 1; max-width: 380px; }
         .search-input { width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 8px; padding: 9px 14px; color: var(--text-main); font-size: 13px; outline: none; }
@@ -137,6 +163,7 @@
         thead { background: rgba(0, 0, 0, 0.3); border-bottom: 1px solid var(--border-color); }
         th { padding: 14px 18px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); }
         
+        /* DRAG AND DROP & WARNING GLOW STYLING */
         tbody tr { border-bottom: 1px solid var(--border-color); transition: background-color 0.15s ease, opacity 0.2s ease; }
         tbody tr.draggable { cursor: grab; }
         tbody tr.draggable:active { cursor: grabbing; }
@@ -422,10 +449,14 @@
             <!-- Dynamically populated by JS based on sign-in status and device -->
         </div>
 
-        <div class="actions-group" id="headerActions">
+        <!-- SEPARATED ACTIONS FOR ADMIN VS STAFF VISIBILITY -->
+        <div class="actions-group" id="staffHeaderActions">
             <button class="btn" style="background: rgba(139, 92, 246, 0.1); border-color: #8B5CF6; color: #8B5CF6;" onclick="window.openTrafficGame()">🛵 Mini Game</button>
-            <button class="btn btn-audit" onclick="window.exportEmployeeHistory()">📅 90-Day Audit</button>
             <button class="btn btn-warning" onclick="window.openLeaderboard()">🏆 Gamification</button>
+        </div>
+
+        <div class="actions-group" id="adminHeaderActions">
+            <button class="btn btn-audit" onclick="window.exportEmployeeHistory()">📅 90-Day Audit</button>
             <button class="btn btn-staff" onclick="window.exportHistory()">📊 Export History</button>
             <button class="btn" onclick="window.exportCSV()">Export Roster</button>
             <button class="btn btn-primary" onclick="window.print()">Print PDF</button>
@@ -473,7 +504,7 @@
         <div class="metric-card glass-panel" style="background: rgba(236, 72, 153, 0.05); border-color: rgba(236, 72, 153, 0.2);">
             <span class="metric-label" style="color: #EC4899; display: flex; justify-content: space-between; align-items: center;">
                 💖 Team Kudos Board
-                <button class="btn" style="padding: 2px 8px; font-size: 10px; background: rgba(236, 72, 153, 0.1); color: #EC4899; border-color: transparent;" onclick="window.addKudo()">+ Add</button>
+                <button id="kudosAddBtn" class="btn" style="padding: 2px 8px; font-size: 10px; background: rgba(236, 72, 153, 0.1); color: #EC4899; border-color: transparent;" onclick="window.addKudo()">+ Add</button>
             </span>
             <span class="metric-value" id="kudosText" style="font-size: 15px; font-weight: 500; font-style: italic; margin-top: 8px; flex-grow: 1; display:flex; align-items:center;">Loading positive vibes...</span>
         </div>
@@ -649,9 +680,17 @@
     }
 
     if (isStaffView) {
+        // HIDE ADMIN TOOLS FROM STAFF ENTIRELY
         document.getElementById('adminControlsArea').style.display = 'none';
-        document.getElementById('headerActions').style.display = 'none';
+        document.getElementById('adminHeaderActions').style.display = 'none';
         document.getElementById('filterTabs').style.display = 'none'; 
+        
+        // DISABLE KUDOS ADD BUTTON AND TICKER CLICK FOR STAFF
+        const kudoBtn = document.getElementById('kudosAddBtn');
+        if(kudoBtn) kudoBtn.style.display = 'none';
+        document.querySelector('.ticker-wrap').style.cursor = 'default';
+        document.getElementById('queueOrb').style.cursor = 'default';
+        
         document.getElementById('viewBadge').innerText = "Staff Dashboard";
         document.getElementById('viewBadge').style.background = "rgba(59, 130, 246, 0.15)";
         document.getElementById('viewBadge').style.color = "#3B82F6";
@@ -849,7 +888,6 @@
         board.innerHTML = '<div class="game-exit"></div>';
         document.getElementById('gameLevelDisplay').innerText = `Level ${currentLevelIndex + 1}`;
         
-        // Deep copy the level so restarting works
         trafficLevel = JSON.parse(JSON.stringify(trafficLevels[currentLevelIndex]));
 
         trafficLevel.forEach((c) => {
@@ -1052,6 +1090,80 @@
         return false;
     }
 
+    // --- DRAG AND DROP GLOBALS ---
+    let dragStartIndex = null;
+
+    window.handleDragStart = function(e, index) {
+        if (!isUnlocked || isStaffView) return;
+        dragStartIndex = index;
+        e.currentTarget.style.opacity = '0.4';
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', index);
+    };
+
+    window.handleDragEnd = function(e) {
+        e.currentTarget.style.opacity = '1';
+        let rows = document.querySelectorAll('#scheduleTable tbody tr');
+        rows.forEach(r => r.classList.remove('drag-over'));
+    };
+
+    window.handleDragOver = function(e) {
+        if (!isUnlocked || isStaffView) return;
+        e.preventDefault(); 
+        e.dataTransfer.dropEffect = 'move';
+        let row = e.currentTarget;
+        if (!row.classList.contains('drag-over')) {
+            row.classList.add('drag-over');
+        }
+    };
+
+    window.handleDragLeave = function(e) {
+        e.currentTarget.classList.remove('drag-over');
+    };
+
+    window.handleDrop = function(e, targetIndex) {
+        e.stopPropagation();
+        e.preventDefault();
+        
+        let rows = document.querySelectorAll('#scheduleTable tbody tr');
+        rows.forEach(r => r.classList.remove('drag-over'));
+
+        if (!isUnlocked || isStaffView || dragStartIndex === null) return;
+        if (dragStartIndex === targetIndex) return;
+
+        if (activeShiftFilter !== 'all' || document.getElementById('searchInput').value.trim() !== '') {
+            alert("Drag and Drop is disabled while searching or filtering. Please switch back to 'All Staff'.");
+            return;
+        }
+
+        let minIdx = Math.min(dragStartIndex, targetIndex);
+        let maxIdx = Math.max(dragStartIndex, targetIndex);
+        for(let i = minIdx; i <= maxIdx; i++) {
+            if(currentEmployees[i].isLocked) {
+                alert("Cannot drag here. One or more employees in the shifting range are LOCKED (🔒). Unlock them first to manually slide the schedule.");
+                return;
+            }
+        }
+
+        let timeSlots = currentEmployees.map(emp => ({
+            timeStart: emp.timeStart,
+            timeEnd: emp.timeEnd,
+            overlap: emp.overlap
+        }));
+
+        let draggedEmp = currentEmployees.splice(dragStartIndex, 1)[0];
+        currentEmployees.splice(targetIndex, 0, draggedEmp);
+
+        currentEmployees.forEach((emp, i) => {
+            emp.timeStart = timeSlots[i].timeStart;
+            emp.timeEnd = timeSlots[i].timeEnd;
+            emp.overlap = timeSlots[i].overlap;
+        });
+
+        set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
+        dragStartIndex = null;
+    };
+
     // --- HEADER AUTH UI ---
     function updateHeaderAuthUI() {
         const authBtnContainer = document.getElementById('staffAuthContainer');
@@ -1209,7 +1321,7 @@
         let ampm = hours >= 12 ? 'PM' : 'AM';
         hours = hours % 12;
         hours = hours ? hours : 12;
-        return `${hours.toString().padStart(2, '0')}:${m} ${ampm}`;
+        return `${hours.toString().padStart(2, '0')}:${m}${ampm}`;
     }
 
     function isCurrentlyOnShift(shiftString) {
@@ -1406,7 +1518,7 @@
             currentEmployees.forEach(emp => {
                 const opt = document.createElement('option');
                 opt.value = emp.name; 
-                opt.innerText = `${emp.pcNumber} | ${emp.name}`;
+                opt.innerText = `${emp.pcNumber} \vert{}${emp.name}`;
                 clockInSelect.appendChild(opt);
             });
             if (currentSelection) clockInSelect.value = currentSelection;
@@ -1419,56 +1531,6 @@
         currentBreaks = snapshot.val() || {};
         renderActiveBreaks();
     });
-
-    // --- MOBILE FOCUS DASHBOARD LOGIC ---
-    function updateMobileFocusDashboard() {
-        if (!isStaffView || !isMobile) return;
-        const authUser = sessionStorage.getItem('prestoStaffAuth');
-        
-        if (!authUser) {
-            document.getElementById('mobileFocusDashboard').style.display = 'none';
-            if(document.querySelector('.table-card')) document.querySelector('.table-card').style.display = '';
-            return;
-        }
-
-        document.querySelector('.table-card').style.display = 'none';
-        document.querySelector('.controls-bar').style.display = 'none';
-        document.querySelector('.rules-card').style.display = 'none';
-        
-        document.getElementById('mobileFocusDashboard').style.display = 'flex';
-        document.getElementById('mobileFocusName').innerText = `Welcome, ${authUser.split(' ')[0]}`;
-
-        const emp = currentEmployees.find(e => e.name === authUser);
-        if(emp && emp.timeStart && emp.timeStart !== '--:--') {
-            const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
-            let startMs = parseTimeToday(emp.timeStart).getTime();
-            let endMs = parseTimeToday(emp.timeEnd).getTime();
-            if (startMs > endMs) {
-                if (new Date(tzStr).getHours() < 12) startMs -= 24 * 3600 * 1000;
-            }
-            let now = Date.now();
-            
-            if(startMs > now) {
-                let diff = Math.floor((startMs - now)/1000);
-                let h = Math.floor(diff/3600);
-                let m = Math.floor((diff%3600)/60);
-                let s = diff%60;
-                document.getElementById('mobileFocusTimer').innerText = `${h>0?h+':':''}${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-                document.getElementById('mobileFocusTimer').style.color = '#FFFFFF';
-                document.getElementById('mobileFocusTimer').style.textShadow = '0 0 20px var(--primary-glow)';
-            } else if(now >= startMs && now <= endMs) {
-                document.getElementById('mobileFocusTimer').innerText = "IT'S TIME!";
-                document.getElementById('mobileFocusTimer').style.color = '#10B981';
-                document.getElementById('mobileFocusTimer').style.textShadow = '0 0 20px rgba(16, 185, 129, 0.4)';
-            } else {
-                document.getElementById('mobileFocusTimer').innerText = "COMPLETED";
-                document.getElementById('mobileFocusTimer').style.color = 'var(--text-muted)';
-                document.getElementById('mobileFocusTimer').style.textShadow = 'none';
-            }
-        } else {
-            document.getElementById('mobileFocusTimer').innerText = "NO BREAK";
-        }
-    }
 
     // --- RENDERING ---
     function renderTable() {
@@ -1545,7 +1607,6 @@
                 tr.setAttribute('ondrop', `window.handleDrop(event, ${index})`);
             }
 
-            const editableAttr = isStaffView ? 'contenteditable="false"' : 'contenteditable="true"';
             const selectDisabled = isStaffView ? 'disabled' : '';
             const breakDisabled = (isOffToday || isOffShift || !emp.clockInTime) ? 'disabled title="Employee is absent, off shift, or has not signed in"' : 'title="Request Break"';
 
@@ -1596,16 +1657,31 @@
 
             let badgeHtml = gamificationBadges[emp.name] ? `<span title="Punctuality Level" style="cursor:help; font-size:16px;">${gamificationBadges[emp.name]}</span>` : '';
 
+            // Ensure no editable HTML structures exist in Staff View
+            const pcEdit = !isStaffView ? ` contenteditable="true" onblur="window.updatePC(${index}, this.innerText)"` : ``;
+            const nameEdit = !isStaffView ? ` contenteditable="true" onblur="window.updateName(${index}, this.innerText)"` : ``;
+            const teamEdit = !isStaffView ? ` contenteditable="true" onblur="window.updateTeam(${index}, this.innerText)"` : ``;
+
+            let permOffHtml = isStaffView 
+                ? `<span style="font-size: 11px; font-weight: 600; color: var(--text-muted);">${emp.assignedDayOff === 'None' ? 'No Perm Off' : 'Perm Off: ' + emp.assignedDayOff}</span>`
+                : `<select class="dayoff-select" onchange="window.updatePermanentDayOff(${index}, this.value)">
+                    ${selectOptionsHtml}
+                   </select>`;
+
+            let presentBtnHtml = isStaffView
+                ? `<span style="display:inline-block; margin-top:6px; padding:4px 8px; border-radius:4px; border:1px solid ${isOffToday ? 'rgba(248,113,113,0.3)' : 'rgba(16,185,129,0.3)'}; color:${isOffToday ? '#F87171' : '#10B981'}; font-size:11px; font-weight:700;">${presentBtnText}</span>`
+                : `<button class="btn-mini-break" style="margin-top:6px; text-align: center; ${presentBtnStyle}" onclick="window.toggleForceAbsent(${index})">${presentBtnText}</button>`;
+
             tr.innerHTML = `
                 <td class="col-id">${index + 1}</td>
                 <td class="col-pc">
-                    <span class="editable-name" ${editableAttr} onblur="window.updatePC(${index}, this.innerText)">${emp.pcNumber}</span>
+                    <span class="editable-name" ${pcEdit}>${emp.pcNumber}</span>
                     ${clockInHtml}
                 </td>
                 <td class="col-name">
                     <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 6px;">
                         <div>
-                            <span class="editable-name" ${editableAttr} onblur="window.updateName(${index}, this.innerText)">${emp.name}</span>
+                            <span class="editable-name" ${nameEdit}>${emp.name}</span>
                             ${badgeHtml}
                         </div>
                         <div style="display: flex; gap: 4px; flex-wrap: wrap; align-items: center;">
@@ -1624,19 +1700,15 @@
                     </div>
                 </td>
                 <td class="col-dayoff">
-                    <div style="display: flex; flex-direction: column; gap: 6px;">
-                        <select class="dayoff-select" ${selectDisabled} onchange="window.updatePermanentDayOff(${index}, this.value)">
-                            ${selectOptionsHtml}
-                        </select>
-                        <button class="btn-mini-break" ${selectDisabled} style="text-align: center; ${presentBtnStyle}" onclick="window.toggleForceAbsent(${index})">
-                            ${presentBtnText}
-                        </button>
+                    <div style="display: flex; flex-direction: column;">
+                        ${permOffHtml}
+                        ${presentBtnHtml}
                     </div>
                 </td>
                 <td class="col-shift">
                     ${shiftBadgeHtml}
                     <br>
-                    <span class="status-badge badge-team editable-name" ${editableAttr} onblur="window.updateTeam(${index}, this.innerText)">${emp.teamName || 'No Team'}</span>
+                    <span class="status-badge badge-team editable-name" ${teamEdit}>${emp.teamName || 'No Team'}</span>
                 </td>
                 <td class="col-time">${emp.timeStart}</td>
                 <td class="col-time">${emp.timeEnd}</td>
@@ -1888,800 +1960,6 @@
         document.getElementById('countPresent').innerText = presentCount;
         document.getElementById('countDayOff').innerText = offCount;
     }
-
-    window.resetQuota = function(index, type) {
-        if(isStaffView) return;
-        if(!requireAdmin()) return;
-        
-        const emp = currentEmployees[index];
-        if (type === '30') {
-            let newVal = prompt(`Set total 30-Min breaks taken for ${emp.name} (Max 1):`, emp.quota30 || 0);
-            if (newVal !== null && !isNaN(newVal)) {
-                emp.quota30 = parseInt(newVal);
-                set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
-            }
-        } else {
-            let newVal = prompt(`Set total 10-Min breaks taken for ${emp.name} (Max 3):`, emp.quota10 || 0);
-            if (newVal !== null && !isNaN(newVal)) {
-                emp.quota10 = parseInt(newVal);
-                set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
-            }
-        }
-    };
-
-    window.startBreak = function(empName, index, requestedType = 'standard') {
-        if (enforcePCWorkstation()) return;
-
-        const safeKey = empName.replace(/[.#$[\]]/g, '');
-        if (currentBreaks[safeKey] && currentBreaks[safeKey].status !== 'completed') {
-            alert(`🚨 BLOCK: ${empName} already has an active or pending break request.`);
-            return;
-        }
-
-        const activeBreaksList = Object.values(currentBreaks).filter(b => b.status !== 'completed');
-        const currentPrayers = activeBreaksList.filter(b => b.type === 'Prayer').length;
-        const current10Mins = activeBreaksList.filter(b => b.type === 'Unscheduled (10m)').length;
-
-        const emp = currentEmployees[index];
-        const q30 = emp.quota30 || 0;
-        const q10 = emp.quota10 || 0;
-        const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
-
-        if (requestedType === 'prayer') {
-            if (currentPrayers >= 2) {
-                alert(`🚨 BLOCK: Maximum prayer capacity reached! (2 employees are currently on or waiting for prayer). Please wait until someone returns.`);
-                return;
-            }
-            alert(`A request for a Prayer break has been sent to the Admin.`);
-            set(ref(db, `${FACTION_ID}/breaks/` + safeKey), {
-                name: empName,
-                startTime: 0,
-                requestTime: Date.now(), 
-                limit: 0, 
-                type: "Prayer",
-                status: "pending"
-            });
-            return;
-        }
-
-        const isOfficial = isOfficialBreakTime(index);
-
-        if (isOfficial) {
-            if (q30 >= 1) {
-                alert(`🚨 BLOCK: ${empName} has already used their 1 official 30-minute break for today!`);
-                return;
-            }
-
-            emp.quota30 = q30 + 1;
-            set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
-
-            let bStart = parseTimeToday(emp.timeStart).getTime();
-            let bEnd = parseTimeToday(emp.timeEnd).getTime();
-            if (bStart > bEnd) {
-                if (new Date(tzStr).getHours() >= 12) {
-                    bEnd += 24 * 3600 * 1000; 
-                }
-            }
-            const endTimeMs = bEnd;
-
-            set(ref(db, `${FACTION_ID}/breaks/` + safeKey), {
-                name: empName,
-                startTime: new Date(tzStr).getTime(), 
-                endTime: endTimeMs, 
-                limit: 30, 
-                type: "Scheduled Slot",
-                status: "active"
-            });
-        } else {
-            if (q10 >= 3) {
-                alert(`🚨 BLOCK: ${empName} has already used all 3 of their 10-minute quick breaks today!`);
-                return;
-            }
-
-            if (current10Mins >= 1) {
-                alert(`🚨 BLOCK: Maximum 10-minute break capacity reached! (1 employee is currently on or waiting for a quick break). Please wait until they return.`);
-                return;
-            }
-
-            alert(`It is currently not the scheduled break time for ${empName}.\n\nA request for a 10-minute quick break has been sent to the Admin.`);
-            set(ref(db, `${FACTION_ID}/breaks/` + safeKey), {
-                name: empName,
-                startTime: 0,
-                requestTime: Date.now(), 
-                limit: 10,
-                type: "Unscheduled (10m)",
-                status: "pending"
-            });
-        }
-    };
-
-    window.approveBreak = function(key) {
-        if (!requireAdmin()) return;
-        const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
-        const nowMs = new Date(tzStr).getTime();
-        
-        const breakData = currentBreaks[key];
-        breakData.status = 'active';
-        breakData.startTime = nowMs; 
-        
-        if (breakData.limit > 0) {
-            breakData.endTime = nowMs + (breakData.limit * 60000); 
-        } else {
-            breakData.endTime = 0; 
-        }
-        
-        if (breakData.limit === 10) {
-            const empIndex = currentEmployees.findIndex(e => e.name === breakData.name);
-            if (empIndex > -1) {
-                currentEmployees[empIndex].quota10 = (currentEmployees[empIndex].quota10 || 0) + 1;
-                set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
-            }
-        }
-        
-        set(ref(db, `${FACTION_ID}/breaks/` + key), breakData);
-    };
-
-    window.denyBreak = function(key) {
-        if (!requireAdmin()) return;
-        remove(ref(db, `${FACTION_ID}/breaks/` + key)); 
-    };
-
-    window.requestReturn = function(key) {
-        if (enforcePCWorkstation()) return;
-
-        const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
-        const breakData = currentBreaks[key];
-        if (breakData) {
-            
-            const now = new Date(tzStr).getTime();
-            if (breakData.endTime > 0) {
-                const diffMs = now - breakData.endTime;
-                const varianceMins = Math.round(diffMs / 60000);
-                if (varianceMins === 0) window.shootConfetti(); 
-            }
-
-            breakData.status = 'return_pending'; 
-            breakData.returnRequestedTime = now; 
-            set(ref(db, `${FACTION_ID}/breaks/` + key), breakData);
-        }
-    };
-
-    window.approveReturn = function(key) {
-        if (!requireAdmin()) return;
-        
-        setTimeout(() => {
-            const breakData = currentBreaks[key];
-            if (breakData) {
-                const adminNote = prompt("Optional: Enter a note for this return (or leave blank):") || "";
-                const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
-                const businessDate = new Date(new Date(tzStr).getTime() - (4 * 3600 * 1000)).toISOString().split('T')[0];
-
-                let variance = "N/A";
-                let varianceMins = 0;
-
-                if (breakData.endTime > 0) {
-                    const diffMs = breakData.returnRequestedTime - breakData.endTime;
-                    varianceMins = Math.round(diffMs / 60000);
-
-                    if (varianceMins > 0) variance = `LATE by ${varianceMins} min`;
-                    else if (varianceMins < 0) variance = `EARLY by ${Math.abs(varianceMins)} min`;
-                    else variance = "EXACT ON TIME";
-                } else {
-                    varianceMins = Math.round((breakData.returnRequestedTime - breakData.startTime) / 60000);
-                    variance = `Took ${varianceMins} min total`;
-                }
-
-                if (variance === "EXACT ON TIME") window.shootConfetti();
-
-                const emp = currentEmployees.find(e => e.name === breakData.name);
-                const clockInToSave = (emp && emp.clockInTime) ? emp.clockInTime : "No Sign-In";
-
-                const historyRef = ref(db, `${FACTION_ID}/history/${businessDate}`);
-                push(historyRef, {
-                    name: breakData.name,
-                    clockInTime: clockInToSave,
-                    type: breakData.type,
-                    startTime: formatAMPM(breakData.startTime),
-                    expectedEnd: breakData.endTime > 0 ? formatAMPM(breakData.endTime) : "Open Return",
-                    actualReturn: formatAMPM(breakData.returnRequestedTime),
-                    variance: variance,
-                    adminNote: adminNote.replace(/"/g, "'"), 
-                    timestamp: new Date(tzStr).getTime()
-                });
-
-                breakData.status = 'completed'; 
-                set(ref(db, `${FACTION_ID}/breaks/` + key), breakData);
-            }
-        }, 100);
-    };
-
-    window.openLeaderboard = async function() {
-        if (!requireAdmin()) return;
-        document.getElementById('leaderboardModal').style.display = 'flex';
-        const contentDiv = document.getElementById('leaderboardContent');
-        contentDiv.innerHTML = '<p style="text-align: center; color: var(--primary);">Fetching historical data...</p>';
-
-        try {
-            const snapshot = await get(ref(db, `${FACTION_ID}/history`));
-            if (!snapshot.exists()) {
-                contentDiv.innerHTML = '<p style="text-align: center; color: var(--text-muted);">No break history has been recorded yet.</p>';
-                return;
-            }
-
-            const allHistory = snapshot.val();
-            let stats = {};
-
-            Object.values(allHistory).forEach(dayRecord => {
-                Object.values(dayRecord).forEach(log => {
-                    if (!stats[log.name]) {
-                        stats[log.name] = { earlyMins: 0, lateMins: 0, perfectCount: 0 };
-                    }
-
-                    if (log.variance.includes('LATE by')) {
-                        const mins = parseInt(log.variance.replace(/[^0-9]/g, ''));
-                        if (!isNaN(mins)) stats[log.name].lateMins += mins;
-                    } else if (log.variance.includes('EARLY by')) {
-                        const mins = parseInt(log.variance.replace(/[^0-9]/g, ''));
-                        if (!isNaN(mins)) stats[log.name].earlyMins += mins;
-                    } else if (log.variance === 'EXACT ON TIME') {
-                        stats[log.name].perfectCount += 1;
-                    }
-                });
-            });
-
-            let sortedStaff = Object.keys(stats).map(name => {
-                const s = stats[name];
-                return {
-                    name: name,
-                    early: s.earlyMins,
-                    late: s.lateMins,
-                    perfect: s.perfectCount,
-                    score: s.earlyMins - s.lateMins
-                };
-            }).sort((a, b) => b.score - a.score);
-
-            let html = `
-                <table class="leaderboard-table">
-                    <thead>
-                        <tr>
-                            <th>Rank</th>
-                            <th>Employee Name</th>
-                            <th>Net Balance</th>
-                            <th>Level</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
-
-            sortedStaff.forEach((emp, index) => {
-                let rankStr = `${index + 1}`;
-                if (index === 0) rankStr = '🥇 1';
-                
-                let scoreClass = 'score-neutral';
-                let scoreText = `${emp.score} min`;
-                if (emp.score > 0) { scoreClass = 'score-good'; scoreText = `+${emp.score} min`; }
-                if (emp.score < 0) { scoreClass = 'score-bad'; scoreText = `${emp.score} min`; }
-
-                let badge = 'Novice';
-                if(index === 0) badge = '👑 Champion';
-                else if (emp.score > 100) badge = '💎 Diamond';
-                else if (emp.score > 50) badge = '🥈 Silver';
-                else if (emp.score > 20) badge = '🥉 Bronze';
-
-                html += `
-                    <tr>
-                        <td style="font-weight: 800;">${rankStr}</td>
-                        <td style="font-weight: 700; color: var(--text-main);">${emp.name}</td>
-                        <td class="${scoreClass}">${scoreText}</td>
-                        <td style="color: var(--text-muted);">${badge}</td>
-                    </tr>
-                `;
-            });
-
-            html += `</tbody></table>`;
-            contentDiv.innerHTML = html;
-
-        } catch (e) {
-            contentDiv.innerHTML = `<p style="color: #EF4444;">Error loading leaderboard: ${e.message}</p>`;
-        }
-    };
-
-    window.closeLeaderboard = function() {
-        document.getElementById('leaderboardModal').style.display = 'none';
-    };
-
-    window.openEmployeeManager = function() {
-        if (!requireAdmin()) return;
-        document.getElementById('employeeModal').style.display = 'flex';
-        renderModalList();
-    };
-
-    window.closeEmployeeManager = function() {
-        document.getElementById('employeeModal').style.display = 'none';
-    };
-
-    window.autoAssignBreaks = function() {
-        const shiftName = document.getElementById('autoShiftName').value.trim();
-        const startRaw = document.getElementById('autoShiftStart').value;
-        
-        if (!shiftName || !startRaw) {
-            alert("Please fill in both the Shift Name and the First Break Start Time to calculate.");
-            return;
-        }
-
-        const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
-        let startTimeMs = parseTimeToday(convertTimeFormat(startRaw)).getTime();
-
-        const baseShiftSearch = shiftName.split(' (')[0];
-        let shiftStaff = currentEmployees.filter(e => e.shift.includes(baseShiftSearch));
-        
-        if(shiftStaff.length === 0) {
-            alert("No employees found assigned to a shift containing: " + baseShiftSearch);
-            return;
-        }
-
-        let currentIndex = 0;
-
-        currentEmployees.forEach(emp => {
-            if (emp.shift.includes(baseShiftSearch)) {
-                let empStartMs = startTimeMs + (currentIndex * 15 * 60000);
-                let empEndMs = empStartMs + (30 * 60000);
-
-                emp.timeStart = formatAMPM(empStartMs);
-                emp.timeEnd = formatAMPM(empEndMs);
-                emp.overlap = "2 Staff"; 
-
-                currentIndex++;
-            }
-        });
-
-        currentEmployees.sort((a, b) => {
-            if (a.shift !== b.shift) return a.shift.localeCompare(b.shift);
-            const getSortTime = (t) => {
-                if (!t || t === '--:--') return 9999999999999;
-                let d = parseTimeToday(t);
-                if (d.getHours() < 6) d.setDate(d.getDate() + 1);
-                return d.getTime();
-            };
-            return getSortTime(a.timeStart) - getSortTime(b.timeStart);
-        });
-
-        set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
-        alert(`Successfully generated sequential breaks for ${currentIndex} employees in ${baseShiftSearch}!`);
-        renderModalList();
-    };
-
-    window.addEmployee = function() {
-        const name = document.getElementById('newEmpName').value.trim();
-        const pc = document.getElementById('newEmpPC').value.trim() || "PC-XX";
-        const team = document.getElementById('newEmpTeam').value.trim() || "Main Team";
-        const shift = document.getElementById('newEmpShift').value.trim() || "Shift A (07:00 PM - 02:00 AM)";
-        const pOff = document.getElementById('newEmpDayOff').value;
-        const startRaw = document.getElementById('newEmpStart').value;
-        const endRaw = document.getElementById('newEmpEnd').value;
-
-        if (!name) { alert("Please enter an employee name."); return; }
-        
-        const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
-        const businessTime = new Date(new Date(tzStr).getTime() - (4 * 3600 * 1000));
-        const todayDayStr = businessTime.toLocaleString('en-US', { weekday: 'long' });
-
-        let finalStart = "12:00 AM";
-        let finalEnd = "12:30 AM";
-
-        if (startRaw && endRaw) {
-            finalStart = convertTimeFormat(startRaw);
-            finalEnd = convertTimeFormat(endRaw);
-        } else {
-            const baseShiftSearch = shift.split(' (')[0];
-            let shiftStaff = currentEmployees.filter(e => e.shift.includes(baseShiftSearch));
-
-            const match = shift.match(/([0-1]?[0-9]:[0-5][0-9]\s*(?:AM|PM|am|pm))/);
-            if (match) {
-                let shiftStartMs = parseTimeToday(match[1].toUpperCase()).getTime();
-                let targetStartMs = shiftStartMs;
-
-                if (shiftStaff.length > 0) {
-                    let maxTimeMs = shiftStartMs;
-                    shiftStaff.forEach(e => {
-                        let eTimeMs = parseTimeToday(e.timeStart).getTime();
-                        if (eTimeMs < shiftStartMs && (shiftStartMs - eTimeMs) > 12 * 3600 * 1000) {
-                            eTimeMs += 24 * 3600 * 1000;
-                        }
-                        if (eTimeMs > maxTimeMs) {
-                            maxTimeMs = eTimeMs;
-                        }
-                    });
-                    targetStartMs = maxTimeMs + (15 * 60000);
-                }
-
-                finalStart = formatAMPM(targetStartMs);
-                finalEnd = formatAMPM(targetStartMs + (30 * 60000));
-            }
-        }
-
-        const newEmp = {
-            name: name,
-            pcNumber: pc,
-            teamName: team,
-            shift: shift,
-            assignedDayOff: pOff,
-            dayOff: (pOff === todayDayStr) ? todayDayStr : "None",
-            timeStart: finalStart, 
-            timeEnd: finalEnd,
-            overlap: "1 Staff",
-            isLocked: false,
-            quota30: 0,
-            quota10: 0,
-            clockInTime: null,
-            passkey: ""
-        };
-
-        try {
-            currentEmployees.push(newEmp);
-            
-            currentEmployees.sort((a, b) => {
-                if (a.shift !== b.shift) return a.shift.localeCompare(b.shift);
-                const getSortTime = (t) => {
-                    if (!t || t === '--:--') return 9999999999999;
-                    let d = parseTimeToday(t);
-                    if (d.getHours() < 6) d.setDate(d.getDate() + 1);
-                    return d.getTime();
-                };
-                return getSortTime(a.timeStart) - getSortTime(b.timeStart);
-            });
-
-            set(ref(db, `${FACTION_ID}/roster`), currentEmployees).then(() => {
-                document.getElementById('newEmpName').value = '';
-                document.getElementById('newEmpPC').value = '';
-                document.getElementById('newEmpStart').value = '';
-                document.getElementById('newEmpEnd').value = '';
-                alert(`✅ SUCCESS: Employee ${name} has been securely saved to the live cloud database!\n\nTheir break was automatically staggered and set to ${finalStart} - ${finalEnd}.`);
-                renderModalList();
-            }).catch((error) => {
-                alert(`❌ FAILURE: Could not save employee to the cloud.\nError Details: ${error.message}`);
-            });
-        } catch (err) {
-            alert(`❌ FAILURE: An unexpected error occurred.\nError Details: ${err.message}`);
-        }
-    };
-
-    window.deleteEmployee = function(index) {
-        if (!requireAdmin()) return;
-        if(confirm(`Are you sure you want to completely remove ${currentEmployees[index].name} from the database?`)) {
-            currentEmployees.splice(index, 1);
-            set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
-            renderModalList();
-        }
-    };
-
-    window.toggleLock = function(index) {
-        if (isStaffView) return;
-        if (!requireAdmin()) return; 
-        currentEmployees[index].isLocked = !currentEmployees[index].isLocked;
-        set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
-    };
-
-    window.resetPIN = function(index) {
-        if (!requireAdmin()) return;
-        if(confirm(`Reset the 4-digit PIN for ${currentEmployees[index].name}? They will be prompted to create a new one on their next sign-in.`)) {
-            currentEmployees[index].passkey = "";
-            set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
-            renderModalList();
-        }
-    };
-
-    function renderModalList() {
-        const listDiv = document.getElementById('modalEmpList');
-        listDiv.innerHTML = '';
-        currentEmployees.forEach((emp, index) => {
-            listDiv.innerHTML += `
-                <div class="emp-list-item">
-                    <div class="emp-list-info">
-                        <span class="emp-list-name">${emp.pcNumber} | ${emp.name}</span>
-                        <span class="emp-list-meta">${emp.shift.split(' (')[0]} | ${emp.teamName} | Break: ${emp.timeStart} - ${emp.timeEnd}</span>
-                    </div>
-                    <div style="display: flex; gap: 8px;">
-                        <button class="btn btn-warning" style="padding: 6px 12px; font-size: 11px;" onclick="window.resetPIN(${index})">Reset PIN</button>
-                        <button class="btn btn-staff" style="padding: 6px 12px; font-size: 11px;" onclick="window.toggleLock(${index})">${emp.isLocked ? '🔒 Locked' : '🔓 Unlock'}</button>
-                        <button class="btn btn-danger" style="padding: 6px 12px; font-size: 11px;" onclick="window.deleteEmployee(${index})">Remove</button>
-                    </div>
-                </div>
-            `;
-        });
-    }
-
-    window.updateShift = function(index, newVal) {
-        if (isStaffView || !requireAdmin()) return; 
-        currentEmployees[index].shift = newVal;
-        set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
-    };
-
-    window.updatePC = function(index, newVal) {
-        if (isStaffView || !requireAdmin()) return; 
-        currentEmployees[index].pcNumber = newVal.trim() || "PC-XX";
-        set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
-    };
-
-    window.updateTeam = function(index, newVal) {
-        if (isStaffView || !requireAdmin()) return; 
-        currentEmployees[index].teamName = newVal.trim() || "No Team";
-        set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
-    };
-
-    window.updatePermanentDayOff = function(index, newStatus) {
-        if (isStaffView || !requireAdmin()) return; 
-        currentEmployees[index].assignedDayOff = newStatus;
-        const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
-        const businessTime = new Date(new Date(tzStr).getTime() - (4 * 3600 * 1000));
-        const todayDayStr = businessTime.toLocaleString('en-US', { weekday: 'long' });
-        currentEmployees[index].dayOff = (newStatus === todayDayStr) ? newStatus : "None";
-        set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
-    };
-
-    window.toggleForceAbsent = function(index) {
-        if (isStaffView || !requireAdmin()) return;
-        if (currentEmployees[index].dayOff === "None") currentEmployees[index].dayOff = "Off Duty"; 
-        else currentEmployees[index].dayOff = "None"; 
-        set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
-    };
-
-    window.updateName = function(index, newName) {
-        if (isStaffView || !requireAdmin()) return; 
-        const cleanedName = newName.trim();
-        if (cleanedName && currentEmployees[index].name !== cleanedName) {
-            currentEmployees[index].name = cleanedName;
-            set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
-        }
-    };
-
-    window.toggleAuth = function() {
-        if (!isUnlocked) {
-            if (requireAdmin()) {
-                isUnlocked = true;
-                document.getElementById('statusDot').classList.add('unlocked');
-                document.getElementById('statusText').innerText = "Roster Controls: UNLOCKED (Drag & Drop to reorder breaks)";
-                document.getElementById('authBtn').innerText = "🔒 Lock Controls";
-                
-                const btn = document.getElementById('reshuffleBtn');
-                btn.disabled = false; btn.style.opacity = "1"; btn.style.cursor = "pointer";
-                renderTable(); 
-            }
-        } else {
-            isUnlocked = false;
-            document.getElementById('statusDot').classList.remove('unlocked');
-            document.getElementById('statusText').innerText = "Roster Controls: Locked (PIN Protected)";
-            document.getElementById('authBtn').innerText = "🔑 Unlock Controls";
-            
-            const btn = document.getElementById('reshuffleBtn');
-            btn.disabled = true; btn.style.opacity = "0.5"; btn.style.cursor = "not-allowed";
-            renderTable();
-        }
-    };
-
-    window.reshuffleSchedule = function() {
-        if (!isUnlocked || isStaffView || !requireAdmin()) return;
-        
-        let shiftGroups = {};
-        
-        currentEmployees.forEach((emp, idx) => {
-            if (!emp.isLocked) {
-                let baseShift = emp.shift.split(' (')[0];
-                if (!shiftGroups[baseShift]) {
-                    shiftGroups[baseShift] = {
-                        unlockedIndices: [],
-                        timeSlots: []
-                    };
-                }
-                shiftGroups[baseShift].unlockedIndices.push(idx);
-                shiftGroups[baseShift].timeSlots.push({
-                    timeStart: emp.timeStart,
-                    timeEnd: emp.timeEnd,
-                    overlap: emp.overlap
-                });
-            }
-        });
-        
-        Object.keys(shiftGroups).forEach(shift => {
-            let group = shiftGroups[shift];
-            
-            group.timeSlots.sort((a, b) => {
-                const getSortTime = (t) => {
-                    if (!t || t === '--:--') return 9999999999999;
-                    let d = parseTimeToday(t);
-                    if (d.getHours() < 6) d.setDate(d.getDate() + 1);
-                    return d.getTime();
-                };
-                return getSortTime(a.timeStart) - getSortTime(b.timeStart);
-            });
-            
-            for (let i = group.unlockedIndices.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [group.unlockedIndices[i], group.unlockedIndices[j]] = [group.unlockedIndices[j], group.unlockedIndices[i]];
-            }
-            
-            group.unlockedIndices.forEach((idx, i) => {
-                currentEmployees[idx].timeStart = group.timeSlots[i].timeStart;
-                currentEmployees[idx].timeEnd = group.timeSlots[i].timeEnd;
-                currentEmployees[idx].overlap = group.timeSlots[i].overlap;
-            });
-        });
-        
-        currentEmployees.sort((a, b) => {
-            if (a.shift !== b.shift) return a.shift.localeCompare(b.shift);
-            const getSortTime = (t) => {
-                if (!t || t === '--:--') return 9999999999999;
-                let d = parseTimeToday(t);
-                if (d.getHours() < 6) d.setDate(d.getDate() + 1);
-                return d.getTime();
-            };
-            return getSortTime(a.timeStart) - getSortTime(b.timeStart);
-        });
-        
-        set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
-    };
-
-    window.copyStaffLink = function() {
-        const staffUrl = window.location.origin + window.location.pathname + "?view=staff";
-        navigator.clipboard.writeText(staffUrl).then(() => {
-            alert("✅ Staff Link Copied to Clipboard!");
-        }).catch(err => {
-            prompt("Copy this URL manually:", staffUrl);
-        });
-    };
-
-    window.filterTable = function() {
-        const inputEl = document.getElementById('searchInput');
-        if(!inputEl) return;
-        const input = inputEl.value.toLowerCase();
-        const rows = document.querySelectorAll('#scheduleTable tbody tr');
-
-        rows.forEach((row, idx) => {
-            const nameEl = row.querySelector('.col-name .editable-name');
-            if(!nameEl) return;
-            const emp = currentEmployees[idx];
-            const searchText = (emp.name + " " + (emp.pcNumber || "") + " " + emp.shift + " " + (emp.teamName || "")).toLowerCase();
-            const shiftText = emp.shift; 
-            const isOff = emp && emp.dayOff !== 'None';
-
-            const matchesSearch = searchText.includes(input);
-            let matchesShift = true;
-
-            if (activeShiftFilter === 'present') matchesShift = !isOff;
-            else if (activeShiftFilter === 'dayoff') matchesShift = isOff;
-            else if (activeShiftFilter !== 'all') matchesShift = shiftText.includes(activeShiftFilter);
-
-            row.style.display = (matchesSearch && matchesShift) ? '' : 'none';
-        });
-    };
-
-    window.filterShift = function(shift, el) {
-        activeShiftFilter = shift;
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        el.classList.add('active');
-        window.filterTable();
-    };
-
-    // --- 90-DAY EMPLOYEE AUDIT ---
-    window.exportEmployeeHistory = async function() {
-        if (!requireAdmin()) return;
-        
-        const empName = prompt("Enter the exact Employee Name to pull their 90-day report:");
-        if (!empName) return;
-
-        try {
-            const snapshot = await get(ref(db, `${FACTION_ID}/history`));
-            if (!snapshot.exists()) {
-                alert("No history found in database.");
-                return;
-            }
-
-            const allHistory = snapshot.val();
-            let csv = ["Date,Employee Name,Clock In Time,Break Type,Start Time,Expected Return,Actual Return,Variance Log,Admin Notes"];
-            let matchCount = 0;
-            
-            const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
-            const today = new Date(tzStr);
-            const ninetyDaysAgo = new Date(today.getTime() - (90 * 24 * 60 * 60 * 1000));
-
-            const dates = Object.keys(allHistory).sort((a, b) => new Date(b) - new Date(a));
-
-            dates.forEach(dateStr => {
-                const recordDate = new Date(dateStr);
-                if (recordDate >= ninetyDaysAgo && recordDate <= today) {
-                    const dailyRecords = allHistory[dateStr];
-                    Object.values(dailyRecords).forEach(log => {
-                        if (log.name.toLowerCase().includes(empName.toLowerCase().trim())) {
-                            csv.push(`"${dateStr}","${log.name}","${log.clockInTime || 'N/A'}","${log.type}","${log.startTime}","${log.expectedEnd}","${log.actualReturn}","${log.variance}","${log.adminNote || ''}"`);
-                            matchCount++;
-                        }
-                    });
-                }
-            });
-
-            if (matchCount === 0) {
-                alert(`No records found for "${empName}" in the last 90 days.`);
-                return;
-            }
-
-            const csvFile = new Blob([csv.join('\n')], { type: 'text/csv' });
-            const downloadLink = document.createElement('a');
-            downloadLink.download = `Audit_${empName.replace(/\s+/g, '_')}_90Days.csv`;
-            downloadLink.href = window.URL.createObjectURL(csvFile);
-            downloadLink.style.display = 'none';
-            document.body.appendChild(downloadLink);
-            downloadLink.click();
-            document.body.removeChild(downloadLink);
-            
-            alert(`✅ Successfully exported ${matchCount} historical break records for ${empName}!`);
-            
-        } catch (e) {
-            alert("Error generating report: " + e.message);
-        }
-    };
-
-    window.exportHistory = async function() {
-        if (!requireAdmin()) return;
-        const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
-        const businessDate = new Date(new Date(tzStr).getTime() - (4 * 3600 * 1000)).toISOString().split('T')[0];
-
-        try {
-            const snapshot = await get(ref(db, `${FACTION_ID}/history/${businessDate}`));
-            if (!snapshot.exists()) {
-                alert("No break history logged for today yet!");
-                return;
-            }
-            
-            const data = snapshot.val();
-            let csv = ["Employee Name,Clock In Time,Break Type,Start Time,Expected Return,Actual Return,Variance Log,Admin Notes"];
-            
-            Object.values(data).forEach(log => {
-                csv.push(`"${log.name}","${log.clockInTime || 'N/A'}","${log.type}","${log.startTime}","${log.expectedEnd}","${log.actualReturn}","${log.variance}","${log.adminNote || ''}"`);
-            });
-            
-            const csvFile = new Blob([csv.join('\n')], { type: 'text/csv' });
-            const downloadLink = document.createElement('a');
-            downloadLink.download = `Presto_Break_History_${businessDate}.csv`;
-            downloadLink.href = window.URL.createObjectURL(csvFile);
-            downloadLink.style.display = 'none';
-            document.body.appendChild(downloadLink);
-            downloadLink.click();
-            document.body.removeChild(downloadLink);
-            
-        } catch (e) {
-            alert("Failed to export history: " + e.message);
-        }
-    };
-
-    window.exportCSV = function() {
-        let csv = [];
-        const rows = document.querySelectorAll('table tr');
-        for (let i = 0; i < rows.length; i++) {
-            let row = [], cols = rows[i].querySelectorAll('td, th');
-            for (let j = 0; j < cols.length; j++) {
-                let text = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, ' ')
-                    .replace('☕ Break', '')
-                    .replace('🕌 Prayer', '')
-                    .replace('🔒 FIXED', '')
-                    .replace('🔒 Locked', '')
-                    .replace('🔓 Unlock', '')
-                    .replace('🔴 Absent Today', 'Absent')
-                    .replace('🟢 Present Today', 'Present')
-                    .trim();
-                row.push('"' + text + '"');
-            }
-            csv.push(row.join(','));
-        }
-        const csvFile = new Blob([csv.join('\n')], { type: 'text/csv' });
-        const downloadLink = document.createElement('a');
-        downloadLink.download = `Presto_Eat_Live_Schedule_${FACTION_ID}.csv`;
-        downloadLink.href = window.URL.createObjectURL(csvFile);
-        downloadLink.style.display = 'none';
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
-    };
-
 </script>
 </body>
 </html>
