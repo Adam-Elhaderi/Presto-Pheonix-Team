@@ -631,7 +631,20 @@
     let gamificationBadges = {};
 
     const urlParams = new URLSearchParams(window.location.search);
-    const isStaffView = urlParams.get('view') === 'staff';
+    const staffViewRequested = urlParams.get('view') === 'staff';
+
+    // Keep staff mode for this tab, while removing ?view=staff from the address bar.
+    if (staffViewRequested) {
+        sessionStorage.setItem('prestoStaffViewMode', '1');
+        urlParams.delete('view');
+        const cleanQuery = urlParams.toString();
+        const cleanUrl = window.location.pathname
+            + (cleanQuery ? '?' + cleanQuery : '')
+            + window.location.hash;
+        window.history.replaceState({}, document.title, cleanUrl);
+    }
+
+    const isStaffView = staffViewRequested || sessionStorage.getItem('prestoStaffViewMode') === '1';
     
     const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     const isSpoofedMac = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
