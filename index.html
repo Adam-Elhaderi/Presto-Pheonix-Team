@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Presto CS — Live Floor Operations</title>
     
-    <!-- GLOBAL CRASH HANDLER (SAFE STRING CONCATENATION) -->
+    <!-- GLOBAL CRASH HANDLER -->
     <script>
         window.addEventListener('error', function(e) {
             var tb = document.getElementById('tableBody');
@@ -19,6 +19,103 @@
                 tb.innerHTML = '<tr><td colspan="9" style="color:#EF4444; text-align:center; padding:40px; font-size:16px;"><strong>🚨 FIREBASE NETWORK REJECTION 🚨</strong><br><br><span style="color:var(--text-main); font-size:14px;">Reason: ' + e.reason + '</span><br><br>Check your AdBlocker, VPN, or Browser Shields.</td></tr>';
             }
         });
+    </script>
+
+    <!-- 🚨 SYNCHRONOUS STATE INITIALIZATION (FIXES REFERENCE ERRORS) 🚨 -->
+    <script>
+        // Global State Variables MUST be initialized before Firebase modules load
+        window.currentEmployees = [];
+        window.currentBreaks = {};
+        window.timerInterval = null;
+        window.isUnlocked = false;
+        window.activeShiftFilter = 'all';
+        window.topAgent = ""; 
+        window.gamificationBadges = {};
+        window.rawKudosData = {};
+        window.kudosList = ["Great teamwork today everyone!", "Keep pushing, you're doing amazing."];
+        window.kudosIndex = 0;
+        window.currentLevelIndex = 0;
+        window.trafficLevel = [];
+        window.activeCar = null;
+        window.startMouse = 0;
+        window.bounds = {};
+        window.initialPos = 0;
+        window.currentTriviaIndex = 0;
+        window.showingTriviaAnswer = false;
+        window.dragStartIndex = null;
+        window.idleTime = 0;
+        
+        window.SECRET_PIN = "9949";
+        window.FACTION_ID = "";
+        
+        window.dayOffOptions = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "None"];
+        
+        window.shiftOptions = [
+            "Shift A (07:00 PM - 02:00 AM)", 
+            "Shift B (07:30 PM - 02:30 AM)", 
+            "Shift C (08:00 AM - 03:00 PM)",
+            "Shift D (04:00 PM - 11:00 PM)", 
+            "Shift E (09:00 AM - 03:00 PM)", 
+            "Shift G (12:00 PM - 07:00 PM)"
+        ];
+
+        window.fixedSlots = [
+            { timeStart: "08:30 PM", timeEnd: "09:00 PM", overlap: "2 Staff" }, 
+            { timeStart: "08:45 PM", timeEnd: "09:15 PM", overlap: "2 Staff" },
+            { timeStart: "09:00 PM", timeEnd: "09:30 PM", overlap: "2 Staff" }, 
+            { timeStart: "09:15 PM", timeEnd: "09:45 PM", overlap: "2 Staff" },
+            { timeStart: "09:30 PM", timeEnd: "10:00 PM", overlap: "2 Staff" }, 
+            { timeStart: "09:45 PM", timeEnd: "10:15 PM", overlap: "2 Staff" },
+            { timeStart: "10:00 PM", timeEnd: "10:30 PM", overlap: "2 Staff" }, 
+            { timeStart: "10:15 PM", timeEnd: "10:45 PM", overlap: "2 Staff" },
+            { timeStart: "10:30 PM", timeEnd: "11:00 PM", overlap: "2 Staff" }, 
+            { timeStart: "10:45 PM", timeEnd: "11:15 PM", overlap: "2 Staff" },
+            { timeStart: "11:00 PM", timeEnd: "11:30 PM", overlap: "2 Staff" }, 
+            { timeStart: "11:15 PM", timeEnd: "11:45 PM", overlap: "2 Staff" },
+            { timeStart: "11:30 PM", timeEnd: "12:00 AM", overlap: "2 Staff" }, 
+            { timeStart: "11:45 PM", timeEnd: "12:15 AM", overlap: "2 Staff" },
+            { timeStart: "12:00 AM", timeEnd: "12:30 AM", overlap: "2 Staff" }, 
+            { timeStart: "12:15 AM", timeEnd: "12:45 AM", overlap: "2 Staff" },
+            { timeStart: "12:30 AM", timeEnd: "01:00 AM", overlap: "2 Staff" }, 
+            { timeStart: "12:45 AM", timeEnd: "01:15 AM", overlap: "2 Staff" },
+            { timeStart: "01:00 AM", timeEnd: "01:30 AM", overlap: "1 Staff" }
+        ];
+
+        window.defaultEmployees = [
+            { name: "Sanad Ghaith", pcNumber: "PC-01", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Saturday" },
+            { name: "Mohammed Kharwat", pcNumber: "PC-02", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Sunday" },
+            { name: "Abdullah Dandi", pcNumber: "PC-03", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: true, dayOff: "None", assignedDayOff: "Monday" },
+            { name: "Abdullah Ali Al-Hamali", pcNumber: "PC-04", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Tuesday" },
+            { name: "Baraa Nader", pcNumber: "PC-05", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Sunday" },
+            { name: "Mohamed Hussein", pcNumber: "PC-06", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Saturday" },
+            { name: "Adam Al-Hudhiri", pcNumber: "PC-07", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Wednesday" },
+            { name: "Khalifa Abu Khabta", pcNumber: "PC-08", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Wednesday" },
+            { name: "Khaled Al-Osta", pcNumber: "PC-09", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Sunday" },
+            { name: "Basheer Al-Qanouni", pcNumber: "PC-10", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Wednesday" },
+            { name: "Abdulmaez Masoud", pcNumber: "PC-11", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Sunday" },
+            { name: "Mahmoud Farnana", pcNumber: "PC-12", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Saturday" },
+            { name: "Elyas Salem", pcNumber: "PC-13", shift: "Shift B (07:30 PM - 02:30 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Tuesday" },
+            { name: "Hisham Al-Fleit", pcNumber: "PC-14", shift: "Shift B (07:30 PM - 02:30 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Monday" },
+            { name: "Abdullah Al-Suwaib", pcNumber: "PC-15", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Monday" },
+            { name: "Mohammed Abu Kinda", pcNumber: "PC-16", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Tuesday" },
+            { name: "Mohamed Al-Tayeb", pcNumber: "PC-17", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Saturday" },
+            { name: "Ihab Al-Tarhouni", pcNumber: "PC-18", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Saturday" },
+            { name: "Tawfik Al-Jarushi", pcNumber: "PC-19", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Thursday" }
+        ];
+
+        window.urlParams = new URLSearchParams(window.location.search);
+        window.isStaffView = window.urlParams.get('view') === 'staff';
+        
+        window.isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        window.isSpoofedMac = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+        window.isSpoofedAndroid = navigator.maxTouchPoints > 0 && screen.height > screen.width;
+        window.isTouchOnly = window.matchMedia("(pointer: coarse)").matches && !window.matchMedia("(pointer: fine)").matches;
+        window.isSmallScreen = Math.min(window.screen.width, window.screen.height) < 700; 
+        window.isMobile = window.isMobileUA || window.isSpoofedMac || window.isSpoofedAndroid || window.isTouchOnly || window.isSmallScreen || window.innerWidth < 800;
+
+        if (window.isStaffView) {
+            document.documentElement.classList.add('staff-mode');
+        }
     </script>
 
     <!-- GOOGLE FONTS -->
@@ -649,73 +746,20 @@
 
 </div> <!-- END WORKSPACE WRAPPER -->
 
-<!-- MASTER SCRIPT LOGIC (ONLY ONE SCRIPT TAG) -->
+<!-- MASTER SCRIPT LOGIC -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
     import { getDatabase, ref, set, onValue, remove, push, get } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
-    // 🚨 1. GLOBAL VARIABLES HOISTED TO TOP TO PREVENT REFERENCE ERRORS 🚨
-    let currentEmployees = [];
-    let currentBreaks = {};
-    let timerInterval = null;
-    let isUnlocked = false;
-    let activeShiftFilter = 'all';
-    let topAgent = ""; 
-    let gamificationBadges = {};
-    let rawKudosData = {};
-    let kudosList = ["Great teamwork today everyone!", "Keep pushing, you're doing amazing."];
-    let kudosIndex = 0;
-    let currentLevelIndex = 0;
-    let trafficLevel = [];
-    let activeCar = null;
-    let startMouse = 0;
-    let bounds = {};
-    let initialPos = 0;
-    let currentTriviaIndex = 0;
-    let showingTriviaAnswer = false;
-    let dragStartIndex = null;
-    let idleTime = 0;
-
-    // 2. FAIL-PROOF CSS STAFF MODE ACTIVATION
-    const urlParams = new URLSearchParams(window.location.search);
-    const isStaffView = urlParams.get('view') === 'staff';
-    
-    if (isStaffView) {
-        document.documentElement.classList.add('staff-mode');
-        setTimeout(() => {
-            const badge = document.getElementById('viewBadge');
-            if (badge) {
-                badge.innerText = "Staff Dashboard";
-                badge.style.background = "rgba(59, 130, 246, 0.15)";
-                badge.style.color = "#3B82F6";
-                badge.style.borderColor = "rgba(59, 130, 246, 0.3)";
-            }
-        }, 100);
-    }
-
-    // 3. FIREBASE CONFIGURATION
-    const firebaseConfig = {
-        apiKey: "AIzaSyCmlKjghDehj9L5aw1dJGa1WLjPRT2o-Yc",
-        authDomain: "presto-phoenix-team.firebaseapp.com",
-        databaseURL: "https://presto-phoenix-team-default-rtdb.firebaseio.com",
-        projectId: "presto-phoenix-team",
-        storageBucket: "presto-phoenix-team.firebasestorage.app",
-        messagingSenderId: "828847025710",
-        appId: "1:828847025710:web:72f00f90f45fe20f1f79bf"
-    };
-
-    const FACTION_ID = ""; 
-    
     let app, db;
     try {
-        app = initializeApp(firebaseConfig);
+        app = initializeApp(window.firebaseConfig);
         db = getDatabase(app);
     } catch(err) {
         document.getElementById('statusMessage').innerHTML = "<span style='color:#EF4444;'>CRITICAL FIREBASE INITIALIZATION ERROR: " + err.message + "</span>";
         throw err; 
     }
 
-    // 4. ON-SCREEN DIAGNOSTIC CONNECTION MONITOR
     const connectedRef = ref(db, ".info/connected");
     onValue(connectedRef, (snap) => {
         const msgEl = document.getElementById('statusMessage');
@@ -734,465 +778,7 @@
             }, 6000);
         }
     });
-    
-    const SECRET_PIN = "9949";         
-    
-    const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    const isSpoofedMac = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
-    const isSpoofedAndroid = navigator.maxTouchPoints > 0 && screen.height > screen.width;
-    const isTouchOnly = window.matchMedia("(pointer: coarse)").matches && !window.matchMedia("(pointer: fine)").matches;
-    const isSmallScreen = Math.min(window.screen.width, window.screen.height) < 700; 
-    const isMobile = isMobileUA || isSpoofedMac || isSpoofedAndroid || isTouchOnly || isSmallScreen || window.innerWidth < 800;
 
-    function getDBPath(path) {
-        return FACTION_ID ? FACTION_ID + "/" + path : path;
-    }
-
-    function enforcePCWorkstation() {
-        if (isStaffView && isMobile) {
-            alert("📱 Mobile Blocked: You must physically use your designated PC workstation to sign in, request breaks, or return from breaks.");
-            return true;
-        }
-        return false;
-    }
-
-    // 5. ADMIN UI TOGGLES
-    window.toggleAuth = function() {
-        if (isUnlocked) {
-            isUnlocked = false;
-            sessionStorage.removeItem('supervisorAuthed');
-            updateAdminUI();
-            renderTable();
-        } else {
-            const input = prompt("Enter Supervisor PIN to unlock administrative controls:");
-            if (input === SECRET_PIN) {
-                isUnlocked = true;
-                sessionStorage.setItem('supervisorAuthed', input);
-                updateAdminUI();
-                renderTable();
-                alert("🔓 Admin Controls Unlocked successfully.");
-            } else if (input !== null) {
-                alert("❌ Incorrect PIN. Access denied.");
-            }
-        }
-    };
-
-    function updateAdminUI() {
-        const dot = document.getElementById('statusDot');
-        const text = document.getElementById('statusText');
-        const authBtn = document.getElementById('authBtn');
-        const reshuffleBtn = document.getElementById('reshuffleBtn');
-
-        if (isUnlocked) {
-            if (dot) dot.classList.add('unlocked');
-            if (text) text.innerText = "Roster Controls: UNLOCKED (Admin Mode)";
-            if (authBtn) {
-                authBtn.innerText = "🔓 Lock Controls";
-                authBtn.classList.add('btn-danger');
-            }
-            if (reshuffleBtn) {
-                reshuffleBtn.disabled = false;
-                reshuffleBtn.style.opacity = '1';
-                reshuffleBtn.style.cursor = 'pointer';
-            }
-        } else {
-            if (dot) dot.classList.remove('unlocked');
-            if (text) text.innerText = "Roster Controls: Locked (PIN Protected)";
-            if (authBtn) {
-                authBtn.innerText = "🔒 Unlock Controls";
-                authBtn.classList.remove('btn-danger');
-            }
-            if (reshuffleBtn) {
-                reshuffleBtn.disabled = true;
-                reshuffleBtn.style.opacity = '0.5';
-                reshuffleBtn.style.cursor = 'not-allowed';
-            }
-        }
-    }
-
-    // 6. INLINE ADMIN EDITING FUNCTIONS
-    window.toggleLock = function(index) {
-        if (!requireAdmin()) return;
-        currentEmployees[index].isLocked = !currentEmployees[index].isLocked;
-        set(ref(db, getDBPath('roster')), currentEmployees);
-    };
-
-    window.updateShift = function(index, value) {
-        if (!requireAdmin()) return;
-        currentEmployees[index].shift = value;
-        set(ref(db, getDBPath('roster')), currentEmployees);
-    };
-
-    window.updateName = function(index, value) {
-        if (!requireAdmin()) return;
-        const cleaned = value.trim();
-        if (cleaned) {
-            currentEmployees[index].name = cleaned;
-            set(ref(db, getDBPath('roster')), currentEmployees);
-        }
-    };
-
-    window.updatePC = function(index, value) {
-        if (!requireAdmin()) return;
-        const cleaned = value.trim();
-        if (cleaned) {
-            currentEmployees[index].pcNumber = cleaned;
-            set(ref(db, getDBPath('roster')), currentEmployees);
-        }
-    };
-
-    window.updateTeam = function(index, value) {
-        if (!requireAdmin()) return;
-        const cleaned = value.trim();
-        if (cleaned) {
-            currentEmployees[index].teamName = cleaned;
-            set(ref(db, getDBPath('roster')), currentEmployees);
-        }
-    };
-
-    window.updatePermanentDayOff = function(index, value) {
-        if (!requireAdmin()) return;
-        currentEmployees[index].assignedDayOff = value;
-        const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
-        const businessTime = new Date(new Date(tzStr).getTime() - (3 * 3600 * 1000));
-        const todayDayStr = businessTime.toLocaleString('en-US', { weekday: 'long' });
-        currentEmployees[index].dayOff = (value === todayDayStr) ? todayDayStr : "None";
-        set(ref(db, getDBPath('roster')), currentEmployees);
-    };
-
-    window.toggleForceAbsent = function(index) {
-        if (!requireAdmin()) return;
-        const emp = currentEmployees[index];
-        const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
-        const businessTime = new Date(new Date(tzStr).getTime() - (3 * 3600 * 1000));
-        const todayDayStr = businessTime.toLocaleString('en-US', { weekday: 'long' });
-
-        if (emp.dayOff === 'None') {
-            emp.dayOff = todayDayStr;
-        } else {
-            emp.dayOff = 'None';
-        }
-        set(ref(db, getDBPath('roster')), currentEmployees);
-    };
-
-    window.resetQuota = function(index, type) {
-        if (!requireAdmin()) return;
-        if (type === '30') currentEmployees[index].quota30 = 0;
-        if (type === '10') currentEmployees[index].quota10 = 0;
-        set(ref(db, getDBPath('roster')), currentEmployees);
-    };
-
-    window.reshuffleSchedule = function() {
-        if (!requireAdmin()) return;
-        if (!confirm("Are you sure you want to reshuffle all unlocked employees?")) return;
-
-        let unlockedIndexes = [];
-        currentEmployees.forEach((emp, i) => {
-            if (!emp.isLocked) unlockedIndexes.push(i);
-        });
-
-        for (let i = unlockedIndexes.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            const idx1 = unlockedIndexes[i];
-            const idx2 = unlockedIndexes[j];
-            
-            const tempStart = currentEmployees[idx1].timeStart;
-            const tempEnd = currentEmployees[idx1].timeEnd;
-            const tempOverlap = currentEmployees[idx1].overlap;
-
-            currentEmployees[idx1].timeStart = currentEmployees[idx2].timeStart;
-            currentEmployees[idx1].timeEnd = currentEmployees[idx2].timeEnd;
-            currentEmployees[idx1].overlap = currentEmployees[idx2].overlap;
-
-            currentEmployees[idx2].timeStart = tempStart;
-            currentEmployees[idx2].timeEnd = tempEnd;
-            currentEmployees[idx2].overlap = tempOverlap;
-        }
-
-        set(ref(db, getDBPath('roster')), currentEmployees);
-    };
-
-    // 7. EMPLOYEE MANAGER CRUD
-    window.openEmployeeManager = function() {
-        if (!requireAdmin()) return;
-        document.getElementById('employeeModal').style.display = 'flex';
-        renderEmployeeManagerList();
-    };
-
-    window.closeEmployeeManager = function() {
-        document.getElementById('employeeModal').style.display = 'none';
-    };
-
-    function renderEmployeeManagerList() {
-        const listContainer = document.getElementById('modalEmpList');
-        if (!listContainer) return;
-        listContainer.innerHTML = '';
-
-        currentEmployees.forEach((emp, i) => {
-            const item = document.createElement('div');
-            item.className = 'emp-list-item';
-            
-            let htmlStr = '<div class="emp-list-info">';
-            htmlStr += '<span class="emp-list-name">' + emp.pcNumber + ' | ' + emp.name + '</span>';
-            htmlStr += '<span class="emp-list-meta">' + emp.shift + ' | ' + (emp.teamName || 'Main Team') + ' | Perm Off: ' + emp.assignedDayOff + '</span>';
-            htmlStr += '</div><div style="display:flex; gap:6px;">';
-            
-            if(emp.isLocked) {
-                htmlStr += '<button class="btn btn-mini-break" onclick="window.toggleLock(' + i + ')">🔒 Locked</button>';
-            } else {
-                htmlStr += '<button class="btn btn-mini-break" onclick="window.toggleLock(' + i + ')">🔓 Unlock</button>';
-            }
-            
-            htmlStr += '<button class="btn btn-danger" style="padding:4px 8px; font-size:11px;" onclick="window.deleteEmployee(' + i + ')">🗑️ Delete</button>';
-            htmlStr += '</div>';
-
-            item.innerHTML = htmlStr;
-            listContainer.appendChild(item);
-        });
-    }
-
-    window.addEmployee = function() {
-        if (!requireAdmin()) return;
-        const name = document.getElementById('newEmpName').value.trim();
-        const pcNumber = document.getElementById('newEmpPC').value.trim() || ("PC-" + (currentEmployees.length + 1).toString().padStart(2, '0'));
-        const teamName = document.getElementById('newEmpTeam').value.trim() || "Main Team";
-        const shift = document.getElementById('newEmpShift').value;
-        const assignedDayOff = document.getElementById('newEmpDayOff').value;
-        let timeStart = document.getElementById('newEmpStart').value;
-        let timeEnd = document.getElementById('newEmpEnd').value;
-
-        if (!name) {
-            alert("Please enter the employee's name.");
-            return;
-        }
-
-        if (timeStart) timeStart = convertTimeFormat(timeStart);
-        else timeStart = "12:00 AM";
-
-        if (timeEnd) timeEnd = convertTimeFormat(timeEnd);
-        else timeEnd = "12:30 AM";
-
-        const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
-        const businessTime = new Date(new Date(tzStr).getTime() - (3 * 3600 * 1000));
-        const todayDayStr = businessTime.toLocaleString('en-US', { weekday: 'long' });
-
-        const newEmp = {
-            name: name,
-            pcNumber: pcNumber,
-            teamName: teamName,
-            shift: shift,
-            assignedDayOff: assignedDayOff,
-            dayOff: (assignedDayOff === todayDayStr) ? todayDayStr : "None",
-            timeStart: timeStart,
-            timeEnd: timeEnd,
-            overlap: "1 Staff",
-            isLocked: false,
-            quota30: 0,
-            quota10: 0,
-            clockInTime: null,
-            passkey: ""
-        };
-
-        currentEmployees.push(newEmp);
-        set(ref(db, getDBPath('roster')), currentEmployees).then(() => {
-            alert("✅ " + name + " added to cloud roster!");
-            document.getElementById('newEmpName').value = '';
-            document.getElementById('newEmpPC').value = '';
-            document.getElementById('newEmpStart').value = '';
-            document.getElementById('newEmpEnd').value = '';
-            renderEmployeeManagerList();
-        });
-    };
-
-    window.deleteEmployee = function(index) {
-        if (!requireAdmin()) return;
-        const name = currentEmployees[index].name;
-        if (confirm("Are you sure you want to permanently delete " + name + " from the roster?")) {
-            currentEmployees.splice(index, 1);
-            set(ref(db, getDBPath('roster')), currentEmployees).then(() => {
-                renderEmployeeManagerList();
-            });
-        }
-    };
-
-    window.autoAssignBreaks = function() {
-        if (!requireAdmin()) return;
-        const targetShift = document.getElementById('autoShiftName').value;
-        const firstBreakTime = document.getElementById('autoShiftStart').value;
-
-        if (!firstBreakTime) {
-            alert("Please provide the starting time for the very first break.");
-            return;
-        }
-
-        let startD = new Date("1970-01-01T" + firstBreakTime + ":00");
-        let shiftEmployees = [];
-
-        currentEmployees.forEach((emp, index) => {
-            if (emp.shift === targetShift) {
-                shiftEmployees.push({ emp: emp, index: index });
-            }
-        });
-
-        if (shiftEmployees.length === 0) {
-            alert("No employees found currently assigned to " + targetShift + ".");
-            return;
-        }
-
-        shiftEmployees.forEach((item, i) => {
-            let sDate = new Date(startD.getTime() + (i * 15 * 60000));
-            let eDate = new Date(sDate.getTime() + (30 * 60000));
-
-            let sh = sDate.getHours().toString().padStart(2, '0');
-            let sm = sDate.getMinutes().toString().padStart(2, '0');
-            let eh = eDate.getHours().toString().padStart(2, '0');
-            let em = eDate.getMinutes().toString().padStart(2, '0');
-
-            item.emp.timeStart = convertTimeFormat(sh + ":" + sm);
-            item.emp.timeEnd = convertTimeFormat(eh + ":" + em);
-            item.emp.overlap = "1 Staff"; 
-        });
-
-        set(ref(db, getDBPath('roster')), currentEmployees).then(() => {
-            alert("✅ Successfully auto-assigned staggered breaks for " + shiftEmployees.length + " employees on " + targetShift + "!");
-            document.getElementById('employeeModal').style.display = 'none';
-        });
-    };
-
-    // 8. UTILITIES
-    window.copyStaffLink = function() {
-        const staffUrl = window.location.origin + window.location.pathname + '?view=staff';
-        navigator.clipboard.writeText(staffUrl).then(() => {
-            alert("📋 Staff Mode link copied to clipboard!\n\nSend this link to agents for PC workstations:\n" + staffUrl);
-        }).catch(() => {
-            prompt("Copy this Staff Mode link:", staffUrl);
-        });
-    };
-
-    window.filterTable = function() {
-        const query = document.getElementById('searchInput').value.toLowerCase().trim();
-        const rows = document.querySelectorAll('#scheduleTable tbody tr');
-
-        rows.forEach((row, idx) => {
-            if (!currentEmployees[idx]) return;
-            const emp = currentEmployees[idx];
-            const matchQuery = !query || 
-                emp.name.toLowerCase().includes(query) || 
-                emp.pcNumber.toLowerCase().includes(query) || 
-                (emp.teamName && emp.teamName.toLowerCase().includes(query)) || 
-                emp.shift.toLowerCase().includes(query);
-
-            let matchFilter = true;
-            if (activeShiftFilter === 'present') {
-                matchFilter = (emp.dayOff === 'None' && isCurrentlyOnShift(emp.shift));
-            } else if (activeShiftFilter === 'dayoff') {
-                matchFilter = (emp.dayOff !== 'None');
-            } else if (activeShiftFilter !== 'all') {
-                matchFilter = emp.shift.includes(activeShiftFilter);
-            }
-
-            if (matchQuery && matchFilter) {
-                row.style.display = '';
-            } else {
-                row.style.display = 'none';
-            }
-        });
-    };
-
-    window.filterShift = function(shiftFilter, btnEl) {
-        activeShiftFilter = shiftFilter;
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        if (btnEl) btnEl.classList.add('active');
-        window.filterTable();
-    };
-
-    function convertTimeFormat(time24) {
-        if(!time24) return "12:00 AM";
-        let parts = time24.split(':');
-        let h = parts[0];
-        let m = parts[1];
-        let hours = parseInt(h);
-        let ampm = hours >= 12 ? 'PM' : 'AM';
-        hours = hours % 12;
-        hours = hours ? hours : 12;
-        return hours.toString().padStart(2, '0') + ":" + m + " " + ampm;
-    }
-
-    function updateCircadianTheme() {
-        const hour = new Date().getHours();
-        const root = document.documentElement;
-        if (hour >= 6 && hour < 12) { 
-            root.style.setProperty('--primary', '#06B6D4');
-            root.style.setProperty('--primary-hover', '#0891B2');
-            root.style.setProperty('--primary-glow', 'rgba(6, 182, 212, 0.15)');
-        } else if (hour >= 12 && hour < 17) { 
-            root.style.setProperty('--primary', '#F59E0B');
-            root.style.setProperty('--primary-hover', '#D97706');
-            root.style.setProperty('--primary-glow', 'rgba(245, 158, 11, 0.15)');
-        } else { 
-            root.style.setProperty('--primary', '#8B5CF6');
-            root.style.setProperty('--primary-hover', '#7C3AED');
-            root.style.setProperty('--primary-glow', 'rgba(139, 92, 246, 0.15)');
-        }
-    }
-    setInterval(updateCircadianTheme, 60000);
-    updateCircadianTheme();
-
-    // 9. DATA DICTIONARIES
-    const shiftOptions = [
-        "Shift A (07:00 PM - 02:00 AM)", 
-        "Shift B (07:30 PM - 02:30 AM)", 
-        "Shift C (08:00 AM - 03:00 PM)",
-        "Shift D (04:00 PM - 11:00 PM)", 
-        "Shift E (09:00 AM - 03:00 PM)", 
-        "Shift G (12:00 PM - 07:00 PM)"
-    ];
-
-    const fixedSlots = [
-        { timeStart: "08:30 PM", timeEnd: "09:00 PM", overlap: "2 Staff" }, 
-        { timeStart: "08:45 PM", timeEnd: "09:15 PM", overlap: "2 Staff" },
-        { timeStart: "09:00 PM", timeEnd: "09:30 PM", overlap: "2 Staff" }, 
-        { timeStart: "09:15 PM", timeEnd: "09:45 PM", overlap: "2 Staff" },
-        { timeStart: "09:30 PM", timeEnd: "10:00 PM", overlap: "2 Staff" }, 
-        { timeStart: "09:45 PM", timeEnd: "10:15 PM", overlap: "2 Staff" },
-        { timeStart: "10:00 PM", timeEnd: "10:30 PM", overlap: "2 Staff" }, 
-        { timeStart: "10:15 PM", timeEnd: "10:45 PM", overlap: "2 Staff" },
-        { timeStart: "10:30 PM", timeEnd: "11:00 PM", overlap: "2 Staff" }, 
-        { timeStart: "10:45 PM", timeEnd: "11:15 PM", overlap: "2 Staff" },
-        { timeStart: "11:00 PM", timeEnd: "11:30 PM", overlap: "2 Staff" }, 
-        { timeStart: "11:15 PM", timeEnd: "11:45 PM", overlap: "2 Staff" },
-        { timeStart: "11:30 PM", timeEnd: "12:00 AM", overlap: "2 Staff" }, 
-        { timeStart: "11:45 PM", timeEnd: "12:15 AM", overlap: "2 Staff" },
-        { timeStart: "12:00 AM", timeEnd: "12:30 AM", overlap: "2 Staff" }, 
-        { timeStart: "12:15 AM", timeEnd: "12:45 AM", overlap: "2 Staff" },
-        { timeStart: "12:30 AM", timeEnd: "01:00 AM", overlap: "2 Staff" }, 
-        { timeStart: "12:45 AM", timeEnd: "01:15 AM", overlap: "2 Staff" },
-        { timeStart: "01:00 AM", timeEnd: "01:30 AM", overlap: "1 Staff" }
-    ];
-
-    const defaultEmployees = [
-        { name: "Sanad Ghaith", pcNumber: "PC-01", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Saturday" },
-        { name: "Mohammed Kharwat", pcNumber: "PC-02", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Sunday" },
-        { name: "Abdullah Dandi", pcNumber: "PC-03", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: true, dayOff: "None", assignedDayOff: "Monday" },
-        { name: "Abdullah Ali Al-Hamali", pcNumber: "PC-04", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Tuesday" },
-        { name: "Baraa Nader", pcNumber: "PC-05", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Sunday" },
-        { name: "Mohamed Hussein", pcNumber: "PC-06", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Saturday" },
-        { name: "Adam Al-Hudhiri", pcNumber: "PC-07", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Wednesday" },
-        { name: "Khalifa Abu Khabta", pcNumber: "PC-08", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Wednesday" },
-        { name: "Khaled Al-Osta", pcNumber: "PC-09", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Sunday" },
-        { name: "Basheer Al-Qanouni", pcNumber: "PC-10", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Wednesday" },
-        { name: "Abdulmaez Masoud", pcNumber: "PC-11", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Sunday" },
-        { name: "Mahmoud Farnana", pcNumber: "PC-12", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Saturday" },
-        { name: "Elyas Salem", pcNumber: "PC-13", shift: "Shift B (07:30 PM - 02:30 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Tuesday" },
-        { name: "Hisham Al-Fleit", pcNumber: "PC-14", shift: "Shift B (07:30 PM - 02:30 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Monday" },
-        { name: "Abdullah Al-Suwaib", pcNumber: "PC-15", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Monday" },
-        { name: "Mohammed Abu Kinda", pcNumber: "PC-16", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Tuesday" },
-        { name: "Mohamed Al-Tayeb", pcNumber: "PC-17", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Saturday" },
-        { name: "Ihab Al-Tarhouni", pcNumber: "PC-18", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Saturday" },
-        { name: "Tawfik Al-Jarushi", pcNumber: "PC-19", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Thursday" }
-    ];
-
-    // 10. AUTO-HEAL ONVALUE LISTENER FOR CORRUPTED FIREBASE DATA
     onValue(ref(db, getDBPath('roster')), (snapshot) => {
         try {
             const data = snapshot.val();
@@ -1204,14 +790,14 @@
                 
                 if (dataArray.length > 0) {
                     isValidData = true;
-                    currentEmployees = dataArray.map((emp, i) => {
-                        if (!emp.assignedDayOff) emp.assignedDayOff = (defaultEmployees[i] && defaultEmployees[i].assignedDayOff) || "None";
-                        if (!emp.timeStart) emp.timeStart = (fixedSlots[i] && fixedSlots[i].timeStart) || "12:00 AM";
-                        if (!emp.timeEnd) emp.timeEnd = (fixedSlots[i] && fixedSlots[i].timeEnd) || "12:30 AM";
+                    window.currentEmployees = dataArray.map((emp, i) => {
+                        if (!emp.assignedDayOff) emp.assignedDayOff = (window.defaultEmployees[i] && window.defaultEmployees[i].assignedDayOff) || "None";
+                        if (!emp.timeStart) emp.timeStart = (window.fixedSlots[i] && window.fixedSlots[i].timeStart) || "12:00 AM";
+                        if (!emp.timeEnd) emp.timeEnd = (window.fixedSlots[i] && window.fixedSlots[i].timeEnd) || "12:30 AM";
                         if (!emp.overlap) emp.overlap = "1 Staff";
                         if (!emp.pcNumber) emp.pcNumber = "PC-" + (i+1).toString().padStart(2, '0');
                         if (!emp.teamName) emp.teamName = "Main Team"; 
-                        if (typeof emp.isLocked === 'undefined') emp.isLocked = (defaultEmployees[i] && typeof defaultEmployees[i].isLocked !== 'undefined') ? defaultEmployees[i].isLocked : false;
+                        if (typeof emp.isLocked === 'undefined') emp.isLocked = (window.defaultEmployees[i] && typeof window.defaultEmployees[i].isLocked !== 'undefined') ? window.defaultEmployees[i].isLocked : false;
                         if (typeof emp.quota30 === 'undefined') emp.quota30 = 0;
                         if (typeof emp.quota10 === 'undefined') emp.quota10 = 0;
                         if (typeof emp.clockInTime === 'undefined') emp.clockInTime = null;
@@ -1232,10 +818,10 @@
                 const businessTime = new Date(new Date(tzStr).getTime() - (3 * 3600 * 1000));
                 const todayDayStr = businessTime.toLocaleString('en-US', { weekday: 'long' });
                 
-                currentEmployees = defaultEmployees.map((emp, i) => {
+                window.currentEmployees = window.defaultEmployees.map((emp, i) => {
                     emp.dayOff = (emp.assignedDayOff === todayDayStr) ? todayDayStr : "None";
-                    emp.timeStart = fixedSlots[i] ? fixedSlots[i].timeStart : "12:00 AM";
-                    emp.timeEnd = fixedSlots[i] ? fixedSlots[i].timeEnd : "12:30 AM";
+                    emp.timeStart = window.fixedSlots[i] ? window.fixedSlots[i].timeStart : "12:00 AM";
+                    emp.timeEnd = window.fixedSlots[i] ? window.fixedSlots[i].timeEnd : "12:30 AM";
                     emp.overlap = "1 Staff";
                     emp.pcNumber = "PC-" + (i+1).toString().padStart(2, '0');
                     emp.teamName = "Main Team";
@@ -1245,7 +831,7 @@
                     emp.passkey = "";
                     return emp;
                 });
-                set(ref(db, getDBPath('roster')), currentEmployees);
+                set(ref(db, getDBPath('roster')), window.currentEmployees);
             }
         } catch(e) {
             console.error("Roster rendering failed: " + e.message);
@@ -1255,7 +841,7 @@
         if (clockInSelect) {
             const currentSelection = clockInSelect.value;
             let optionsHtml = '<option value="">-- Select Your Name / PC --</option>';
-            currentEmployees.forEach(emp => {
+            window.currentEmployees.forEach(emp => {
                 optionsHtml += '<option value="' + emp.name + '">' + emp.pcNumber + ' | ' + emp.name + '</option>';
             });
             clockInSelect.innerHTML = optionsHtml;
@@ -1266,13 +852,12 @@
     });
 
     onValue(ref(db, getDBPath('breaks')), (snapshot) => {
-        currentBreaks = snapshot.val() || {};
+        window.currentBreaks = snapshot.val() || {};
         renderActiveBreaks();
     });
 
-    // 11. MIDNIGHT AUTO-RESET LOGIC
     setInterval(() => {
-        if (currentEmployees.length === 0) return; 
+        if (window.currentEmployees.length === 0) return; 
         const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
         const now = new Date(tzStr);
         const businessTime = new Date(now.getTime() - (3 * 3600 * 1000));
@@ -1285,7 +870,7 @@
                 set(ref(db, getDBPath('system/lastBusinessDate')), businessDateStr);
                 remove(ref(db, getDBPath('breaks'))); 
                 
-                let resetRoster = currentEmployees.map(emp => {
+                let resetRoster = window.currentEmployees.map(emp => {
                     let permOff = emp.assignedDayOff || "None";
                     emp.dayOff = (permOff === businessDayStr) ? businessDayStr : "None";
                     emp.quota30 = 0;
@@ -1300,22 +885,21 @@
         }, { onlyOnce: true });
     }, 30000);
 
-    // 12. MAIN RENDERING LOGIC (100% FLAT HTML CONCATENATION - ZERO NESTED TEMPLATES)
     function renderTable() {
-        if (!currentEmployees || currentEmployees.length === 0) return;
+        if (!window.currentEmployees || window.currentEmployees.length === 0) return;
         const tbody = document.getElementById('tableBody');
         tbody.innerHTML = '';
 
         const localAuthUser = sessionStorage.getItem('prestoStaffAuth');
-        const isDraggableList = !isStaffView && isUnlocked && activeShiftFilter === 'all' && document.getElementById('searchInput').value.trim() === '';
+        const isDraggableList = !window.isStaffView && window.isUnlocked && window.activeShiftFilter === 'all' && document.getElementById('searchInput').value.trim() === '';
         const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
         const nowTimeMs = new Date(tzStr).getTime();
 
-        currentEmployees.forEach((emp, index) => {
+        window.currentEmployees.forEach((emp, index) => {
             const isOffToday = emp.dayOff !== 'None';
             const isOffShift = !isCurrentlyOnShift(emp.shift);
 
-            if (isStaffView && (isOffToday || isOffShift)) return;
+            if (window.isStaffView && (isOffToday || isOffShift)) return;
 
             let shiftClass = 'badge-shift-custom';
             if (emp.shift.includes('Shift A')) shiftClass = 'badge-shift-a';
@@ -1326,17 +910,17 @@
             else if (emp.shift.includes('Shift G')) shiftClass = 'badge-shift-g';
 
             let shiftSelectOptionsHtml = "";
-            shiftOptions.forEach(opt => {
+            window.shiftOptions.forEach(opt => {
                 let isSelected = emp.shift === opt ? 'selected' : '';
                 shiftSelectOptionsHtml += '<option value="' + opt + '" ' + isSelected + '>' + opt.split(' (')[0] + '</option>';
             });
             
-            if (!shiftOptions.includes(emp.shift)) {
+            if (!window.shiftOptions.includes(emp.shift)) {
                 shiftSelectOptionsHtml = '<option value="' + emp.shift + '" selected>' + emp.shift.split(' (')[0] + ' (Custom)</option>' + shiftSelectOptionsHtml;
             }
 
             let shiftBadgeHtml = "";
-            if (isStaffView) {
+            if (window.isStaffView) {
                 shiftBadgeHtml = '<span class="status-badge ' + shiftClass + '">' + emp.shift.split(' (')[0] + '</span>';
             } else {
                 shiftBadgeHtml = '<select class="dayoff-select" style="margin-bottom: 4px; font-size: 11px; padding: 4px; width: 100%;" onchange="window.updateShift(' + index + ', this.value)">' + shiftSelectOptionsHtml + '</select>';
@@ -1349,7 +933,7 @@
             const overlapClass = emp.overlap === '2 Staff' ? 'badge-overlap' : 'badge-single';
             
             let selectOptionsHtml = "";
-            dayOffOptions.forEach(opt => {
+            window.dayOffOptions.forEach(opt => {
                 let label = opt === 'None' ? 'No Permanent Day Off' : 'Perm Off: ' + opt;
                 let isSelected = emp.assignedDayOff === opt ? 'selected' : '';
                 selectOptionsHtml += '<option value="' + opt + '" ' + isSelected + '>' + label + '</option>';
@@ -1395,7 +979,7 @@
 
             let clockInHtml = "";
             if (emp.clockInTime) {
-                if (!isStaffView) {
+                if (!window.isStaffView) {
                     clockInHtml = '<div style="font-size: 10px; color: #10B981; font-weight: 700; margin-top: 6px; cursor:pointer;" onclick="window.voidClockIn(' + index + ')" title="Admin: Click to VOID this sign-in">▶ In: ' + emp.clockInTime + '</div>';
                 } else {
                     clockInHtml = '<div style="font-size: 10px; color: #10B981; font-weight: 700; margin-top: 6px;">▶ In: ' + emp.clockInTime + '</div>';
@@ -1405,10 +989,10 @@
             }
 
             let canViewButtons = true;
-            if (isStaffView && localAuthUser !== emp.name) {
+            if (window.isStaffView && localAuthUser !== emp.name) {
                 canViewButtons = false;
             }
-            if (isStaffView && isMobile) {
+            if (window.isStaffView && window.isMobile) {
                 canViewButtons = false;
             }
 
@@ -1419,14 +1003,14 @@
                 actionButtonsHtml += '<button class="btn-mini-break" onclick="window.startBreak(\'' + safeEmpName + '\', ' + index + ', \'standard\')" ' + breakDisabled + '>☕ Break</button>';
                 actionButtonsHtml += '<button class="btn-mini-break" style="color: #38BDF8; border-color: rgba(56, 189, 248, 0.3);" onclick="window.startBreak(\'' + safeEmpName + '\', ' + index + ', \'prayer\')" ' + breakDisabled + '>🕌 Prayer</button>';
             } else {
-                if (isStaffView && isMobile) {
+                if (window.isStaffView && window.isMobile) {
                     actionButtonsHtml = '<span style="font-size: 10px; color: var(--text-muted); padding: 4px;">📱 PC Sign-in Required</span>';
                 } else {
                     actionButtonsHtml = '<span style="font-size: 10px; color: var(--text-muted); padding: 4px;">🔒 Sign in to access</span>';
                 }
             }
 
-            if (!isStaffView) {
+            if (!window.isStaffView) {
                 let lockStyle = emp.isLocked ? 'border-color: #F59E0B; color: #F59E0B;' : 'opacity: 0.6;';
                 let lockText = emp.isLocked ? '🔒 Locked' : '🔓 Unlock';
                 actionButtonsHtml += '<button class="btn-mini-break" style="' + lockStyle + '" onclick="window.toggleLock(' + index + ')" title="Prevent from Reshuffling">' + lockText + '</button>';
@@ -1434,14 +1018,14 @@
                 actionButtonsHtml += '<span class="lock-badge">🔒 FIXED</span>';
             }
 
-            let badgeHtml = gamificationBadges[emp.name] ? '<span title="Punctuality Level" style="cursor:help; font-size:16px;">' + gamificationBadges[emp.name] + '</span>' : '';
+            let badgeHtml = window.gamificationBadges[emp.name] ? '<span title="Punctuality Level" style="cursor:help; font-size:16px;">' + window.gamificationBadges[emp.name] + '</span>' : '';
 
-            const pcEdit = !isStaffView ? ' contenteditable="true" onblur="window.updatePC(' + index + ', this.innerText)"' : '';
-            const nameEdit = !isStaffView ? ' contenteditable="true" onblur="window.updateName(' + index + ', this.innerText)"' : '';
-            const teamEdit = !isStaffView ? ' contenteditable="true" onblur="window.updateTeam(' + index + ', this.innerText)"' : '';
+            const pcEdit = !window.isStaffView ? ' contenteditable="true" onblur="window.updatePC(' + index + ', this.innerText)"' : '';
+            const nameEdit = !window.isStaffView ? ' contenteditable="true" onblur="window.updateName(' + index + ', this.innerText)"' : '';
+            const teamEdit = !window.isStaffView ? ' contenteditable="true" onblur="window.updateTeam(' + index + ', this.innerText)"' : '';
 
             let permOffHtml = "";
-            if (isStaffView) {
+            if (window.isStaffView) {
                 let offText = emp.assignedDayOff === 'None' ? 'No Perm Off' : 'Perm Off: ' + emp.assignedDayOff;
                 permOffHtml = '<span style="font-size: 11px; font-weight: 600; color: var(--text-muted);">' + offText + '</span>';
             } else {
@@ -1449,7 +1033,7 @@
             }
 
             let presentBtnHtml = "";
-            if (isStaffView) {
+            if (window.isStaffView) {
                 let borderColor = isOffToday ? 'rgba(248,113,113,0.3)' : 'rgba(16,185,129,0.3)';
                 let textColor = isOffToday ? '#F87171' : '#10B981';
                 presentBtnHtml = '<span style="display:inline-block; margin-top:6px; padding:4px 8px; border-radius:4px; border:1px solid ' + borderColor + '; color:' + textColor + '; font-size:11px; font-weight:700;">' + presentBtnText + '</span>';
@@ -1457,15 +1041,15 @@
                 presentBtnHtml = '<button class="btn-mini-break" style="margin-top:6px; text-align: center; ' + presentBtnStyle + '" onclick="window.toggleForceAbsent(' + index + ')">' + presentBtnText + '</button>';
             }
 
-            let q30Click = !isStaffView ? 'onclick="window.resetQuota(' + index + ', \'30\')"' : '';
-            let q10Click = !isStaffView ? 'onclick="window.resetQuota(' + index + ', \'10\')"' : '';
+            let q30Click = !window.isStaffView ? 'onclick="window.resetQuota(' + index + ', \'30\')"' : '';
+            let q10Click = !window.isStaffView ? 'onclick="window.resetQuota(' + index + ', \'10\')"' : '';
 
             let rowHtml = '<td class="col-id">' + (index + 1) + '</td>';
             rowHtml += '<td class="col-pc"><span class="editable-name"' + pcEdit + '>' + emp.pcNumber + '</span>' + clockInHtml + '</td>';
             rowHtml += '<td class="col-name"><div style="display: flex; flex-direction: column; align-items: flex-start; gap: 6px;"><div><span class="editable-name"' + nameEdit + '>' + emp.name + '</span>' + badgeHtml + '</div><div style="display: flex; gap: 4px; flex-wrap: wrap; align-items: center;">' + actionButtonsHtml + '</div></div></td>';
             rowHtml += '<td class="col-quotas"><div style="display: flex; flex-direction: column; gap: 4px;">';
-            rowHtml += '<span style="background: ' + q30Bg + '; color: ' + q30Color + '; border: 1px solid ' + q30Border + '; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; cursor: ' + (isStaffView ? 'default' : 'pointer') + ';" ' + q30Click + ' title="Official 30-Min Breaks">30 Min: ' + emp.quota30 + ' / 1</span>';
-            rowHtml += '<span style="background: ' + q10Bg + '; color: ' + q10Color + '; border: 1px solid ' + q10Border + '; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; cursor: ' + (isStaffView ? 'default' : 'pointer') + ';" ' + q10Click + ' title="Quick 10-Min Breaks">10 Min: ' + emp.quota10 + ' / 3</span>';
+            rowHtml += '<span style="background: ' + q30Bg + '; color: ' + q30Color + '; border: 1px solid ' + q30Border + '; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; cursor: ' + (window.isStaffView ? 'default' : 'pointer') + ';" ' + q30Click + ' title="Official 30-Min Breaks">30 Min: ' + emp.quota30 + ' / 1</span>';
+            rowHtml += '<span style="background: ' + q10Bg + '; color: ' + q10Color + '; border: 1px solid ' + q10Border + '; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; cursor: ' + (window.isStaffView ? 'default' : 'pointer') + ';" ' + q10Click + ' title="Quick 10-Min Breaks">10 Min: ' + emp.quota10 + ' / 3</span>';
             rowHtml += '</div></td>';
             rowHtml += '<td class="col-dayoff"><div style="display: flex; flex-direction: column;">' + permOffHtml + presentBtnHtml + '</div></td>';
             rowHtml += '<td class="col-shift">' + shiftBadgeHtml + '<br><span class="status-badge badge-team editable-name"' + teamEdit + '>' + (emp.teamName || 'No Team') + '</span></td>';
@@ -1477,7 +1061,7 @@
             tbody.appendChild(tr);
         });
 
-        updateAdminUI();
+        window.updateAdminUI();
         updateAutomatedMetrics();
         window.filterTable();
     }
@@ -1487,19 +1071,19 @@
         const grid = document.getElementById('breakTrackerGrid');
         const mobileFloor = document.getElementById('mobileFocusFloor'); 
         
-        const breakKeys = Object.keys(currentBreaks);
+        const breakKeys = Object.keys(window.currentBreaks);
         const localAuthUser = sessionStorage.getItem('prestoStaffAuth');
         
-        const visibleBreaks = breakKeys.filter(key => currentBreaks[key].status !== 'completed');
+        const visibleBreaks = breakKeys.filter(key => window.currentBreaks[key].status !== 'completed');
 
         const pendingList = visibleBreaks
-            .filter(key => currentBreaks[key].status === 'pending')
-            .sort((a,b) => (currentBreaks[a].requestTime || 0) - (currentBreaks[b].requestTime || 0));
+            .filter(key => window.currentBreaks[key].status === 'pending')
+            .sort((a,b) => (window.currentBreaks[a].requestTime || 0) - (window.currentBreaks[b].requestTime || 0));
 
         if (visibleBreaks.length === 0) {
             section.style.display = 'none';
             if(mobileFloor) mobileFloor.innerHTML = '<div style="color:var(--text-muted); font-size:13px; font-weight:600; text-transform:uppercase;">No one is on break right now. Floor is full.</div>';
-            if (timerInterval) clearInterval(timerInterval);
+            if (window.timerInterval) clearInterval(window.timerInterval);
             return;
         }
 
@@ -1508,10 +1092,10 @@
         if(mobileFloor) mobileFloor.innerHTML = '';
 
         visibleBreaks.forEach(key => {
-            const b = currentBreaks[key];
+            const b = window.currentBreaks[key];
             const card = document.createElement('div');
             
-            const empMatch = currentEmployees.find(e => e.name === b.name);
+            const empMatch = window.currentEmployees.find(e => e.name === b.name);
             const shiftBadge = empMatch ? '<span class="break-shift-badge">' + empMatch.shift.split(' ')[0] + ' ' + (empMatch.shift.split(' ')[1] || '') + '</span>' : '';
             const pcBadge = empMatch && empMatch.pcNumber ? '<span class="break-shift-badge" style="background: rgba(251, 191, 36, 0.2); color: #FBBF24;">' + empMatch.pcNumber + '</span>' : '';
             const teamBadge = empMatch && empMatch.teamName && empMatch.teamName !== 'No Team' ? '<span class="break-shift-badge" style="background: rgba(16, 185, 129, 0.15); color: #10B981;">' + empMatch.teamName + '</span>' : '';
@@ -1528,7 +1112,7 @@
 
                 card.className = 'break-card card-pending';
                 let adminControls = '';
-                if (!isStaffView) {
+                if (!window.isStaffView) {
                     adminControls = '<div style="display: flex; gap: 8px;"><button class="btn btn-success" onclick="window.approveBreak(\'' + key + '\')">Approve</button><button class="btn btn-danger" onclick="window.denyBreak(\'' + key + '\')">Deny</button></div>';
                 }
                 
@@ -1537,7 +1121,7 @@
             } 
             else if (b.status === 'return_pending') {
                 card.className = 'break-card card-unofficial'; 
-                let adminControls = isStaffView ? 
+                let adminControls = window.isStaffView ? 
                     '<button class="btn btn-staff" disabled>Pending Admin Auth...</button>' : 
                     '<button class="btn btn-success" onclick="window.approveReturn(\'' + key + '\')">Approve Return</button>';
                 
@@ -1552,15 +1136,15 @@
                 let returnBtnHtml = '';
                 let canReturn = true;
 
-                if (isStaffView && localAuthUser !== b.name) canReturn = false;
-                if (isStaffView && isMobile) canReturn = false; 
+                if (window.isStaffView && localAuthUser !== b.name) canReturn = false;
+                if (window.isStaffView && window.isMobile) canReturn = false; 
 
                 if (canReturn) {
                     returnBtnHtml = '<button class="btn btn-primary" onclick="window.requestReturn(\'' + key + '\')">Request Return</button>';
-                } else if (!isStaffView) {
+                } else if (!window.isStaffView) {
                     returnBtnHtml = '<button class="btn btn-primary" style="background: #F59E0B; border-color: #F59E0B;" onclick="if(confirm(\'Admin Override: Force return?\')) window.requestReturn(\'' + key + '\')" title="Admin Override">Force Return</button>';
                 } else {
-                    if (isStaffView && isMobile) {
+                    if (window.isStaffView && window.isMobile) {
                         returnBtnHtml = '<span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">📱 PC Sign-in Required</span>';
                     } else {
                         returnBtnHtml = '<span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">🔒 Waiting for ' + b.name.split(' ')[0] + '</span>';
@@ -1582,9 +1166,9 @@
             }
         });
 
-        if (timerInterval) clearInterval(timerInterval);
+        if (window.timerInterval) clearInterval(window.timerInterval);
         updateTimers(); 
-        timerInterval = setInterval(updateTimers, 1000);
+        window.timerInterval = setInterval(updateTimers, 1000);
         updateAutomatedMetrics(); 
     }
 
@@ -1634,7 +1218,7 @@
     }
 
     function updateMobileFocusDashboard() {
-        if (!isStaffView || !isMobile) return;
+        if (!window.isStaffView || !window.isMobile) return;
         const authUser = sessionStorage.getItem('prestoStaffAuth');
         
         if (!authUser) {
@@ -1650,7 +1234,7 @@
         document.getElementById('mobileFocusDashboard').style.display = 'flex';
         document.getElementById('mobileFocusName').innerText = "Welcome, " + authUser.split(' ')[0];
 
-        const emp = currentEmployees.find(e => e.name === authUser);
+        const emp = window.currentEmployees.find(e => e.name === authUser);
         if(emp && emp.timeStart && emp.timeStart !== '--:--') {
             const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
             let startMs = parseTimeToday(emp.timeStart).getTime();
@@ -1693,7 +1277,7 @@
         let otherActive = 0;
         let offCount = 0;
 
-        currentEmployees.forEach(e => {
+        window.currentEmployees.forEach(e => {
             if (e.dayOff !== 'None') {
                 offCount++;
                 return; 
@@ -1710,9 +1294,9 @@
             else otherActive++;
         });
 
-        const activeBreaksCount = Object.values(currentBreaks).filter(b => b.status === 'active' || b.status === 'return_pending').length;
+        const activeBreaksCount = Object.values(window.currentBreaks).filter(b => b.status === 'active' || b.status === 'return_pending').length;
         const liveFloorStaff = Math.max(0, presentCount - activeBreaksCount);
-        const total = currentEmployees.length;
+        const total = window.currentEmployees.length;
 
         document.getElementById('metricStaffCount').innerText = presentCount + " Present";
         let shiftStr = shiftAActive + " A | " + shiftBActive + " B";
@@ -1772,7 +1356,7 @@
     }
 
     function isOfficialBreakTime(index) {
-        const emp = currentEmployees[index];
+        const emp = window.currentEmployees[index];
         if (!emp.timeStart || emp.timeStart === '--:--') return false;
         const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
         const now = new Date(tzStr).getTime();
@@ -1786,7 +1370,7 @@
         return now >= bStart && now <= bEnd;
     }
 
-    // 13. CLOCK IN / AUTH / BREAK SYSTEM
+    // 20. CLOCK IN / AUTH / BREAK SYSTEM
     window.processClockIn = function() {
         if (enforcePCWorkstation()) return;
 
@@ -1798,14 +1382,14 @@
             return;
         }
 
-        let empIndex = currentEmployees.findIndex(e => e.name === inputId);
+        let empIndex = window.currentEmployees.findIndex(e => e.name === inputId);
 
         if (empIndex === -1) {
             alert("❌ Name not found in system.");
             return;
         }
 
-        let emp = currentEmployees[empIndex];
+        let emp = window.currentEmployees[empIndex];
         let isFirstTime = false;
 
         if (!emp.passkey || emp.passkey === "") {
@@ -1822,7 +1406,7 @@
 
         if (!isCurrentlyOnShift(emp.shift)) {
             if (isFirstTime) {
-                set(ref(db, getDBPath('roster')), currentEmployees);
+                set(ref(db, getDBPath('roster')), window.currentEmployees);
                 alert("✅ PIN successfully registered!\n\nHowever, you are outside your scheduled shift window, so you cannot fully sign in to the floor yet. Please return closer to your shift time.");
             } else {
                 alert("❌ You cannot sign in right now. You are currently outside of your scheduled shift window.");
@@ -1857,7 +1441,7 @@
         sessionStorage.setItem('prestoStaffAuth', emp.name);
         updateHeaderAuthUI();
 
-        set(ref(db, getDBPath('roster')), currentEmployees).then(() => {
+        set(ref(db, getDBPath('roster')), window.currentEmployees).then(() => {
             document.getElementById('clockInId').value = '';
             document.getElementById('clockInPin').value = '';
             document.getElementById('clockInModal').style.display = 'none';
@@ -1885,19 +1469,19 @@
     };
 
     window.voidClockIn = function(index) {
-        if (isStaffView) return;
+        if (window.isStaffView) return;
         if (!requireAdmin()) return;
         
-        if (confirm("Are you sure you want to VOID the clock-in for " + currentEmployees[index].name + "? This will mark them as not signed in and force them to re-enter their PIN.")) {
-            currentEmployees[index].clockInTime = null;
-            set(ref(db, getDBPath('roster')), currentEmployees);
+        if (confirm("Are you sure you want to VOID the clock-in for " + window.currentEmployees[index].name + "? This will mark them as not signed in and force them to re-enter their PIN.")) {
+            window.currentEmployees[index].clockInTime = null;
+            set(ref(db, getDBPath('roster')), window.currentEmployees);
         }
     };
 
     window.startBreak = function(empName, index, requestedType) {
         if (enforcePCWorkstation()) return;
 
-        const emp = currentEmployees[index];
+        const emp = window.currentEmployees[index];
 
         if (!emp.clockInTime) {
             alert("🚨 MANDATORY SIGN-IN REQUIRED: " + empName + " has not signed in for today's shift yet!\n\nPlease click the \"Sign In\" button at the top of the dashboard and enter your 4-digit PIN first.");
@@ -1907,12 +1491,12 @@
 
         try {
             const safeKey = empName.replace(/[.#$[\]]/g, '');
-            if (currentBreaks[safeKey] && currentBreaks[safeKey].status !== 'completed') {
+            if (window.currentBreaks[safeKey] && window.currentBreaks[safeKey].status !== 'completed') {
                 alert("🚨 BLOCK: " + empName + " already has an active or pending break request.");
                 return;
             }
 
-            const activeBreaksList = Object.values(currentBreaks).filter(b => b.status !== 'completed');
+            const activeBreaksList = Object.values(window.currentBreaks).filter(b => b.status !== 'completed');
             const currentPrayers = activeBreaksList.filter(b => b.type === 'Prayer').length;
             const current10Mins = activeBreaksList.filter(b => b.type === 'Unscheduled (10m)').length;
 
@@ -1946,7 +1530,7 @@
                 }
 
                 emp.quota30 = q30 + 1;
-                set(ref(db, getDBPath('roster')), currentEmployees);
+                set(ref(db, getDBPath('roster')), window.currentEmployees);
 
                 let bStart = parseTimeToday(emp.timeStart).getTime();
                 let bEnd = parseTimeToday(emp.timeEnd).getTime();
@@ -1998,7 +1582,7 @@
             const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
             const nowMs = new Date(tzStr).getTime();
             
-            const breakData = currentBreaks[key];
+            const breakData = window.currentBreaks[key];
             if(!breakData) { alert("Break request no longer exists."); return; }
 
             breakData.status = 'active';
@@ -2011,10 +1595,10 @@
             }
             
             if (breakData.limit === 10) {
-                const empIndex = currentEmployees.findIndex(e => e.name === breakData.name);
+                const empIndex = window.currentEmployees.findIndex(e => e.name === breakData.name);
                 if (empIndex > -1) {
-                    currentEmployees[empIndex].quota10 = (currentEmployees[empIndex].quota10 || 0) + 1;
-                    set(ref(db, getDBPath('roster')), currentEmployees);
+                    window.currentEmployees[empIndex].quota10 = (window.currentEmployees[empIndex].quota10 || 0) + 1;
+                    set(ref(db, getDBPath('roster')), window.currentEmployees);
                 }
             }
             
@@ -2035,7 +1619,7 @@
         try {
             const key = rawKey.replace(/'/g, "");
             const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
-            const breakData = currentBreaks[key];
+            const breakData = window.currentBreaks[key];
             if (breakData) {
                 const now = new Date(tzStr).getTime();
                 if (breakData.endTime > 0) {
@@ -2058,7 +1642,7 @@
         setTimeout(() => {
             try {
                 const key = rawKey.replace(/'/g, "");
-                const breakData = currentBreaks[key];
+                const breakData = window.currentBreaks[key];
                 if (breakData) {
                     const adminNote = prompt("Optional: Enter a note for this return (or leave blank):") || "";
                     const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
@@ -2081,7 +1665,7 @@
 
                     if (variance === "EXACT ON TIME") window.shootConfetti();
 
-                    const emp = currentEmployees.find(e => e.name === breakData.name);
+                    const emp = window.currentEmployees.find(e => e.name === breakData.name);
                     const clockInToSave = (emp && emp.clockInTime) ? emp.clockInTime : "No Sign-In";
 
                     const historyRef = ref(db, getDBPath('history/' + businessDate));
@@ -2113,7 +1697,7 @@
 
         if (!authBtnContainer) return;
 
-        if (isStaffView && isMobile) {
+        if (window.isStaffView && window.isMobile) {
             authBtnContainer.innerHTML = '<span class="brand-badge" style="background: rgba(148, 163, 184, 0.15); color: #94A3B8; border-color: rgba(148, 163, 184, 0.3); padding: 8px 16px; font-size: 13px;">📱 Mobile Mode Active</span>';
             if (clockInModal) clockInModal.style.display = 'none';
             return;
@@ -2126,7 +1710,7 @@
         } else {
             authBtnContainer.innerHTML = '<button class="btn btn-success" style="font-size: 14px; padding: 10px 20px;" onclick="document.getElementById(\'clockInModal\').style.display=\'flex\'">🕒 Mandatory Daily Sign In</button>';
             
-            if (isStaffView && clockInModal) {
+            if (window.isStaffView && clockInModal) {
                 clockInModal.style.display = 'flex';
                 if (closeBtn) closeBtn.style.display = 'none'; 
             } else {
@@ -2136,7 +1720,7 @@
     }
     updateHeaderAuthUI();
 
-    // 14. LEADERBOARD & EXPORT AUDIT SYSTEMS
+    // 21. LEADERBOARD & EXPORT AUDIT SYSTEMS
     window.openLeaderboard = async function() {
         if (!requireAdmin()) return;
         document.getElementById('leaderboardModal').style.display = 'flex';
