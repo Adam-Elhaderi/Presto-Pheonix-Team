@@ -216,9 +216,13 @@
         @keyframes fall { to { transform: translateY(105vh) rotate(720deg); opacity: 0; } }
 
         /* --- PRESTO DELIVERY RUSH (GAME STYLES) --- */
-        .game-board { width: 300px; height: 300px; background: rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.1); position: relative; border-radius: 8px; margin: 0 auto; overflow: hidden; box-shadow: inset 0 0 20px rgba(0,0,0,0.8); }
-        .game-car { position: absolute; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: grab; user-select: none; touch-action: none; transition: transform 0.1s;}
-        .game-car:active { cursor: grabbing; transform: scale(0.95); }
+        .game-board { width: min(300px, calc(100vw - 64px)); aspect-ratio: 1; height: auto; background-color: rgba(0,0,0,0.5); background-image: linear-gradient(rgba(148,163,184,.10) 1px, transparent 1px), linear-gradient(90deg, rgba(148,163,184,.10) 1px, transparent 1px); background-size: calc(100% / 6) calc(100% / 6); border: 2px solid rgba(255,255,255,0.1); position: relative; border-radius: 10px; margin: 0 auto; overflow: hidden; box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 8px 30px rgba(0,0,0,.18); touch-action: none; }
+        .game-car { position: absolute; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: clamp(14px, 4vw, 20px); cursor: grab; user-select: none; touch-action: none; transition: box-shadow .12s, filter .12s; box-sizing: border-box; }
+        .game-car:active { cursor: grabbing; filter: brightness(1.2); }
+        .game-car.hint-car { outline: 3px solid #FBBF24; box-shadow: 0 0 18px rgba(251,191,36,.75); }
+        .game-stat { background: rgba(15,23,42,.55); border: 1px solid var(--border-color); border-radius: 9px; padding: 8px 10px; min-width: 80px; }
+        .game-action-row { display: flex; gap: 8px; margin-top: 10px; }
+        .game-action-row .btn { flex: 1; min-width: 0; padding: 9px 6px; font-size: 12px; }
         
         /* THE DRIVER */
         .car-presto { 
@@ -305,15 +309,20 @@
             <h2 style="color: #FF3B00;">🛵 Presto Delivery Rush</h2>
             <button class="close-btn" onclick="window.closeTrafficGame()">×</button>
         </div>
-        <h3 id="gameLevelDisplay" style="font-size: 14px; color: #38BDF8; margin-bottom: 5px;">Level 1</h3>
-        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">Clear the path so our Presto driver can escape the traffic jam and deliver the order!</p>
-        
-        <div id="gameBoard" class="game-board">
-            <div class="game-exit"></div>
-            <!-- Cars rendered via JS -->
+        <h3 id="gameLevelDisplay" style="font-size: 14px; color: #38BDF8; margin-bottom: 5px;">Level 1 · Easy</h3>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">Slide the vehicles along their lanes. Clear a path for the Presto driver to deliver the order.</p>
+        <div style="display:flex; justify-content:center; gap:8px; margin-bottom:12px;">
+            <div class="game-stat"><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;">Moves</div><strong id="gameMoveCount" style="color:#38BDF8;font-size:18px;">0</strong></div>
+            <div class="game-stat"><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;">Best</div><strong id="gameBestMoves" style="color:#10B981;font-size:18px;">—</strong></div>
+            <div class="game-stat"><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;">Levels</div><strong id="gameProgress" style="color:#FBBF24;font-size:18px;">1 / 8</strong></div>
         </div>
-        
-        <button class="btn btn-staff" style="width: 100%; margin-top: 15px;" onclick="window.initTrafficGame()">Reset Level</button>
+        <div id="gameBoard" class="game-board" aria-label="Traffic puzzle board"><div class="game-exit"></div></div>
+        <p id="gameMessage" role="status" aria-live="polite" style="font-size:11px;color:var(--text-muted);min-height:16px;margin:9px 0 0;">Tip: move cars only forward or backward in their lane.</p>
+        <div class="game-action-row">
+            <button class="btn btn-staff" onclick="window.trafficGameHint()">💡 Hint</button>
+            <button class="btn btn-staff" onclick="window.trafficGameUndo()">↶ Undo</button>
+            <button class="btn btn-staff" onclick="window.initTrafficGame()">↻ Reset</button>
+        </div>
     </div>
 </div>
 
@@ -808,148 +817,363 @@
         }
     };
 
-    // --- PRESTO DELIVERY RUSH (GAME) ---
+    // --- PRESTO DELIVERY RUSH (IMPROVED GAME) ---
     const trafficLevels = [
-        [ // Level 1 (Easy)
-            { id: 0, x: 1, y: 2, len: 2, horiz: true, isRed: true },
-            { id: 1, x: 0, y: 0, len: 3, horiz: false },
-            { id: 2, x: 1, y: 0, len: 2, horiz: true },
-            { id: 3, x: 3, y: 1, len: 2, horiz: false },
-            { id: 4, x: 4, y: 0, len: 2, horiz: false },
-            { id: 5, x: 4, y: 2, len: 2, horiz: true },
-            { id: 6, x: 2, y: 4, len: 2, horiz: false },
-            { id: 7, x: 3, y: 3, len: 2, horiz: true },
-            { id: 8, x: 4, y: 4, len: 2, horiz: true }
-        ],
-        [ // Level 2 (Medium)
+        [ // Level Easy · 1
             { id: 0, x: 0, y: 2, len: 2, horiz: true, isRed: true },
-            { id: 1, x: 2, y: 1, len: 3, horiz: false },
-            { id: 2, x: 0, y: 0, len: 2, horiz: true },
-            { id: 3, x: 3, y: 0, len: 2, horiz: false },
-            { id: 4, x: 4, y: 0, len: 2, horiz: true },
-            { id: 5, x: 5, y: 1, len: 3, horiz: false },
-            { id: 6, x: 3, y: 3, len: 2, horiz: true },
-            { id: 7, x: 0, y: 5, len: 3, horiz: true },
-            { id: 8, x: 3, y: 4, len: 2, horiz: false }
+            { id: 1, x: 3, y: 0, len: 2, horiz: true },
+            { id: 2, x: 1, y: 3, len: 2, horiz: true },
+            { id: 3, x: 5, y: 1, len: 2, horiz: false },
+            { id: 4, x: 3, y: 3, len: 3, horiz: false },
+            { id: 5, x: 2, y: 1, len: 3, horiz: true },
+            { id: 6, x: 4, y: 3, len: 2, horiz: false },
+            { id: 7, x: 0, y: 0, len: 2, horiz: true },
+            { id: 8, x: 5, y: 4, len: 2, horiz: false },
         ],
-        [ // Level 3 (Hard)
-            { id: 0, x: 1, y: 2, len: 2, horiz: true, isRed: true },
-            { id: 1, x: 0, y: 1, len: 3, horiz: false },
-            { id: 2, x: 1, y: 1, len: 2, horiz: true },
-            { id: 3, x: 3, y: 0, len: 3, horiz: false },
-            { id: 4, x: 4, y: 0, len: 2, horiz: true },
-            { id: 5, x: 5, y: 1, len: 2, horiz: false },
-            { id: 6, x: 4, y: 3, len: 2, horiz: true },
-            { id: 7, x: 3, y: 4, len: 2, horiz: false },
-            { id: 8, x: 0, y: 5, len: 3, horiz: true }
+        [ // Level Easy · 2
+            { id: 0, x: 0, y: 2, len: 2, horiz: true, isRed: true },
+            { id: 1, x: 5, y: 2, len: 2, horiz: false },
+            { id: 2, x: 4, y: 2, len: 3, horiz: false },
+            { id: 3, x: 3, y: 0, len: 2, horiz: false },
+            { id: 4, x: 2, y: 0, len: 2, horiz: false },
+            { id: 5, x: 1, y: 3, len: 2, horiz: true },
+            { id: 6, x: 1, y: 4, len: 2, horiz: true },
+            { id: 7, x: 3, y: 3, len: 2, horiz: false },
+            { id: 8, x: 5, y: 4, len: 2, horiz: false },
+            { id: 9, x: 2, y: 2, len: 2, horiz: true },
+        ],
+        [ // Level Medium · 3
+            { id: 0, x: 0, y: 2, len: 2, horiz: true, isRed: true },
+            { id: 1, x: 3, y: 2, len: 2, horiz: true },
+            { id: 2, x: 2, y: 2, len: 3, horiz: false },
+            { id: 3, x: 3, y: 1, len: 2, horiz: true },
+            { id: 4, x: 1, y: 5, len: 2, horiz: true },
+            { id: 5, x: 4, y: 4, len: 2, horiz: true },
+            { id: 6, x: 2, y: 0, len: 2, horiz: false },
+            { id: 7, x: 5, y: 0, len: 2, horiz: false },
+            { id: 8, x: 3, y: 5, len: 2, horiz: true },
+        ],
+        [ // Level Medium · 4
+            { id: 0, x: 0, y: 2, len: 2, horiz: true, isRed: true },
+            { id: 1, x: 4, y: 4, len: 2, horiz: true },
+            { id: 2, x: 4, y: 5, len: 2, horiz: true },
+            { id: 3, x: 4, y: 1, len: 3, horiz: false },
+            { id: 4, x: 3, y: 0, len: 3, horiz: false },
+            { id: 5, x: 2, y: 5, len: 2, horiz: true },
+            { id: 6, x: 1, y: 4, len: 2, horiz: true },
+            { id: 7, x: 1, y: 0, len: 2, horiz: false },
+            { id: 8, x: 1, y: 3, len: 2, horiz: true },
+        ],
+        [ // Level Hard · 5
+            { id: 0, x: 0, y: 2, len: 2, horiz: true, isRed: true },
+            { id: 1, x: 3, y: 1, len: 3, horiz: false },
+            { id: 2, x: 2, y: 4, len: 3, horiz: true },
+            { id: 3, x: 4, y: 0, len: 3, horiz: false },
+            { id: 4, x: 5, y: 1, len: 3, horiz: false },
+            { id: 5, x: 0, y: 3, len: 2, horiz: true },
+            { id: 6, x: 3, y: 5, len: 3, horiz: true },
+        ],
+        [ // Level Hard · 6
+            { id: 0, x: 0, y: 2, len: 2, horiz: true, isRed: true },
+            { id: 1, x: 2, y: 0, len: 3, horiz: true },
+            { id: 2, x: 1, y: 5, len: 2, horiz: true },
+            { id: 3, x: 4, y: 2, len: 2, horiz: true },
+            { id: 4, x: 3, y: 3, len: 3, horiz: false },
+            { id: 5, x: 2, y: 1, len: 2, horiz: false },
+            { id: 6, x: 1, y: 3, len: 2, horiz: true },
+            { id: 7, x: 4, y: 3, len: 2, horiz: true },
+            { id: 8, x: 3, y: 1, len: 2, horiz: false },
+            { id: 9, x: 0, y: 3, len: 2, horiz: false },
+        ],
+        [ // Level Expert · 7
+            { id: 0, x: 0, y: 2, len: 2, horiz: true, isRed: true },
+            { id: 1, x: 4, y: 0, len: 3, horiz: false },
+            { id: 2, x: 0, y: 3, len: 3, horiz: false },
+            { id: 3, x: 3, y: 3, len: 2, horiz: true },
+            { id: 4, x: 3, y: 0, len: 3, horiz: false },
+            { id: 5, x: 2, y: 3, len: 3, horiz: false },
+            { id: 6, x: 1, y: 1, len: 2, horiz: true },
+            { id: 7, x: 3, y: 4, len: 3, horiz: true },
+            { id: 8, x: 1, y: 0, len: 2, horiz: true },
+        ],
+        [ // Level Expert · 8
+            { id: 0, x: 0, y: 2, len: 2, horiz: true, isRed: true },
+            { id: 1, x: 1, y: 0, len: 2, horiz: false },
+            { id: 2, x: 0, y: 4, len: 2, horiz: false },
+            { id: 3, x: 3, y: 0, len: 3, horiz: true },
+            { id: 4, x: 4, y: 3, len: 3, horiz: false },
+            { id: 5, x: 1, y: 3, len: 2, horiz: false },
+            { id: 6, x: 2, y: 3, len: 2, horiz: true },
+            { id: 7, x: 2, y: 1, len: 2, horiz: false },
+            { id: 8, x: 4, y: 1, len: 2, horiz: false },
+            { id: 9, x: 1, y: 5, len: 2, horiz: true },
         ]
     ];
+    const trafficDifficulty = ['Easy', 'Easy', 'Medium', 'Medium', 'Hard', 'Hard', 'Expert', 'Expert'];
     let currentLevelIndex = 0;
     let trafficLevel = [];
     let activeCar = null, startMouse = 0, bounds = {}, initialPos = 0;
+    let trafficMoves = 0, trafficHistory = [], trafficWon = false;
+    let highlightedHint = null, hintTimer = null;
+    const trafficBestKey = 'prestoTrafficBestMoves';
 
+    function trafficCellSize() {
+        const board = document.getElementById('gameBoard');
+        return board ? board.clientWidth / 6 : 50;
+    }
+    function trafficBestScores() {
+        try { return JSON.parse(localStorage.getItem(trafficBestKey) || '{}'); }
+        catch (_) { return {}; }
+    }
+    function saveTrafficBest(level, moves) {
+        const scores = trafficBestScores();
+        if (!scores[level] || moves < scores[level]) scores[level] = moves;
+        try { localStorage.setItem(trafficBestKey, JSON.stringify(scores)); } catch (_) {}
+    }
+    function renderTrafficStats() {
+        const movesEl = document.getElementById('gameMoveCount');
+        const bestEl = document.getElementById('gameBestMoves');
+        const progressEl = document.getElementById('gameProgress');
+        if (movesEl) movesEl.textContent = String(trafficMoves);
+        if (bestEl) bestEl.textContent = trafficBestScores()[currentLevelIndex] || '—';
+        if (progressEl) progressEl.textContent = `${currentLevelIndex + 1} / ${trafficLevels.length}`;
+    }
+    function setTrafficMessage(message, color) {
+        const el = document.getElementById('gameMessage');
+        if (!el) return;
+        el.textContent = message;
+        el.style.color = color || 'var(--text-muted)';
+    }
+    function clearTrafficHint() {
+        if (hintTimer) clearTimeout(hintTimer);
+        hintTimer = null;
+        if (highlightedHint && highlightedHint.el) highlightedHint.el.classList.remove('hint-car');
+        highlightedHint = null;
+    }
+    function paintTrafficCar(car) {
+        if (!car || !car.el) return;
+        const cell = trafficCellSize();
+        car.el.style.width = ((car.horiz ? car.len : 1) * cell) + 'px';
+        car.el.style.height = ((car.horiz ? 1 : car.len) * cell) + 'px';
+        car.el.style.left = (car.x * cell) + 'px';
+        car.el.style.top = (car.y * cell) + 'px';
+    }
     window.openTrafficGame = function() {
-        document.getElementById('gameModal').style.display = 'flex';
+        const modal = document.getElementById('gameModal');
+        if (modal) modal.style.display = 'flex';
         window.initTrafficGame();
-    }
-
+    };
     window.closeTrafficGame = function() {
-        document.getElementById('gameModal').style.display = 'none';
-    }
-
+        const modal = document.getElementById('gameModal');
+        if (modal) modal.style.display = 'none';
+        if (activeCar) endDragCar(null);
+        clearTrafficHint();
+    };
     window.initTrafficGame = function() {
-        let board = document.getElementById('gameBoard');
-        board.innerHTML = '<div class="game-exit"></div>';
-        document.getElementById('gameLevelDisplay').innerText = `Level ${currentLevelIndex + 1}`;
-        
-        // Deep copy the level so restarting works
+        const board = document.getElementById('gameBoard');
+        if (!board) return;
+        if (activeCar) {
+            window.removeEventListener('pointermove', dragCar);
+            window.removeEventListener('pointerup', endDragCar);
+            activeCar = null;
+        }
+        clearTrafficHint();
+        trafficWon = false;
+        trafficMoves = 0;
+        trafficHistory = [];
+        board.innerHTML = '<div class="game-exit" style="top:calc(100% / 3);height:calc(100% / 6);width:10px;z-index:0;"></div>';
+        const title = document.getElementById('gameLevelDisplay');
+        if (title) title.textContent = `Level ${currentLevelIndex + 1} · ${trafficDifficulty[currentLevelIndex]}`;
         trafficLevel = JSON.parse(JSON.stringify(trafficLevels[currentLevelIndex]));
-
-        trafficLevel.forEach((c) => {
-            let el = document.createElement('div');
-            el.className = 'game-car ' + (c.isRed ? 'car-presto' : 'car-normal');
-            el.innerText = c.isRed ? '' : '🚙';
-            el.style.width = (c.horiz ? c.len * 50 : 50) + 'px';
-            el.style.height = (c.horiz ? 50 : c.len * 50) + 'px';
-            el.style.left = (c.x * 50) + 'px';
-            el.style.top = (c.y * 50) + 'px';
-            
-            el.onpointerdown = (e) => startDragCar(e, c, el);
-            c.el = el;
+        trafficLevel.forEach((car) => {
+            const el = document.createElement('div');
+            el.className = 'game-car ' + (car.isRed ? 'car-presto' : 'car-normal');
+            el.textContent = car.isRed ? '🛵' : '🚙';
+            el.setAttribute('role', 'button');
+            el.setAttribute('aria-label', `${car.isRed ? 'Presto delivery scooter' : 'Vehicle'}; move ${car.horiz ? 'horizontally' : 'vertically'}`);
+            el.tabIndex = 0;
+            el.style.zIndex = car.isRed ? 10 : 1;
+            el.onpointerdown = (e) => startDragCar(e, car, el);
+            el.onkeydown = (e) => {
+                if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight' && e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+                if ((car.horiz && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) || (!car.horiz && (e.key === 'ArrowUp' || e.key === 'ArrowDown'))) {
+                    e.preventDefault(); moveTrafficCarByKey(car, e.key);
+                }
+            };
+            car.el = el;
+            paintTrafficCar(car);
             board.appendChild(el);
         });
-    }
-
+        renderTrafficStats();
+        setTrafficMessage('Tip: drag vehicles, or focus one and use the arrow keys.');
+    };
     function getGameGrid(ignoreCar) {
-        let g = Array(6).fill(0).map(() => Array(6).fill(0));
-        trafficLevel.forEach(c => {
-            if (c === ignoreCar) return;
-            for(let i=0; i<c.len; i++) {
-                if (c.horiz) g[c.y][c.x + i] = 1;
-                else g[c.y + i][c.x] = 1;
+        const grid = Array.from({ length: 6 }, () => Array(6).fill(0));
+        trafficLevel.forEach(car => {
+            if (car === ignoreCar) return;
+            for (let i = 0; i < car.len; i++) {
+                const x = car.horiz ? car.x + i : car.x;
+                const y = car.horiz ? car.y : car.y + i;
+                if (grid[y] && x >= 0 && x < 6) grid[y][x] = 1;
             }
         });
-        return g;
+        return grid;
     }
-
+    function trafficBounds(car) {
+        const grid = getGameGrid(car);
+        let min = 0, max = 6 - car.len;
+        if (car.horiz) {
+            for (let x = car.x - 1; x >= 0; x--) if (grid[car.y][x]) { min = x + 1; break; }
+            for (let x = car.x + car.len; x < 6; x++) if (grid[car.y][x]) { max = x - car.len; break; }
+        } else {
+            for (let y = car.y - 1; y >= 0; y--) if (grid[y][car.x]) { min = y + 1; break; }
+            for (let y = car.y + car.len; y < 6; y++) if (grid[y][car.x]) { max = y - car.len; break; }
+        }
+        return { min, max };
+    }
+    function snapshotTraffic() {
+        return trafficLevel.map(car => ({ id: car.id, x: car.x, y: car.y }));
+    }
+    function restoreTraffic(snapshot) {
+        snapshot.forEach(pos => {
+            const car = trafficLevel.find(item => item.id === pos.id);
+            if (car) { car.x = pos.x; car.y = pos.y; paintTrafficCar(car); }
+        });
+    }
+    function commitTrafficMove(car, oldPosition) {
+        const nextPosition = car.horiz ? car.x : car.y;
+        if (nextPosition === oldPosition) { paintTrafficCar(car); return; }
+        trafficHistory.push(snapshotTraffic().map(pos => {
+            if (pos.id === car.id) { if (car.horiz) pos.x = oldPosition; else pos.y = oldPosition; }
+            return pos;
+        }));
+        trafficMoves++;
+        renderTrafficStats();
+        if (car.isRed && car.x === 4) {
+            trafficWon = true;
+            saveTrafficBest(currentLevelIndex, trafficMoves);
+            renderTrafficStats();
+            setTrafficMessage(`Delivery complete in ${trafficMoves} ${trafficMoves === 1 ? 'move' : 'moves'}!`, '#10B981');
+            setTimeout(() => {
+                if (!trafficWon || document.getElementById('gameModal')?.style.display === 'none') return;
+                if (currentLevelIndex < trafficLevels.length - 1) {
+                    currentLevelIndex++;
+                    window.initTrafficGame();
+                    setTrafficMessage('Great delivery! Next level unlocked.', '#10B981');
+                } else {
+                    setTrafficMessage('🏆 All 8 levels cleared! Choose Reset to start again from Level 1.', '#FBBF24');
+                    const title = document.getElementById('gameLevelDisplay');
+                    if (title) title.textContent = 'All Levels Complete!';
+                    currentLevelIndex = 0;
+                    trafficWon = false;
+                }
+            }, 900);
+        } else {
+            setTrafficMessage('Nice move. Find a clear route for the delivery scooter.');
+        }
+    }
     function startDragCar(e, car, el) {
+        if (trafficWon || e.button !== undefined && e.button !== 0) return;
         e.preventDefault();
+        clearTrafficHint();
         activeCar = car;
         startMouse = car.horiz ? e.clientX : e.clientY;
         initialPos = car.horiz ? car.x : car.y;
-        
-        let g = getGameGrid(car);
-        let min = 0, max = 6 - car.len;
-        
-        if (car.horiz) {
-            for(let x = car.x - 1; x >= 0; x--) if(g[car.y][x]) { min = x + 1; break; }
-            for(let x = car.x + car.len; x < 6; x++) if(g[car.y][x]) { max = x - car.len; break; }
-        } else {
-            for(let y = car.y - 1; y >= 0; y--) if(g[y][car.x]) { min = y + 1; break; }
-            for(let y = car.y + car.len; y < 6; y++) if(g[y][car.x]) { max = y - car.len; break; }
-        }
-        bounds = { min, max };
+        bounds = trafficBounds(car);
+        activeCar.currentFloat = initialPos;
         el.style.zIndex = 100;
-        
         window.addEventListener('pointermove', dragCar);
-        window.addEventListener('pointerup', endDragCar);
+        window.addEventListener('pointerup', endDragCar, { once: true });
+        window.addEventListener('pointercancel', endDragCar, { once: true });
     }
-
     function dragCar(e) {
         if (!activeCar) return;
-        let deltaPx = (activeCar.horiz ? e.clientX : e.clientY) - startMouse;
-        let deltaCells = deltaPx / 50;
-        let newVal = initialPos + deltaCells;
-        newVal = Math.max(bounds.min, Math.min(bounds.max, newVal));
+        const cell = trafficCellSize();
+        const deltaPx = (activeCar.horiz ? e.clientX : e.clientY) - startMouse;
+        const newVal = Math.max(bounds.min, Math.min(bounds.max, initialPos + deltaPx / cell));
         activeCar.currentFloat = newVal;
-        activeCar.el.style[activeCar.horiz ? 'left' : 'top'] = (newVal * 50) + 'px';
+        const board = document.getElementById('gameBoard');
+        const offset = newVal * cell;
+        activeCar.el.style[activeCar.horiz ? 'left' : 'top'] = offset + 'px';
     }
-
-    function endDragCar(e) {
+    function endDragCar() {
         if (!activeCar) return;
         window.removeEventListener('pointermove', dragCar);
         window.removeEventListener('pointerup', endDragCar);
-        
-        let finalVal = Math.round(activeCar.currentFloat !== undefined ? activeCar.currentFloat : initialPos);
-        if (activeCar.horiz) activeCar.x = finalVal; else activeCar.y = finalVal;
-        activeCar.el.style[activeCar.horiz ? 'left' : 'top'] = (finalVal * 50) + 'px';
-        activeCar.el.style.zIndex = activeCar.isRed ? 10 : 1;
-        
-        if (activeCar.isRed && activeCar.x === 4) { 
-            setTimeout(() => {
-                window.shootConfetti();
-                currentLevelIndex++;
-                if (currentLevelIndex >= trafficLevels.length) {
-                    alert("🎉 Incredible! You beat all the delivery rushes!");
-                    currentLevelIndex = 0;
-                } else {
-                    alert("🎉 Delivery Successful! Get ready for the next rush.");
-                }
-                window.initTrafficGame(); 
-            }, 100);
-        }
+        window.removeEventListener('pointercancel', endDragCar);
+        const car = activeCar;
+        const oldPosition = initialPos;
+        const finalVal = Math.max(bounds.min, Math.min(bounds.max, Math.round(car.currentFloat ?? initialPos)));
+        if (car.horiz) car.x = finalVal; else car.y = finalVal;
+        car.el.style.zIndex = car.isRed ? 10 : 1;
+        paintTrafficCar(car);
         activeCar = null;
+        commitTrafficMove(car, oldPosition);
     }
+    function moveTrafficCarByKey(car, key) {
+        if (trafficWon) return;
+        const delta = (key === 'ArrowRight' || key === 'ArrowDown') ? 1 : -1;
+        const old = car.horiz ? car.x : car.y;
+        const limits = trafficBounds(car);
+        const next = Math.max(limits.min, Math.min(limits.max, old + delta));
+        if (next === old) { setTrafficMessage('That vehicle cannot move farther in that direction.', '#FBBF24'); return; }
+        trafficHistory.push(snapshotTraffic());
+        if (car.horiz) car.x = next; else car.y = next;
+        paintTrafficCar(car);
+        trafficMoves++;
+        renderTrafficStats();
+        if (car.isRed && car.x === 4) {
+            trafficWon = true;
+            saveTrafficBest(currentLevelIndex, trafficMoves);
+            renderTrafficStats();
+            setTrafficMessage(`Delivery complete in ${trafficMoves} ${trafficMoves === 1 ? 'move' : 'moves'}!`, '#10B981');
+            setTimeout(() => {
+                if (!trafficWon || document.getElementById('gameModal')?.style.display === 'none') return;
+                if (currentLevelIndex < trafficLevels.length - 1) { currentLevelIndex++; window.initTrafficGame(); setTrafficMessage('Great delivery! Next level unlocked.', '#10B981'); }
+                else {
+                    setTrafficMessage('🏆 All 8 levels cleared! Choose Reset to start again from Level 1.', '#FBBF24');
+                    const title = document.getElementById('gameLevelDisplay');
+                    if (title) title.textContent = 'All Levels Complete!';
+                    currentLevelIndex = 0;
+                    trafficWon = false;
+                }
+            }, 900);
+        } else setTrafficMessage('Nice move.');
+    }
+    window.trafficGameUndo = function() {
+        if (trafficWon) return;
+        const previous = trafficHistory.pop();
+        if (!previous) { setTrafficMessage('No moves to undo yet.', '#FBBF24'); return; }
+        restoreTraffic(previous);
+        trafficMoves = Math.max(0, trafficMoves - 1);
+        renderTrafficStats();
+        clearTrafficHint();
+        setTrafficMessage('Last move undone.');
+    };
+    window.trafficGameHint = function() {
+        if (trafficWon) return;
+        clearTrafficHint();
+        const target = trafficLevel.find(car => car.isRed);
+        const grid = getGameGrid(target);
+        const blockers = [];
+        for (let x = target.x + target.len; x < 6; x++) {
+            const blocker = trafficLevel.find(car => !car.horiz && car.x === x && target.y >= car.y && target.y < car.y + car.len);
+            if (blocker && !blockers.includes(blocker)) blockers.push(blocker);
+        }
+        const hintCar = blockers[0];
+        if (hintCar) {
+            highlightedHint = hintCar;
+            hintCar.el.classList.add('hint-car');
+            hintTimer = setTimeout(clearTrafficHint, 2500);
+            setTrafficMessage('Move the highlighted vehicle out of the scooter’s row.', '#FBBF24');
+        } else {
+            setTrafficMessage('The exit lane is clear — slide the scooter to the right!', '#10B981');
+            target.el.classList.add('hint-car');
+            highlightedHint = target;
+            hintTimer = setTimeout(clearTrafficHint, 2500);
+        }
+    };
+    window.addEventListener('resize', () => trafficLevel.forEach(paintTrafficCar));
 
     // --- CYCLING TRIVIA WIDGET ---
     const triviaDB = [
@@ -959,7 +1183,18 @@
         { q: "I have keys but no locks. I have space but no room. What am I?", a: "A keyboard." },
         { q: "What belongs to you, but other people use it more than you do?", a: "Your name." },
         { q: "What has to be broken before you can use it?", a: "An egg." },
-        { q: "I’m tall when I’m young, and I’m short when I’m old. What am I?", a: "A candle." }
+        { q: "I’m tall when I’m young, and I’m short when I’m old. What am I?", a: "A candle." },
+        { q: "What gets wetter the more it dries?", a: "A towel." },
+        { q: "What has one eye but cannot see?", a: "A needle." },
+        { q: "What has cities, rivers, and roads, but no houses, water, or cars?", a: "A map." },
+        { q: "What has many teeth but cannot bite?", a: "A comb." },
+        { q: "What can travel around the world while staying in one corner?", a: "A postage stamp." },
+        { q: "What has a neck but no head?", a: "A bottle." },
+        { q: "What goes up but never comes back down?", a: "Your age." },
+        { q: "What has four legs but cannot walk?", a: "A table." },
+        { q: "What can you catch but cannot throw?", a: "A cold." },
+        { q: "What has pages but is not a website, and can tell a story without speaking?", a: "A book." },
+        { q: "What has keys and space but no locks or rooms?", a: "A keyboard." }
     ];
     let currentTriviaIndex = 0;
     let showingTriviaAnswer = false;
