@@ -13,7 +13,7 @@
                 tb.innerHTML = `<tr><td colspan="9" style="color:#EF4444; text-align:center; padding:40px; font-size:16px;">
                     <strong>🚨 CRITICAL SYSTEM CRASH 🚨</strong><br><br>
                     <span style="color:var(--text-main); font-size:14px;">Error: ${e.message}</span><br>
-                    <span style="color:var(--text-muted); font-size:12px;">Line: ${e.lineno} \vert{} Col:${e.colno}</span><br><br>
+                    <span style="color:var(--text-muted); font-size:12px;">Line: ${e.lineno} | Col: ${e.colno}</span><br><br>
                     Please screenshot this error and share it with the developer.
                 </td></tr>`;
             }
@@ -664,13 +664,11 @@
     import { getDatabase, ref, set, onValue, remove, push, get } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
     // 0. FAIL-PROOF CSS STAFF MODE ACTIVATION
-    // This executes immediately, bypassing any Javascript timing or rendering crashes.
     const urlParams = new URLSearchParams(window.location.search);
     const isStaffView = urlParams.get('view') === 'staff';
     
     if (isStaffView) {
         document.documentElement.classList.add('staff-mode');
-        // Give the DOM a tiny fraction of a second to build before changing the badge text
         setTimeout(() => {
             const badge = document.getElementById('viewBadge');
             if (badge) {
@@ -693,7 +691,6 @@
         appId: "1:828847025710:web:72f00f90f45fe20f1f79bf"
     };
 
-    // MUST BE EMPTY STRING TO FIX FOLDER MISMATCH
     const FACTION_ID = ""; 
     
     let app, db;
@@ -701,8 +698,8 @@
         app = initializeApp(firebaseConfig);
         db = getDatabase(app);
     } catch(err) {
-        document.getElementById('statusMessage').innerHTML = `<span style="color:#EF4444;">CRITICAL FIREBASE INITIALIZATION ERROR: ${err.message}</span>`;
-        throw err; // Stop execution if DB fails to load
+        document.getElementById('statusMessage').innerHTML = "<span style='color:#EF4444;'>CRITICAL FIREBASE INITIALIZATION ERROR: " + err.message + "</span>";
+        throw err; 
     }
 
     // 2. ON-SCREEN DIAGNOSTIC CONNECTION MONITOR
@@ -719,10 +716,7 @@
             setTimeout(() => {
                 const currentText = msgEl.innerText;
                 if(currentText.includes('Establishing') || currentText.includes('Fetching')) {
-                    msgEl.innerHTML = `
-                    <h2 style="color: #EF4444; margin-bottom: 10px;">🚨 DATABASE CONNECTION BLOCKED</h2>
-                    <p style="color: var(--text-main); font-size: 14px;">Firebase is unable to reach your database.</p>
-                    <p style="color: var(--text-muted); font-size: 13px; margin-top: 15px;">Check your browser's Ad-Blocker, VPN, or Brave Shields, then refresh the page.</p>`;
+                    msgEl.innerHTML = "<h2 style='color: #EF4444; margin-bottom: 10px;'>🚨 DATABASE CONNECTION BLOCKED</h2><p style='color: var(--text-main); font-size: 14px;'>Firebase is unable to reach your database.</p><p style='color: var(--text-muted); font-size: 13px; margin-top: 15px;'>Check your browser's Ad-Blocker, VPN, or Brave Shields, then refresh the page.</p>";
                 }
             }, 6000);
         }
@@ -743,7 +737,7 @@
     const isMobile = isMobileUA || isSpoofedMac || isSpoofedAndroid || isTouchOnly || isSmallScreen || window.innerWidth < 800;
 
     function getDBPath(path) {
-        return FACTION_ID ? `${FACTION_ID}/${path}` : path;
+        return FACTION_ID ? FACTION_ID + "/" + path : path;
     }
 
     function enforcePCWorkstation() {
@@ -929,16 +923,22 @@
         currentEmployees.forEach((emp, i) => {
             const item = document.createElement('div');
             item.className = 'emp-list-item';
-            item.innerHTML = `
-                <div class="emp-list-info">
-                    <span class="emp-list-name">${emp.pcNumber} \vert{}${emp.name}</span>
-                    <span class="emp-list-meta">${emp.shift} | ${emp.teamName \vert{}\vert{} 'Main Team'} \vert{} Perm Off:${emp.assignedDayOff}</span>
-                </div>
-                <div style="display:flex; gap:6px;">
-                    <button class="btn btn-mini-break" onclick="window.toggleLock(${i})">${emp.isLocked ? '🔒 Locked' : '🔓 Unlock'}</button>
-                    <button class="btn btn-danger" style="padding:4px 8px; font-size:11px;" onclick="window.deleteEmployee(${i})">🗑️ Delete</button>
-                </div>
-            `;
+            
+            let htmlStr = '<div class="emp-list-info">';
+            htmlStr += '<span class="emp-list-name">' + emp.pcNumber + ' | ' + emp.name + '</span>';
+            htmlStr += '<span class="emp-list-meta">' + emp.shift + ' | ' + (emp.teamName || 'Main Team') + ' | Perm Off: ' + emp.assignedDayOff + '</span>';
+            htmlStr += '</div><div style="display:flex; gap:6px;">';
+            
+            if(emp.isLocked) {
+                htmlStr += '<button class="btn btn-mini-break" onclick="window.toggleLock(' + i + ')">🔒 Locked</button>';
+            } else {
+                htmlStr += '<button class="btn btn-mini-break" onclick="window.toggleLock(' + i + ')">🔓 Unlock</button>';
+            }
+            
+            htmlStr += '<button class="btn btn-danger" style="padding:4px 8px; font-size:11px;" onclick="window.deleteEmployee(' + i + ')">🗑️ Delete</button>';
+            htmlStr += '</div>';
+
+            item.innerHTML = htmlStr;
             listContainer.appendChild(item);
         });
     }
@@ -987,7 +987,7 @@
 
         currentEmployees.push(newEmp);
         set(ref(db, getDBPath('roster')), currentEmployees).then(() => {
-            alert(`✅ ${name} added to cloud roster!`);
+            alert("✅ " + name + " added to cloud roster!");
             document.getElementById('newEmpName').value = '';
             document.getElementById('newEmpPC').value = '';
             document.getElementById('newEmpStart').value = '';
@@ -999,7 +999,7 @@
     window.deleteEmployee = function(index) {
         if (!requireAdmin()) return;
         const name = currentEmployees[index].name;
-        if (confirm(`Are you sure you want to permanently delete ${name} from the roster?`)) {
+        if (confirm("Are you sure you want to permanently delete " + name + " from the roster?")) {
             currentEmployees.splice(index, 1);
             set(ref(db, getDBPath('roster')), currentEmployees).then(() => {
                 renderEmployeeManagerList();
@@ -1017,7 +1017,7 @@
             return;
         }
 
-        let startD = new Date(`1970-01-01T${firstBreakTime}:00`);
+        let startD = new Date("1970-01-01T" + firstBreakTime + ":00");
         let shiftEmployees = [];
 
         currentEmployees.forEach((emp, index) => {
@@ -1027,7 +1027,7 @@
         });
 
         if (shiftEmployees.length === 0) {
-            alert(`No employees found currently assigned to ${targetShift}.`);
+            alert("No employees found currently assigned to " + targetShift + ".");
             return;
         }
 
@@ -1040,13 +1040,13 @@
             let eh = eDate.getHours().toString().padStart(2, '0');
             let em = eDate.getMinutes().toString().padStart(2, '0');
 
-            item.emp.timeStart = convertTimeFormat(`${sh}:${sm}`);
-            item.emp.timeEnd = convertTimeFormat(`${eh}:${em}`);
+            item.emp.timeStart = convertTimeFormat(sh + ":" + sm);
+            item.emp.timeEnd = convertTimeFormat(eh + ":" + em);
             item.emp.overlap = "1 Staff"; 
         });
 
         set(ref(db, getDBPath('roster')), currentEmployees).then(() => {
-            alert(`✅ Successfully auto-assigned staggered breaks for ${shiftEmployees.length} employees on${targetShift}!`);
+            alert("✅ Successfully auto-assigned staggered breaks for " + shiftEmployees.length + " employees on " + targetShift + "!");
             document.getElementById('employeeModal').style.display = 'none';
         });
     };
@@ -1100,12 +1100,14 @@
 
     function convertTimeFormat(time24) {
         if(!time24) return "12:00 AM";
-        let [h, m] = time24.split(':');
+        let parts = time24.split(':');
+        let h = parts[0];
+        let m = parts[1];
         let hours = parseInt(h);
         let ampm = hours >= 12 ? 'PM' : 'AM';
         hours = hours % 12;
         hours = hours ? hours : 12;
-        return `${hours.toString().padStart(2, '0')}:${m}${ampm}`;
+        return hours.toString().padStart(2, '0') + ":" + m + " " + ampm;
     }
 
     function updateCircadianTheme() {
@@ -1247,7 +1249,7 @@
             if(el) {
                 el.style.opacity = 0;
                 setTimeout(() => {
-                    el.innerText = `"${kudosList[kudosIndex]}"`;
+                    el.innerText = '"' + kudosList[kudosIndex] + '"';
                     el.style.opacity = 1;
                 }, 500);
             }
@@ -1276,13 +1278,12 @@
 
         keys.forEach(k => {
             const text = rawKudosData[k];
-            container.innerHTML += `
-                <div style="display:flex; gap:10px; align-items:center;">
-                    <input type="text" id="kudo_edit_${k}" class="form-control" style="flex-grow:1; background: rgba(0,0,0,0.5);" value="${text.replace(/"/g, '&quot;')}">
-                    <button class="btn btn-staff" onclick="window.updateKudo('${k}')">Save</button>
-                    <button class="btn btn-danger" onclick="window.deleteKudo('${k}')">🗑️</button>
-                </div>
-            `;
+            let itemHtml = '<div style="display:flex; gap:10px; align-items:center;">';
+            itemHtml += '<input type="text" id="kudo_edit_' + k + '" class="form-control" style="flex-grow:1; background: rgba(0,0,0,0.5);" value="' + text.replace(/"/g, '&quot;') + '">';
+            itemHtml += '<button class="btn btn-staff" onclick="window.updateKudo(\'' + k + '\')">Save</button>';
+            itemHtml += '<button class="btn btn-danger" onclick="window.deleteKudo(\'' + k + '\')">🗑️</button>';
+            itemHtml += '</div>';
+            container.innerHTML += itemHtml;
         });
     }
 
@@ -1296,7 +1297,7 @@
     window.updateKudo = function(key) {
         const newVal = document.getElementById('kudo_edit_' + key).value.trim();
         if (newVal) {
-            set(ref(db, getDBPath(`system/kudos/${key}`)), newVal).then(() => {
+            set(ref(db, getDBPath('system/kudos/' + key)), newVal).then(() => {
                 alert("Kudo updated successfully.");
                 renderKudosManager();
             });
@@ -1305,7 +1306,7 @@
 
     window.deleteKudo = function(key) {
         if(confirm("Delete this shoutout?")) {
-            remove(ref(db, getDBPath(`system/kudos/${key}`))).then(() => renderKudosManager());
+            remove(ref(db, getDBPath('system/kudos/' + key))).then(() => renderKudosManager());
         }
     };
 
@@ -1373,7 +1374,7 @@
     window.initTrafficGame = function() {
         let board = document.getElementById('gameBoard');
         board.innerHTML = '<div class="game-exit"></div>';
-        document.getElementById('gameLevelDisplay').innerText = `Level ${currentLevelIndex + 1}`;
+        document.getElementById('gameLevelDisplay').innerText = "Level " + (currentLevelIndex + 1);
         
         trafficLevel = JSON.parse(JSON.stringify(trafficLevels[currentLevelIndex]));
 
@@ -1455,7 +1456,7 @@
                     alert("🎉 Incredible! You beat all 5 rush levels!");
                     currentLevelIndex = 0;
                 } else {
-                    alert(`🎉 Level ${currentLevelIndex} Cleared! Get ready for the next delivery.`);
+                    alert("🎉 Level " + currentLevelIndex + " Cleared! Get ready for the next delivery.");
                 }
                 window.initTrafficGame(); 
             }, 100);
@@ -1721,13 +1722,11 @@
         const clockInSelect = document.getElementById('clockInId');
         if (clockInSelect) {
             const currentSelection = clockInSelect.value;
-            clockInSelect.innerHTML = '<option value="">-- Select Your Name / PC --</option>';
+            let optionsHtml = '<option value="">-- Select Your Name / PC --</option>';
             currentEmployees.forEach(emp => {
-                const opt = document.createElement('option');
-                opt.value = emp.name; 
-                opt.innerText = `${emp.pcNumber} \vert{}${emp.name}`;
-                clockInSelect.appendChild(opt);
+                optionsHtml += '<option value="' + emp.name + '">' + emp.pcNumber + ' | ' + emp.name + '</option>';
             });
+            clockInSelect.innerHTML = optionsHtml;
             if (currentSelection) clockInSelect.value = currentSelection;
         }
 
@@ -1769,7 +1768,7 @@
         }, { onlyOnce: true });
     }, 30000);
 
-    // 18. MAIN RENDERING LOGIC
+    // 18. MAIN RENDERING LOGIC (100% FLAT HTML CONCATENATION - ZERO NESTED TEMPLATES)
     function renderTable() {
         if (!currentEmployees || currentEmployees.length === 0) return;
         const tbody = document.getElementById('tableBody');
@@ -1794,32 +1793,35 @@
             else if (emp.shift.includes('Shift E')) shiftClass = 'badge-shift-e';
             else if (emp.shift.includes('Shift G')) shiftClass = 'badge-shift-g';
 
-            let shiftSelectOptionsHtml = shiftOptions.map(opt => {
-                const isSelected = emp.shift === opt;
-                return `<option value="${opt}" ${isSelected ? 'selected' : ''}>${opt.split(' (')[0]}</option>`;
-            }).join('');
+            let shiftSelectOptionsHtml = "";
+            shiftOptions.forEach(opt => {
+                let isSelected = emp.shift === opt ? 'selected' : '';
+                shiftSelectOptionsHtml += '<option value="' + opt + '" ' + isSelected + '>' + opt.split(' (')[0] + '</option>';
+            });
             
             if (!shiftOptions.includes(emp.shift)) {
-                shiftSelectOptionsHtml = `<option value="${emp.shift}" selected>${emp.shift.split(' (')[0]} (Custom)</option>` + shiftSelectOptionsHtml;
+                shiftSelectOptionsHtml = '<option value="' + emp.shift + '" selected>' + emp.shift.split(' (')[0] + ' (Custom)</option>' + shiftSelectOptionsHtml;
             }
 
-            let shiftBadgeHtml = isStaffView 
-                ? `<span class="status-badge ${shiftClass}">${emp.shift.split(' (')[0]}</span>`
-                : `<select class="dayoff-select" style="margin-bottom: 4px; font-size: 11px; padding: 4px; width: 100%;" onchange="window.updateShift(${index}, this.value)">
-                     ${shiftSelectOptionsHtml}
-                   </select>`;
+            let shiftBadgeHtml = "";
+            if (isStaffView) {
+                shiftBadgeHtml = '<span class="status-badge ' + shiftClass + '">' + emp.shift.split(' (')[0] + '</span>';
+            } else {
+                shiftBadgeHtml = '<select class="dayoff-select" style="margin-bottom: 4px; font-size: 11px; padding: 4px; width: 100%;" onchange="window.updateShift(' + index + ', this.value)">' + shiftSelectOptionsHtml + '</select>';
+            }
 
             if (isOffShift && !isOffToday) {
-                shiftBadgeHtml += ` <br><span style="font-size:10px; color:#EF4444; font-weight:700;">(OFF SHIFT)</span>`;
+                shiftBadgeHtml += ' <br><span style="font-size:10px; color:#EF4444; font-weight:700;">(OFF SHIFT)</span>';
             }
 
             const overlapClass = emp.overlap === '2 Staff' ? 'badge-overlap' : 'badge-single';
             
-            const selectOptionsHtml = dayOffOptions.map(opt => {
-                const label = opt === 'None' ? 'No Permanent Day Off' : `Perm Off: ${opt}`;
-                const isSelected = emp.assignedDayOff === opt;
-                return `<option value="${opt}" ${isSelected ? 'selected' : ''}>${label}</option>`;
-            }).join('');
+            let selectOptionsHtml = "";
+            dayOffOptions.forEach(opt => {
+                let label = opt === 'None' ? 'No Permanent Day Off' : 'Perm Off: ' + opt;
+                let isSelected = emp.assignedDayOff === opt ? 'selected' : '';
+                selectOptionsHtml += '<option value="' + opt + '" ' + isSelected + '>' + label + '</option>';
+            });
 
             const tr = document.createElement('tr');
             if (isOffToday || isOffShift) tr.classList.add('row-off-duty');
@@ -1837,15 +1839,14 @@
             if (isDraggableList) {
                 tr.setAttribute('draggable', 'true');
                 tr.classList.add('draggable');
-                tr.setAttribute('ondragstart', `window.handleDragStart(event, ${index})`);
-                tr.setAttribute('ondragend', `window.handleDragEnd(event)`);
-                tr.setAttribute('ondragover', `window.handleDragOver(event)`);
-                tr.setAttribute('ondragleave', `window.handleDragLeave(event)`);
-                tr.setAttribute('ondrop', `window.handleDrop(event, ${index})`);
+                tr.setAttribute('ondragstart', 'window.handleDragStart(event, ' + index + ')');
+                tr.setAttribute('ondragend', 'window.handleDragEnd(event)');
+                tr.setAttribute('ondragover', 'window.handleDragOver(event)');
+                tr.setAttribute('ondragleave', 'window.handleDragLeave(event)');
+                tr.setAttribute('ondrop', 'window.handleDrop(event, ' + index + ')');
             }
 
-            // STRICT SIGN-IN CHECK
-            const breakDisabled = (isOffToday || isOffShift || !emp.clockInTime) ? 'disabled style="opacity:0.3; cursor:not-allowed;" title="MANDATORY: Must Sign In first"' : 'title="Request Break"';
+            let breakDisabled = (isOffToday || isOffShift || !emp.clockInTime) ? 'disabled style="opacity:0.3; cursor:not-allowed;" title="MANDATORY: Must Sign In first"' : 'title="Request Break"';
 
             const presentBtnStyle = isOffToday ? 'color: #F87171; border-color: #F87171;' : 'color: #10B981; border-color: #10B981;';
             const presentBtnText = isOffToday ? '🔴 Absent Today' : '🟢 Present Today';
@@ -1860,9 +1861,16 @@
             const q10Color = q10Maxed ? '#EF4444' : '#38BDF8';
             const q10Border = q10Maxed ? 'rgba(239, 68, 68, 0.3)' : 'rgba(56, 189, 248, 0.3)';
 
-            let clockInHtml = emp.clockInTime 
-                ? `<div style="font-size: 10px; color: #10B981; font-weight: 700; margin-top: 6px; ${!isStaffView ? 'cursor:pointer;' : ''}" ${!isStaffView ? `onclick="window.voidClockIn(${index})"` : ''} title="${!isStaffView ? 'Admin: Click to VOID this sign-in' : ''}">▶ In: ${emp.clockInTime}</div>` 
-                : `<div style="font-size: 10px; color: #EF4444; font-weight: 700; margin-top: 6px;">❌ Not Signed In</div>`;
+            let clockInHtml = "";
+            if (emp.clockInTime) {
+                if (!isStaffView) {
+                    clockInHtml = '<div style="font-size: 10px; color: #10B981; font-weight: 700; margin-top: 6px; cursor:pointer;" onclick="window.voidClockIn(' + index + ')" title="Admin: Click to VOID this sign-in">▶ In: ' + emp.clockInTime + '</div>';
+                } else {
+                    clockInHtml = '<div style="font-size: 10px; color: #10B981; font-weight: 700; margin-top: 6px;">▶ In: ' + emp.clockInTime + '</div>';
+                }
+            } else {
+                clockInHtml = '<div style="font-size: 10px; color: #EF4444; font-weight: 700; margin-top: 6px;">❌ Not Signed In</div>';
+            }
 
             let canViewButtons = true;
             if (isStaffView && localAuthUser !== emp.name) {
@@ -1872,84 +1880,68 @@
                 canViewButtons = false;
             }
 
+            const safeEmpName = emp.name.replace(/'/g, "\\'");
             let actionButtonsHtml = '';
+            
             if (canViewButtons) {
-                actionButtonsHtml = `
-                    <button class="btn-mini-break" onclick="window.startBreak('${emp.name.replace(/'/g, "\\'")}', ${index}, 'standard')" ${breakDisabled}>☕ Break</button>
-                    <button class="btn-mini-break" style="color: #38BDF8; border-color: rgba(56, 189, 248, 0.3);" onclick="window.startBreak('${emp.name.replace(/'/g, "\\'")}', ${index}, 'prayer')" ${breakDisabled}>🕌 Prayer</button>
-                `;
+                actionButtonsHtml += '<button class="btn-mini-break" onclick="window.startBreak(\'' + safeEmpName + '\', ' + index + ', \'standard\')" ' + breakDisabled + '>☕ Break</button>';
+                actionButtonsHtml += '<button class="btn-mini-break" style="color: #38BDF8; border-color: rgba(56, 189, 248, 0.3);" onclick="window.startBreak(\'' + safeEmpName + '\', ' + index + ', \'prayer\')" ' + breakDisabled + '>🕌 Prayer</button>';
             } else {
                 if (isStaffView && isMobile) {
-                    actionButtonsHtml = `<span style="font-size: 10px; color: var(--text-muted); padding: 4px;">📱 PC Sign-in Required</span>`;
+                    actionButtonsHtml = '<span style="font-size: 10px; color: var(--text-muted); padding: 4px;">📱 PC Sign-in Required</span>';
                 } else {
-                    actionButtonsHtml = `<span style="font-size: 10px; color: var(--text-muted); padding: 4px;">🔒 Sign in to access</span>`;
+                    actionButtonsHtml = '<span style="font-size: 10px; color: var(--text-muted); padding: 4px;">🔒 Sign in to access</span>';
                 }
             }
 
             if (!isStaffView) {
-                actionButtonsHtml += `<button class="btn-mini-break" style="${emp.isLocked ? 'border-color: #F59E0B; color: #F59E0B;' : 'opacity: 0.6;'}" onclick="window.toggleLock(${index})" title="Prevent from Reshuffling">${emp.isLocked ? '🔒 Locked' : '🔓 Unlock'}</button>`;
+                let lockStyle = emp.isLocked ? 'border-color: #F59E0B; color: #F59E0B;' : 'opacity: 0.6;';
+                let lockText = emp.isLocked ? '🔒 Locked' : '🔓 Unlock';
+                actionButtonsHtml += '<button class="btn-mini-break" style="' + lockStyle + '" onclick="window.toggleLock(' + index + ')" title="Prevent from Reshuffling">' + lockText + '</button>';
             } else if (emp.isLocked && canViewButtons) {
                 actionButtonsHtml += '<span class="lock-badge">🔒 FIXED</span>';
             }
 
-            let badgeHtml = gamificationBadges[emp.name] ? `<span title="Punctuality Level" style="cursor:help; font-size:16px;">${gamificationBadges[emp.name]}</span>` : '';
+            let badgeHtml = gamificationBadges[emp.name] ? '<span title="Punctuality Level" style="cursor:help; font-size:16px;">' + gamificationBadges[emp.name] + '</span>' : '';
 
-            const pcEdit = !isStaffView ? ` contenteditable="true" onblur="window.updatePC(${index}, this.innerText)"` : ``;
-            const nameEdit = !isStaffView ? ` contenteditable="true" onblur="window.updateName(${index}, this.innerText)"` : ``;
-            const teamEdit = !isStaffView ? ` contenteditable="true" onblur="window.updateTeam(${index}, this.innerText)"` : ``;
+            const pcEdit = !isStaffView ? ' contenteditable="true" onblur="window.updatePC(' + index + ', this.innerText)"' : '';
+            const nameEdit = !isStaffView ? ' contenteditable="true" onblur="window.updateName(' + index + ', this.innerText)"' : '';
+            const teamEdit = !isStaffView ? ' contenteditable="true" onblur="window.updateTeam(' + index + ', this.innerText)"' : '';
 
-            let permOffHtml = isStaffView 
-                ? `<span style="font-size: 11px; font-weight: 600; color: var(--text-muted);">${emp.assignedDayOff === 'None' ? 'No Perm Off' : 'Perm Off: ' + emp.assignedDayOff}</span>`
-                : `<select class="dayoff-select" onchange="window.updatePermanentDayOff(${index}, this.value)">
-                    ${selectOptionsHtml}
-                   </select>`;
+            let permOffHtml = "";
+            if (isStaffView) {
+                let offText = emp.assignedDayOff === 'None' ? 'No Perm Off' : 'Perm Off: ' + emp.assignedDayOff;
+                permOffHtml = '<span style="font-size: 11px; font-weight: 600; color: var(--text-muted);">' + offText + '</span>';
+            } else {
+                permOffHtml = '<select class="dayoff-select" onchange="window.updatePermanentDayOff(' + index + ', this.value)">' + selectOptionsHtml + '</select>';
+            }
 
-            let presentBtnHtml = isStaffView
-                ? `<span style="display:inline-block; margin-top:6px; padding:4px 8px; border-radius:4px; border:1px solid ${isOffToday ? 'rgba(248,113,113,0.3)' : 'rgba(16,185,129,0.3)'}; color:${isOffToday ? '#F87171' : '#10B981'}; font-size:11px; font-weight:700;">${presentBtnText}</span>`
-                : `<button class="btn-mini-break" style="margin-top:6px; text-align: center; ${presentBtnStyle}" onclick="window.toggleForceAbsent(${index})">${presentBtnText}</button>`;
+            let presentBtnHtml = "";
+            if (isStaffView) {
+                let borderColor = isOffToday ? 'rgba(248,113,113,0.3)' : 'rgba(16,185,129,0.3)';
+                let textColor = isOffToday ? '#F87171' : '#10B981';
+                presentBtnHtml = '<span style="display:inline-block; margin-top:6px; padding:4px 8px; border-radius:4px; border:1px solid ' + borderColor + '; color:' + textColor + '; font-size:11px; font-weight:700;">' + presentBtnText + '</span>';
+            } else {
+                presentBtnHtml = '<button class="btn-mini-break" style="margin-top:6px; text-align: center; ' + presentBtnStyle + '" onclick="window.toggleForceAbsent(' + index + ')">' + presentBtnText + '</button>';
+            }
 
-            tr.innerHTML = `
-                <td class="col-id">${index + 1}</td>
-                <td class="col-pc">
-                    <span class="editable-name" ${pcEdit}>${emp.pcNumber}</span>
-                    ${clockInHtml}
-                </td>
-                <td class="col-name">
-                    <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 6px;">
-                        <div>
-                            <span class="editable-name" ${nameEdit}>${emp.name}</span>
-                            ${badgeHtml}
-                        </div>
-                        <div style="display: flex; gap: 4px; flex-wrap: wrap; align-items: center;">
-                            ${actionButtonsHtml}
-                        </div>
-                    </div>
-                </td>
-                <td class="col-quotas">
-                    <div style="display: flex; flex-direction: column; gap: 4px;">
-                        <span style="background: ${q30Bg}; color: ${q30Color}; border: 1px solid ${q30Border}; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; cursor: ${isStaffView ? 'default' : 'pointer'};" ${!isStaffView ? `onclick="window.resetQuota(${index}, '30')"` : ''} title="Official 30-Min Breaks">
-                            30 Min: ${emp.quota30} / 1
-                        </span>
-                        <span style="background: ${q10Bg}; color: ${q10Color}; border: 1px solid ${q10Border}; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; cursor: ${isStaffView ? 'default' : 'pointer'};" ${!isStaffView ? `onclick="window.resetQuota(${index}, '10')"` : ''} title="Quick 10-Min Breaks">
-                            10 Min: ${emp.quota10} / 3
-                        </span>
-                    </div>
-                </td>
-                <td class="col-dayoff">
-                    <div style="display: flex; flex-direction: column;">
-                        ${permOffHtml}
-                        ${presentBtnHtml}
-                    </div>
-                </td>
-                <td class="col-shift">
-                    ${shiftBadgeHtml}
-                    <br>
-                    <span class="status-badge badge-team editable-name" ${teamEdit}>${emp.teamName || 'No Team'}</span>
-                </td>
-                <td class="col-time">${emp.timeStart}</td>
-                <td class="col-time">${emp.timeEnd}</td>
-                <td class="col-overlap"><span class="status-badge ${overlapClass}">${emp.overlap}</span></td>
-            `;
+            let q30Click = !isStaffView ? 'onclick="window.resetQuota(' + index + ', \'30\')"' : '';
+            let q10Click = !isStaffView ? 'onclick="window.resetQuota(' + index + ', \'10\')"' : '';
+
+            let rowHtml = '<td class="col-id">' + (index + 1) + '</td>';
+            rowHtml += '<td class="col-pc"><span class="editable-name"' + pcEdit + '>' + emp.pcNumber + '</span>' + clockInHtml + '</td>';
+            rowHtml += '<td class="col-name"><div style="display: flex; flex-direction: column; align-items: flex-start; gap: 6px;"><div><span class="editable-name"' + nameEdit + '>' + emp.name + '</span>' + badgeHtml + '</div><div style="display: flex; gap: 4px; flex-wrap: wrap; align-items: center;">' + actionButtonsHtml + '</div></div></td>';
+            rowHtml += '<td class="col-quotas"><div style="display: flex; flex-direction: column; gap: 4px;">';
+            rowHtml += '<span style="background: ' + q30Bg + '; color: ' + q30Color + '; border: 1px solid ' + q30Border + '; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; cursor: ' + (isStaffView ? 'default' : 'pointer') + ';" ' + q30Click + ' title="Official 30-Min Breaks">30 Min: ' + emp.quota30 + ' / 1</span>';
+            rowHtml += '<span style="background: ' + q10Bg + '; color: ' + q10Color + '; border: 1px solid ' + q10Border + '; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; cursor: ' + (isStaffView ? 'default' : 'pointer') + ';" ' + q10Click + ' title="Quick 10-Min Breaks">10 Min: ' + emp.quota10 + ' / 3</span>';
+            rowHtml += '</div></td>';
+            rowHtml += '<td class="col-dayoff"><div style="display: flex; flex-direction: column;">' + permOffHtml + presentBtnHtml + '</div></td>';
+            rowHtml += '<td class="col-shift">' + shiftBadgeHtml + '<br><span class="status-badge badge-team editable-name"' + teamEdit + '>' + (emp.teamName || 'No Team') + '</span></td>';
+            rowHtml += '<td class="col-time">' + emp.timeStart + '</td>';
+            rowHtml += '<td class="col-time">' + emp.timeEnd + '</td>';
+            rowHtml += '<td class="col-overlap"><span class="status-badge ' + overlapClass + '">' + emp.overlap + '</span></td>';
+
+            tr.innerHTML = rowHtml;
             tbody.appendChild(tr);
         });
 
@@ -1988,63 +1980,42 @@
             const card = document.createElement('div');
             
             const empMatch = currentEmployees.find(e => e.name === b.name);
-            const shiftBadge = empMatch ? `<span class="break-shift-badge">${empMatch.shift.split(' ')[0]} ${empMatch.shift.split(' ')[1] || ''}</span>` : '';
-            const pcBadge = empMatch && empMatch.pcNumber ? `<span class="break-shift-badge" style="background: rgba(251, 191, 36, 0.2); color: #FBBF24;">${empMatch.pcNumber}</span>` : '';
-            const teamBadge = empMatch && empMatch.teamName && empMatch.teamName !== 'No Team' ? `<span class="break-shift-badge" style="background: rgba(16, 185, 129, 0.15); color: #10B981;">${empMatch.teamName}</span>` : '';
+            const shiftBadge = empMatch ? '<span class="break-shift-badge">' + empMatch.shift.split(' ')[0] + ' ' + (empMatch.shift.split(' ')[1] || '') + '</span>' : '';
+            const pcBadge = empMatch && empMatch.pcNumber ? '<span class="break-shift-badge" style="background: rgba(251, 191, 36, 0.2); color: #FBBF24;">' + empMatch.pcNumber + '</span>' : '';
+            const teamBadge = empMatch && empMatch.teamName && empMatch.teamName !== 'No Team' ? '<span class="break-shift-badge" style="background: rgba(16, 185, 129, 0.15); color: #10B981;">' + empMatch.teamName + '</span>' : '';
             
             const isPrayer = b.type === 'Prayer';
-            const startedText = b.startTime ? `▶ Start: ${formatAMPM(b.startTime)}` : '▶ Start: --:--';
+            const startedText = b.startTime ? '▶ Start: ' + formatAMPM(b.startTime) : '▶ Start: --:--';
             
             const endTimeMs = b.endTime || (b.startTime && b.limit > 0 ? b.startTime + (b.limit * 60000) : 0);
-            const endText = isPrayer ? `⏱️ Open Return` : (endTimeMs ? `🎯 Due: ${formatAMPM(endTimeMs)}` : '🎯 Due: --:--');
+            const endText = isPrayer ? '⏱️ Open Return' : (endTimeMs ? '🎯 Due: ' + formatAMPM(endTimeMs) : '🎯 Due: --:--');
 
             if (b.status === 'pending') {
                 const pos = pendingList.indexOf(key) + 1;
                 const waitEst = pos * 10;
 
-                card.className = `break-card card-pending`;
+                card.className = 'break-card card-pending';
                 let adminControls = '';
                 if (!isStaffView) {
-                    adminControls = `
-                    <div style="display: flex; gap: 8px;">
-                        <button class="btn btn-success" onclick="window.approveBreak('${key}')">Approve</button>
-                        <button class="btn btn-danger" onclick="window.denyBreak('${key}')">Deny</button>
-                    </div>`;
+                    adminControls = '<div style="display: flex; gap: 8px;"><button class="btn btn-success" onclick="window.approveBreak(\'' + key + '\')">Approve</button><button class="btn btn-danger" onclick="window.denyBreak(\'' + key + '\')">Deny</button></div>';
                 }
-                card.innerHTML = `
-                    <div class="break-info">
-                        <span class="break-name">${b.name} ${pcBadge} ${teamBadge} ${shiftBadge}</span>
-                        <span class="break-type" style="color: #EF4444;">🔴 QUEUE POSITION: #${pos} (Est Wait: ~${waitEst}m)</span>
-                        <div style="font-size:11px; color:#EF4444; margin-top:4px; font-weight:700;">Type: ${b.type}</div>
-                    </div>
-                    ${adminControls}
-                `;
+                
+                card.innerHTML = '<div class="break-info"><span class="break-name">' + b.name + ' ' + pcBadge + ' ' + teamBadge + ' ' + shiftBadge + '</span><span class="break-type" style="color: #EF4444;">🔴 QUEUE POSITION: #' + pos + ' (Est Wait: ~' + waitEst + 'm)</span><div style="font-size:11px; color:#EF4444; margin-top:4px; font-weight:700;">Type: ' + b.type + '</div></div>' + adminControls;
+                
             } 
             else if (b.status === 'return_pending') {
-                card.className = `break-card card-unofficial`; 
+                card.className = 'break-card card-unofficial'; 
                 let adminControls = isStaffView ? 
-                    `<button class="btn btn-staff" disabled>Pending Admin Auth...</button>` : 
-                    `<button class="btn btn-success" onclick="window.approveReturn('${key}')">Approve Return</button>`;
+                    '<button class="btn btn-staff" disabled>Pending Admin Auth...</button>' : 
+                    '<button class="btn btn-success" onclick="window.approveReturn(\'' + key + '\')">Approve Return</button>';
                 
-                card.innerHTML = `
-                    <div class="break-info">
-                        <span class="break-name">${b.name} ${pcBadge} ${teamBadge} ${shiftBadge}</span>
-                        <span class="break-type" style="color: #F59E0B;">🟡 RETURN REQUESTED</span>
-                        <div class="break-meta">
-                            <span>${startedText}</span>
-                            <span>${endText}</span>
-                            <span style="color: #F59E0B;">🛑 Req: ${formatAMPM(b.returnRequestedTime)}</span>
-                        </div>
-                    </div>
-                    <div class="break-timer-group">
-                        <span class="break-timer" data-start="${b.startTime}" data-endtime="${endTimeMs}" data-end="${b.returnRequestedTime}"></span>
-                        ${adminControls}
-                    </div>
-                `;
+                let inner = '<div class="break-info"><span class="break-name">' + b.name + ' ' + pcBadge + ' ' + teamBadge + ' ' + shiftBadge + '</span><span class="break-type" style="color: #F59E0B;">🟡 RETURN REQUESTED</span><div class="break-meta"><span>' + startedText + '</span><span>' + endText + '</span><span style="color: #F59E0B;">🛑 Req: ' + formatAMPM(b.returnRequestedTime) + '</span></div></div>';
+                inner += '<div class="break-timer-group"><span class="break-timer" data-start="' + b.startTime + '" data-endtime="' + endTimeMs + '" data-end="' + b.returnRequestedTime + '"></span>' + adminControls + '</div>';
+                card.innerHTML = inner;
             }
             else {
                 const isOfficial = b.limit === 30;
-                card.className = `break-card ${isOfficial ? 'card-official' : 'card-unofficial'}`;
+                card.className = 'break-card ' + (isOfficial ? 'card-official' : 'card-unofficial');
                 
                 let returnBtnHtml = '';
                 let canReturn = true;
@@ -2053,31 +2024,20 @@
                 if (isStaffView && isMobile) canReturn = false; 
 
                 if (canReturn) {
-                    returnBtnHtml = `<button class="btn btn-primary" onclick="window.requestReturn('${key}')">Request Return</button>`;
+                    returnBtnHtml = '<button class="btn btn-primary" onclick="window.requestReturn(\'' + key + '\')">Request Return</button>';
                 } else if (!isStaffView) {
-                    returnBtnHtml = `<button class="btn btn-primary" style="background: #F59E0B; border-color: #F59E0B;" onclick="if(confirm('Admin Override: Force return for ${b.name}?')) window.requestReturn('${key}')" title="Admin Override">Force Return</button>`;
+                    returnBtnHtml = '<button class="btn btn-primary" style="background: #F59E0B; border-color: #F59E0B;" onclick="if(confirm(\'Admin Override: Force return?\')) window.requestReturn(\'' + key + '\')" title="Admin Override">Force Return</button>';
                 } else {
                     if (isStaffView && isMobile) {
-                        returnBtnHtml = `<span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">📱 PC Sign-in Required</span>`;
+                        returnBtnHtml = '<span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">📱 PC Sign-in Required</span>';
                     } else {
-                        returnBtnHtml = `<span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">🔒 Waiting for ${b.name.split(' ')[0]}</span>`;
+                        returnBtnHtml = '<span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">🔒 Waiting for ' + b.name.split(' ')[0] + '</span>';
                     }
                 }
 
-                card.innerHTML = `
-                    <div class="break-info">
-                        <span class="break-name">${b.name} ${pcBadge} ${teamBadge} ${shiftBadge}</span>
-                        <span class="break-type" style="color: ${isOfficial ? '#10B981' : '#38BDF8'}">${b.type} (ON BREAK)</span>
-                        <div class="break-meta">
-                            <span>${startedText}</span>
-                            <span>${endText}</span>
-                        </div>
-                    </div>
-                    <div class="break-timer-group">
-                        <span class="break-timer" data-start="${b.startTime}" data-endtime="${endTimeMs}"></span>
-                        ${returnBtnHtml}
-                    </div>
-                `;
+                let inner = '<div class="break-info"><span class="break-name">' + b.name + ' ' + pcBadge + ' ' + teamBadge + ' ' + shiftBadge + '</span><span class="break-type" style="color: ' + (isOfficial ? '#10B981' : '#38BDF8') + '">' + b.type + ' (ON BREAK)</span><div class="break-meta"><span>' + startedText + '</span><span>' + endText + '</span></div></div>';
+                inner += '<div class="break-timer-group"><span class="break-timer" data-start="' + b.startTime + '" data-endtime="' + endTimeMs + '"></span>' + returnBtnHtml + '</div>';
+                card.innerHTML = inner;
             }
             grid.appendChild(card);
 
@@ -2117,7 +2077,7 @@
                 let elapsedSecs = Math.floor((currentOrFrozen - start) / 1000);
                 const mins = Math.floor(elapsedSecs / 60);
                 const secs = elapsedSecs % 60;
-                timerEl.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                timerEl.innerText = mins.toString().padStart(2, '0') + ":" + secs.toString().padStart(2, '0');
                 
                 if (mins >= 10) timerEl.classList.add('overtime');
                 else timerEl.classList.remove('overtime');
@@ -2132,7 +2092,7 @@
             const secs = absSecs % 60;
             
             const sign = isOvertime ? "-" : "";
-            timerEl.innerText = `${sign}${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            timerEl.innerText = sign + mins.toString().padStart(2, '0') + ":" + secs.toString().padStart(2, '0');
             
             if (isOvertime) timerEl.classList.add('overtime');
             else timerEl.classList.remove('overtime');
@@ -2156,7 +2116,7 @@
         document.querySelector('.rules-card').style.display = 'none';
         
         document.getElementById('mobileFocusDashboard').style.display = 'flex';
-        document.getElementById('mobileFocusName').innerText = `Welcome, ${authUser.split(' ')[0]}`;
+        document.getElementById('mobileFocusName').innerText = "Welcome, " + authUser.split(' ')[0];
 
         const emp = currentEmployees.find(e => e.name === authUser);
         if(emp && emp.timeStart && emp.timeStart !== '--:--') {
@@ -2173,7 +2133,7 @@
                 let h = Math.floor(diff/3600);
                 let m = Math.floor((diff%3600)/60);
                 let s = diff%60;
-                document.getElementById('mobileFocusTimer').innerText = `${h>0?h+':':''}${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+                document.getElementById('mobileFocusTimer').innerText = (h>0 ? h+':' : '') + m.toString().padStart(2,'0') + ":" + s.toString().padStart(2,'0');
                 document.getElementById('mobileFocusTimer').style.color = '#FFFFFF';
                 document.getElementById('mobileFocusTimer').style.textShadow = '0 0 20px var(--primary-glow)';
             } else if(now >= startMs && now <= endMs) {
@@ -2222,23 +2182,23 @@
         const liveFloorStaff = Math.max(0, presentCount - activeBreaksCount);
         const total = currentEmployees.length;
 
-        document.getElementById('metricStaffCount').innerText = `${presentCount} Present`;
-        let shiftStr = `${shiftAActive} A | ${shiftBActive} B`;
-        if (shiftCActive > 0) shiftStr += ` | ${shiftCActive} C`;
-        if (shiftDActive > 0) shiftStr += ` | ${shiftDActive} D`;
-        if (shiftEActive > 0) shiftStr += ` | ${shiftEActive} E`;
-        if (shiftGActive > 0) shiftStr += ` | ${shiftGActive} G`;
-        if (otherActive > 0) shiftStr += ` | ${otherActive} Oth`;
+        document.getElementById('metricStaffCount').innerText = presentCount + " Present";
+        let shiftStr = shiftAActive + " A | " + shiftBActive + " B";
+        if (shiftCActive > 0) shiftStr += " | " + shiftCActive + " C";
+        if (shiftDActive > 0) shiftStr += " | " + shiftDActive + " D";
+        if (shiftEActive > 0) shiftStr += " | " + shiftEActive + " E";
+        if (shiftGActive > 0) shiftStr += " | " + shiftGActive + " G";
+        if (otherActive > 0) shiftStr += " | " + otherActive + " Oth";
         document.getElementById('metricShiftBreakdown').innerText = shiftStr;
         
-        document.getElementById('metricOffCount').innerText = `${offCount} Staff Off`;
-        document.getElementById('metricOffSub').innerText = offCount === 0 ? '100% Floor Attendance' : `${((presentCount / (total - offCount || 1)) * 100).toFixed(1)}% Shift Fill`;
+        document.getElementById('metricOffCount').innerText = offCount + " Staff Off";
+        document.getElementById('metricOffSub').innerText = offCount === 0 ? '100% Floor Attendance' : ((presentCount / (total - offCount || 1)) * 100).toFixed(1) + "% Shift Fill";
 
-        document.getElementById('metricFloorStaff').innerText = `${liveFloorStaff} Active`;
-        document.getElementById('metricFloorSub').innerText = `${activeBreaksCount} Currently on Break`;
+        document.getElementById('metricFloorStaff').innerText = liveFloorStaff + " Active";
+        document.getElementById('metricFloorSub').innerText = activeBreaksCount + " Currently on Break";
 
         const loadEl = document.getElementById('metricBreakLoad');
-        loadEl.innerText = `${activeBreaksCount} / 2 Slots`;
+        loadEl.innerText = activeBreaksCount + " / 2 Slots";
         if (activeBreaksCount >= 2) loadEl.classList.add('break-load-warning');
         else loadEl.classList.remove('break-load-warning');
 
@@ -2346,7 +2306,7 @@
         if (!emp.clockInTime) {
             emp.clockInTime = nowTime;
             
-            const historyRef = ref(db, getDBPath(`history/${businessDate}`));
+            const historyRef = ref(db, getDBPath('history/' + businessDate));
             push(historyRef, {
                 name: emp.name,
                 clockInTime: nowTime,
@@ -2371,9 +2331,9 @@
             document.getElementById('clockInModal').style.display = 'none';
             
             if (isFirstTime) {
-                alert(`✅ PIN Registered & Sign-In Successful!\n\nWelcome, ${emp.name}. You are now authenticated for today.`);
+                alert("✅ PIN Registered & Sign-In Successful!\n\nWelcome, " + emp.name + ". You are now authenticated for today.");
             } else {
-                alert(`✅ Welcome back, ${emp.name}!\n\nYou are signed in for today's shift.`);
+                alert("✅ Welcome back, " + emp.name + "!\n\nYou are signed in for today's shift.");
             }
             
             renderTable();
@@ -2396,19 +2356,19 @@
         if (isStaffView) return;
         if (!requireAdmin()) return;
         
-        if (confirm(`Are you sure you want to VOID the clock-in for ${currentEmployees[index].name}? This will mark them as not signed in and force them to re-enter their PIN.`)) {
+        if (confirm("Are you sure you want to VOID the clock-in for " + currentEmployees[index].name + "? This will mark them as not signed in and force them to re-enter their PIN.")) {
             currentEmployees[index].clockInTime = null;
             set(ref(db, getDBPath('roster')), currentEmployees);
         }
     };
 
-    window.startBreak = function(empName, index, requestedType = 'standard') {
+    window.startBreak = function(empName, index, requestedType) {
         if (enforcePCWorkstation()) return;
 
         const emp = currentEmployees[index];
 
         if (!emp.clockInTime) {
-            alert(`🚨 MANDATORY SIGN-IN REQUIRED: ${empName} has not signed in for today's shift yet!\n\nPlease click the "Sign In" button at the top of the dashboard and enter your 4-digit PIN first.`);
+            alert("🚨 MANDATORY SIGN-IN REQUIRED: " + empName + " has not signed in for today's shift yet!\n\nPlease click the \"Sign In\" button at the top of the dashboard and enter your 4-digit PIN first.");
             document.getElementById('clockInModal').style.display = 'flex';
             return;
         }
@@ -2416,7 +2376,7 @@
         try {
             const safeKey = empName.replace(/[.#$[\]]/g, '');
             if (currentBreaks[safeKey] && currentBreaks[safeKey].status !== 'completed') {
-                alert(`🚨 BLOCK: ${empName} already has an active or pending break request.`);
+                alert("🚨 BLOCK: " + empName + " already has an active or pending break request.");
                 return;
             }
 
@@ -2430,11 +2390,11 @@
 
             if (requestedType === 'prayer') {
                 if (currentPrayers >= 4) {
-                    alert(`🚨 BLOCK: Maximum prayer capacity reached! (4 employees are currently on or waiting for prayer). Please wait until someone returns.`);
+                    alert("🚨 BLOCK: Maximum prayer capacity reached! (4 employees are currently on or waiting for prayer). Please wait until someone returns.");
                     return;
                 }
-                alert(`A request for a Prayer break has been sent to the Admin.`);
-                set(ref(db, getDBPath(`breaks/${safeKey}`)), {
+                alert("A request for a Prayer break has been sent to the Admin.");
+                set(ref(db, getDBPath('breaks/' + safeKey)), {
                     name: empName,
                     startTime: 0,
                     requestTime: Date.now(), 
@@ -2449,7 +2409,7 @@
 
             if (isOfficial) {
                 if (q30 >= 1) {
-                    alert(`🚨 BLOCK: ${empName} has already used their 1 official 30-minute break for today!`);
+                    alert("🚨 BLOCK: " + empName + " has already used their 1 official 30-minute break for today!");
                     return;
                 }
 
@@ -2465,7 +2425,7 @@
                 }
                 const endTimeMs = bEnd;
 
-                set(ref(db, getDBPath(`breaks/${safeKey}`)), {
+                set(ref(db, getDBPath('breaks/' + safeKey)), {
                     name: empName,
                     startTime: new Date(tzStr).getTime(), 
                     endTime: endTimeMs, 
@@ -2475,17 +2435,17 @@
                 }).catch(err => alert("Error communicating with cloud: " + err.message));
             } else {
                 if (q10 >= 3) {
-                    alert(`🚨 BLOCK: ${empName} has already used all 3 of their 10-minute quick breaks today!`);
+                    alert("🚨 BLOCK: " + empName + " has already used all 3 of their 10-minute quick breaks today!");
                     return;
                 }
 
                 if (current10Mins >= 3) {
-                    alert(`🚨 BLOCK: Maximum 10-minute break capacity reached! (3 employees are currently on or waiting for a quick break). Please wait until they return.`);
+                    alert("🚨 BLOCK: Maximum 10-minute break capacity reached! (3 employees are currently on or waiting for a quick break). Please wait until they return.");
                     return;
                 }
 
-                alert(`It is currently not the scheduled break time for ${empName}.\n\nA request for a 10-minute quick break has been sent to the Admin.`);
-                set(ref(db, getDBPath(`breaks/${safeKey}`)), {
+                alert("It is currently not the scheduled break time for " + empName + ".\n\nA request for a 10-minute quick break has been sent to the Admin.");
+                set(ref(db, getDBPath('breaks/' + safeKey)), {
                     name: empName,
                     startTime: 0,
                     requestTime: Date.now(), 
@@ -2526,7 +2486,7 @@
                 }
             }
             
-            set(ref(db, getDBPath(`breaks/${key}`)), breakData).catch(err => alert("Sync Error: " + err.message));
+            set(ref(db, getDBPath('breaks/' + key)), breakData).catch(err => alert("Sync Error: " + err.message));
         } catch(err) {
             alert("Error approving break: " + err.message);
         }
@@ -2535,7 +2495,7 @@
     window.denyBreak = function(rawKey) {
         if (!requireAdmin()) return;
         const key = rawKey.replace(/'/g, "");
-        remove(ref(db, getDBPath(`breaks/${key}`))); 
+        remove(ref(db, getDBPath('breaks/' + key))); 
     };
 
     window.requestReturn = function(rawKey) {
@@ -2554,7 +2514,7 @@
 
                 breakData.status = 'return_pending'; 
                 breakData.returnRequestedTime = now; 
-                set(ref(db, getDBPath(`breaks/${key}`)), breakData);
+                set(ref(db, getDBPath('breaks/' + key)), breakData);
             }
         } catch(err) {
             alert("Error requesting return: " + err.message);
@@ -2579,12 +2539,12 @@
                         const diffMs = breakData.returnRequestedTime - breakData.endTime;
                         varianceMins = Math.round(diffMs / 60000);
 
-                        if (varianceMins > 0) variance = `LATE by ${varianceMins} min`;
-                        else if (varianceMins < 0) variance = `EARLY by ${Math.abs(varianceMins)} min`;
+                        if (varianceMins > 0) variance = "LATE by " + varianceMins + " min";
+                        else if (varianceMins < 0) variance = "EARLY by " + Math.abs(varianceMins) + " min";
                         else variance = "EXACT ON TIME";
                     } else {
                         varianceMins = Math.round((breakData.returnRequestedTime - breakData.startTime) / 60000);
-                        variance = `Took ${varianceMins} min total`;
+                        variance = "Took " + varianceMins + " min total";
                     }
 
                     if (variance === "EXACT ON TIME") window.shootConfetti();
@@ -2592,7 +2552,7 @@
                     const emp = currentEmployees.find(e => e.name === breakData.name);
                     const clockInToSave = (emp && emp.clockInTime) ? emp.clockInTime : "No Sign-In";
 
-                    const historyRef = ref(db, getDBPath(`history/${businessDate}`));
+                    const historyRef = ref(db, getDBPath('history/' + businessDate));
                     push(historyRef, {
                         name: breakData.name,
                         clockInTime: clockInToSave,
@@ -2606,13 +2566,43 @@
                     });
 
                     breakData.status = 'completed'; 
-                    set(ref(db, getDBPath(`breaks/${key}`)), breakData);
+                    set(ref(db, getDBPath('breaks/' + key)), breakData);
                 }
             } catch(err) {
                 alert("Error approving return: " + err.message);
             }
         }, 100);
     };
+
+    function updateHeaderAuthUI() {
+        const authBtnContainer = document.getElementById('staffAuthContainer');
+        const clockInModal = document.getElementById('clockInModal');
+        const closeBtn = document.getElementById('clockInCloseBtn');
+
+        if (!authBtnContainer) return;
+
+        if (isStaffView && isMobile) {
+            authBtnContainer.innerHTML = '<span class="brand-badge" style="background: rgba(148, 163, 184, 0.15); color: #94A3B8; border-color: rgba(148, 163, 184, 0.3); padding: 8px 16px; font-size: 13px;">📱 Mobile Mode Active</span>';
+            if (clockInModal) clockInModal.style.display = 'none';
+            return;
+        }
+
+        const localUser = sessionStorage.getItem('prestoStaffAuth');
+        if (localUser) {
+            authBtnContainer.innerHTML = '<button class="btn btn-warning" style="font-size: 14px; padding: 10px 20px;" onclick="window.processClockOut()">🚪 Sign Out (' + localUser.split(' ')[0] + ')</button>';
+            if (clockInModal) clockInModal.style.display = 'none'; 
+        } else {
+            authBtnContainer.innerHTML = '<button class="btn btn-success" style="font-size: 14px; padding: 10px 20px;" onclick="document.getElementById(\'clockInModal\').style.display=\'flex\'">🕒 Mandatory Daily Sign In</button>';
+            
+            if (isStaffView && clockInModal) {
+                clockInModal.style.display = 'flex';
+                if (closeBtn) closeBtn.style.display = 'none'; 
+            } else {
+                if (closeBtn) closeBtn.style.display = 'block'; 
+            }
+        }
+    }
+    updateHeaderAuthUI();
 
     // 21. LEADERBOARD & EXPORT AUDIT SYSTEMS
     window.openLeaderboard = async function() {
@@ -2660,27 +2650,16 @@
                 };
             }).sort((a, b) => b.score - a.score);
 
-            let html = `
-                <table class="leaderboard-table">
-                    <thead>
-                        <tr>
-                            <th>Rank</th>
-                            <th>Employee Name</th>
-                            <th>Net Balance</th>
-                            <th>Level</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
+            let html = '<table class="leaderboard-table"><thead><tr><th>Rank</th><th>Employee Name</th><th>Net Balance</th><th>Level</th></tr></thead><tbody>';
 
             sortedStaff.forEach((emp, index) => {
-                let rankStr = `${index + 1}`;
+                let rankStr = (index + 1).toString();
                 if (index === 0) rankStr = '🥇 1';
                 
                 let scoreClass = 'score-neutral';
-                let scoreText = `${emp.score} min`;
-                if (emp.score > 0) { scoreClass = 'score-good'; scoreText = `+${emp.score} min`; }
-                if (emp.score < 0) { scoreClass = 'score-bad'; scoreText = `${emp.score} min`; }
+                let scoreText = emp.score + " min";
+                if (emp.score > 0) { scoreClass = 'score-good'; scoreText = "+" + emp.score + " min"; }
+                if (emp.score < 0) { scoreClass = 'score-bad'; scoreText = emp.score + " min"; }
 
                 let badge = 'Novice';
                 if(index === 0) badge = '👑 Champion';
@@ -2688,21 +2667,14 @@
                 else if (emp.score > 50) badge = '🥈 Silver';
                 else if (emp.score > 20) badge = '🥉 Bronze';
 
-                html += `
-                    <tr>
-                        <td style="font-weight: 800;">${rankStr}</td>
-                        <td style="font-weight: 700; color: var(--text-main);">${emp.name}</td>
-                        <td class="${scoreClass}">${scoreText}</td>
-                        <td style="color: var(--text-muted);">${badge}</td>
-                    </tr>
-                `;
+                html += '<tr><td style="font-weight: 800;">' + rankStr + '</td><td style="font-weight: 700; color: var(--text-main);">' + emp.name + '</td><td class="' + scoreClass + '">' + scoreText + '</td><td style="color: var(--text-muted);">' + badge + '</td></tr>';
             });
 
-            html += `</tbody></table>`;
+            html += '</tbody></table>';
             contentDiv.innerHTML = html;
 
         } catch (e) {
-            contentDiv.innerHTML = `<p style="color: #EF4444;">Error loading leaderboard: ${e.message}</p>`;
+            contentDiv.innerHTML = '<p style="color: #EF4444;">Error loading leaderboard: ' + e.message + '</p>';
         }
     };
 
@@ -2739,7 +2711,8 @@
                     const dailyRecords = allHistory[dateStr];
                     Object.values(dailyRecords).forEach(log => {
                         if (log.name.toLowerCase().includes(empName.toLowerCase().trim())) {
-                            csv.push(`"${dateStr}","${log.name}","${log.clockInTime || 'N/A'}","${log.type}","${log.startTime}","${log.expectedEnd}","${log.actualReturn}","${log.variance}","${log.adminNote || ''}"`);
+                            let rLog = '"' + dateStr + '","' + log.name + '","' + (log.clockInTime || 'N/A') + '","' + log.type + '","' + log.startTime + '","' + log.expectedEnd + '","' + log.actualReturn + '","' + log.variance + '","' + (log.adminNote || '') + '"';
+                            csv.push(rLog);
                             matchCount++;
                         }
                     });
@@ -2747,20 +2720,20 @@
             });
 
             if (matchCount === 0) {
-                alert(`No records found for "${empName}" in the last 90 days.`);
+                alert("No records found for \"" + empName + "\" in the last 90 days.");
                 return;
             }
 
             const csvFile = new Blob([csv.join('\n')], { type: 'text/csv' });
             const downloadLink = document.createElement('a');
-            downloadLink.download = `Audit_${empName.replace(/\s+/g, '_')}_90Days.csv`;
+            downloadLink.download = "Audit_" + empName.replace(/\s+/g, '_') + "_90Days.csv";
             downloadLink.href = window.URL.createObjectURL(csvFile);
             downloadLink.style.display = 'none';
             document.body.appendChild(downloadLink);
             downloadLink.click();
             document.body.removeChild(downloadLink);
             
-            alert(`✅ Successfully exported ${matchCount} historical break records for ${empName}!`);
+            alert("✅ Successfully exported " + matchCount + " historical break records for " + empName + "!");
             
         } catch (e) {
             alert("Error generating report: " + e.message);
@@ -2773,7 +2746,7 @@
         const businessDate = new Date(new Date(tzStr).getTime() - (3 * 3600 * 1000)).toISOString().split('T')[0];
 
         try {
-            const snapshot = await get(ref(db, getDBPath(`history/${businessDate}`)));
+            const snapshot = await get(ref(db, getDBPath('history/' + businessDate)));
             if (!snapshot.exists()) {
                 alert("No break history logged for today yet!");
                 return;
@@ -2783,12 +2756,13 @@
             let csv = ["Employee Name,Clock In Time,Break Type,Start Time,Expected Return,Actual Return,Variance Log,Admin Notes"];
             
             Object.values(data).forEach(log => {
-                csv.push(`"${log.name}","${log.clockInTime || 'N/A'}","${log.type}","${log.startTime}","${log.expectedEnd}","${log.actualReturn}","${log.variance}","${log.adminNote || ''}"`);
+                let rLog = '"' + log.name + '","' + (log.clockInTime || 'N/A') + '","' + log.type + '","' + log.startTime + '","' + log.expectedEnd + '","' + log.actualReturn + '","' + log.variance + '","' + (log.adminNote || '') + '"';
+                csv.push(rLog);
             });
             
             const csvFile = new Blob([csv.join('\n')], { type: 'text/csv' });
             const downloadLink = document.createElement('a');
-            downloadLink.download = `Presto_Break_History_${businessDate}.csv`;
+            downloadLink.download = "Presto_Break_History_" + businessDate + ".csv";
             downloadLink.href = window.URL.createObjectURL(csvFile);
             downloadLink.style.display = 'none';
             document.body.appendChild(downloadLink);
@@ -2821,7 +2795,7 @@
         }
         const csvFile = new Blob([csv.join('\n')], { type: 'text/csv' });
         const downloadLink = document.createElement('a');
-        downloadLink.download = `Presto_Eat_Live_Schedule.csv`;
+        downloadLink.download = "Presto_Eat_Live_Schedule.csv";
         downloadLink.href = window.URL.createObjectURL(csvFile);
         downloadLink.style.display = 'none';
         document.body.appendChild(downloadLink);
