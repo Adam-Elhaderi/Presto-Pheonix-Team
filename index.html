@@ -431,6 +431,11 @@
             <!-- Dynamically populated by JS based on sign-in status and device -->
         </div>
 
+        <!-- Staff-only game access; admin header actions are hidden in staff view. -->
+        <div id="staffGameAccess" style="display:none; width:100%; max-width:420px; margin:12px auto;">
+            <button class="btn" style="width:100%; background:rgba(139,92,246,.12); border-color:#8B5CF6; color:#C4B5FD;" onclick="window.openTrafficGame()">🛵 Play Presto Delivery Rush</button>
+        </div>
+
         <div class="actions-group" id="headerActions">
             <button class="btn" style="background: rgba(139, 92, 246, 0.1); border-color: #8B5CF6; color: #8B5CF6;" onclick="window.openTrafficGame()">🛵 Mini Game</button>
             <button class="btn btn-audit" onclick="window.exportEmployeeHistory()">📅 90-Day Audit</button>
@@ -673,6 +678,8 @@
     if (isStaffView) {
         document.getElementById('adminControlsArea').style.display = 'none';
         document.getElementById('headerActions').style.display = 'none';
+        const staffGameAccess = document.getElementById('staffGameAccess');
+        if (staffGameAccess) staffGameAccess.style.display = 'block';
         document.getElementById('filterTabs').style.display = 'none'; 
         document.getElementById('viewBadge').innerText = "Staff Dashboard";
         document.getElementById('viewBadge').style.background = "rgba(59, 130, 246, 0.15)";
