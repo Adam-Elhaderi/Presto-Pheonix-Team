@@ -21,9 +21,8 @@
         });
     </script>
 
-    <!-- 🚨 SYNCHRONOUS STATE INITIALIZATION (FIXES REFERENCE ERRORS) 🚨 -->
+    <!-- SYNCHRONOUS STATE INITIALIZATION -->
     <script>
-        // Global State Variables MUST be initialized before Firebase modules load
         window.currentEmployees = [];
         window.currentBreaks = {};
         window.timerInterval = null;
@@ -751,9 +750,20 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
     import { getDatabase, ref, set, onValue, remove, push, get } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
+    // EXPLICIT FIREBASE CONFIGURATION TO PREVENT (app/no-options) ERROR
+    const firebaseConfig = {
+        apiKey: "AIzaSyCmlKjghDehj9L5aw1dJGa1WLjPRT2o-Yc",
+        authDomain: "presto-phoenix-team.firebaseapp.com",
+        databaseURL: "https://presto-phoenix-team-default-rtdb.firebaseio.com",
+        projectId: "presto-phoenix-team",
+        storageBucket: "presto-phoenix-team.firebasestorage.app",
+        messagingSenderId: "828847025710",
+        appId: "1:828847025710:web:72f00f90f45fe20f1f79bf"
+    };
+
     let app, db;
     try {
-        app = initializeApp(window.firebaseConfig);
+        app = initializeApp(firebaseConfig);
         db = getDatabase(app);
     } catch(err) {
         document.getElementById('statusMessage').innerHTML = "<span style='color:#EF4444;'>CRITICAL FIREBASE INITIALIZATION ERROR: " + err.message + "</span>";
