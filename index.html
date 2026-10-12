@@ -10,22 +10,13 @@
         window.addEventListener('error', function(e) {
             const tb = document.getElementById('tableBody');
             if(tb) {
-                tb.innerHTML = `<tr><td colspan="9" style="color:#EF4444; text-align:center; padding:40px; font-size:16px;">
-                    <strong>🚨 CRITICAL SYSTEM CRASH 🚨</strong><br><br>
-                    <span style="color:var(--text-main); font-size:14px;">Error: ${e.message}</span><br>
-                    <span style="color:var(--text-muted); font-size:12px;">Line: ${e.lineno} | Col: ${e.colno}</span><br><br>
-                    Please screenshot this error and share it with the developer.
-                </td></tr>`;
+                tb.innerHTML = '<tr><td colspan="9" style="color:#EF4444; text-align:center; padding:40px; font-size:16px;"><strong>🚨 CRITICAL SYSTEM CRASH 🚨</strong><br><br><span style="color:var(--text-main); font-size:14px;">Error: ' + e.message + '</span><br><span style="color:var(--text-muted); font-size:12px;">Line: ' + e.lineno + ' | Col: ' + e.colno + '</span><br><br>Please screenshot this error and share it with the developer.</td></tr>';
             }
         });
         window.addEventListener('unhandledrejection', function(e) {
             const tb = document.getElementById('tableBody');
             if(tb) {
-                tb.innerHTML = `<tr><td colspan="9" style="color:#EF4444; text-align:center; padding:40px; font-size:16px;">
-                    <strong>🚨 FIREBASE NETWORK REJECTION 🚨</strong><br><br>
-                    <span style="color:var(--text-main); font-size:14px;">Reason: ${e.reason}</span><br><br>
-                    Check your AdBlocker, VPN, or Browser Shields.
-                </td></tr>`;
+                tb.innerHTML = '<tr><td colspan="9" style="color:#EF4444; text-align:center; padding:40px; font-size:16px;"><strong>🚨 FIREBASE NETWORK REJECTION 🚨</strong><br><br><span style="color:var(--text-main); font-size:14px;">Reason: ' + e.reason + '</span><br><br>Check your AdBlocker, VPN, or Browser Shields.</td></tr>';
             }
         });
     </script>
@@ -1184,482 +1175,6 @@
         { name: "Tawfik Al-Jarushi", pcNumber: "PC-19", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Thursday" }
     ];
 
-    const dayOffOptions = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "None"];
-    let currentEmployees = [];
-    let currentBreaks = {};
-    let timerInterval = null;
-
-    // 9. IDLE / ZEN MODE LOGIC
-    let idleTime = 0;
-    const zenDiv = document.getElementById('zenMode');
-    const zenTimeEl = document.getElementById('zenTime');
-    
-    function resetIdle() {
-        idleTime = 0;
-        if (zenDiv.classList.contains('active')) {
-            zenDiv.classList.remove('active');
-        }
-    }
-    window.wakeUp = resetIdle;
-    window.addEventListener('mousemove', resetIdle);
-    window.addEventListener('keydown', resetIdle);
-    window.addEventListener('touchstart', resetIdle);
-    window.addEventListener('click', resetIdle);
-
-    setInterval(() => {
-        if (isStaffView && isMobile) return; 
-        idleTime++;
-        if (idleTime >= 300) { 
-            zenDiv.classList.add('active');
-            const d = new Date().toLocaleTimeString('en-US', { timeZone: 'Africa/Tripoli', hour: '2-digit', minute:'2-digit' });
-            zenTimeEl.innerText = d;
-        }
-    }, 1000);
-
-    // 10. CONFETTI ANIMATION
-    window.shootConfetti = function() {
-        const colors = ['#38BDF8', '#10B981', '#FBBF24', '#EF4444', '#A855F7'];
-        for(let i=0; i<60; i++) {
-            let conf = document.createElement('div');
-            conf.className = 'confetti';
-            conf.style.left = Math.random() * 100 + 'vw';
-            conf.style.top = '-10px';
-            conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-            conf.style.animationDuration = (Math.random() * 2 + 2) + 's';
-            document.body.appendChild(conf);
-            setTimeout(() => conf.remove(), 5000);
-        }
-    };
-
-    // 11. TEAM KUDOS WIDGET
-    let rawKudosData = {};
-    let kudosList = ["Great teamwork today everyone!", "Keep pushing, you're doing amazing."];
-    let kudosIndex = 0;
-    
-    onValue(ref(db, getDBPath('system/kudos')), (snapshot) => {
-        rawKudosData = snapshot.val() || {};
-        kudosList = Object.values(rawKudosData);
-        if(kudosList.length === 0) kudosList = ["Great teamwork today everyone!", "Keep pushing, you're doing amazing."];
-    });
-
-    setInterval(() => {
-        if(kudosList.length > 0) {
-            kudosIndex = (kudosIndex + 1) % kudosList.length;
-            const el = document.getElementById('kudosText');
-            if(el) {
-                el.style.opacity = 0;
-                setTimeout(() => {
-                    el.innerText = '"' + kudosList[kudosIndex] + '"';
-                    el.style.opacity = 1;
-                }, 500);
-            }
-        }
-    }, 8000);
-
-    window.openKudosManager = function() {
-        if (!requireAdmin()) return;
-        document.getElementById('kudosModal').style.display = 'flex';
-        renderKudosManager();
-    };
-
-    window.closeKudosManager = function() {
-        document.getElementById('kudosModal').style.display = 'none';
-    };
-
-    function renderKudosManager() {
-        const container = document.getElementById('kudosListContainer');
-        container.innerHTML = '';
-        
-        const keys = Object.keys(rawKudosData);
-        if(keys.length === 0) {
-            container.innerHTML = '<p style="color:var(--text-muted); font-size:13px;">No custom kudos found. Default messages are playing.</p>';
-            return;
-        }
-
-        keys.forEach(k => {
-            const text = rawKudosData[k];
-            let itemHtml = '<div style="display:flex; gap:10px; align-items:center;">';
-            itemHtml += '<input type="text" id="kudo_edit_' + k + '" class="form-control" style="flex-grow:1; background: rgba(0,0,0,0.5);" value="' + text.replace(/"/g, '&quot;') + '">';
-            itemHtml += '<button class="btn btn-staff" onclick="window.updateKudo(\'' + k + '\')">Save</button>';
-            itemHtml += '<button class="btn btn-danger" onclick="window.deleteKudo(\'' + k + '\')">🗑️</button>';
-            itemHtml += '</div>';
-            container.innerHTML += itemHtml;
-        });
-    }
-
-    window.addKudoFromManager = function() {
-        const note = prompt("Enter a new shoutout:");
-        if (note && note.trim() !== "") {
-            push(ref(db, getDBPath('system/kudos')), note.trim()).then(() => renderKudosManager());
-        }
-    };
-
-    window.updateKudo = function(key) {
-        const newVal = document.getElementById('kudo_edit_' + key).value.trim();
-        if (newVal) {
-            set(ref(db, getDBPath('system/kudos/' + key)), newVal).then(() => {
-                alert("Kudo updated successfully.");
-                renderKudosManager();
-            });
-        }
-    };
-
-    window.deleteKudo = function(key) {
-        if(confirm("Delete this shoutout?")) {
-            remove(ref(db, getDBPath('system/kudos/' + key))).then(() => renderKudosManager());
-        }
-    };
-
-    // 12. PRESTO DELIVERY RUSH (5 LEVELS)
-    const trafficLevels = [
-        [ 
-            { id: 0, x: 0, y: 2, len: 2, horiz: true, isRed: true },
-            { id: 1, x: 2, y: 1, len: 2, horiz: false }, 
-            { id: 2, x: 2, y: 3, len: 2, horiz: true }, 
-            { id: 3, x: 5, y: 0, len: 3, horiz: false }
-        ],
-        [ 
-            { id: 0, x: 0, y: 2, len: 2, horiz: true, isRed: true },
-            { id: 1, x: 2, y: 0, len: 3, horiz: false }, 
-            { id: 2, x: 0, y: 3, len: 2, horiz: true },
-            { id: 3, x: 3, y: 3, len: 3, horiz: false },
-            { id: 4, x: 4, y: 2, len: 2, horiz: false },
-            { id: 5, x: 4, y: 5, len: 2, horiz: true }
-        ],
-        [ 
-            { id: 0, x: 1, y: 2, len: 2, horiz: true, isRed: true },
-            { id: 1, x: 0, y: 0, len: 3, horiz: true },
-            { id: 2, x: 3, y: 0, len: 3, horiz: false },
-            { id: 3, x: 0, y: 1, len: 2, horiz: false },
-            { id: 4, x: 1, y: 3, len: 2, horiz: false },
-            { id: 5, x: 2, y: 4, len: 2, horiz: true },
-            { id: 6, x: 4, y: 2, len: 3, horiz: false }
-        ],
-        [ 
-            { id: 0, x: 0, y: 2, len: 2, horiz: true, isRed: true },
-            { id: 1, x: 2, y: 1, len: 3, horiz: false },
-            { id: 2, x: 3, y: 0, len: 2, horiz: true },
-            { id: 3, x: 3, y: 1, len: 2, horiz: false },
-            { id: 4, x: 0, y: 4, len: 2, horiz: true },
-            { id: 5, x: 2, y: 4, len: 2, horiz: false },
-            { id: 6, x: 4, y: 3, len: 2, horiz: true },
-            { id: 7, x: 5, y: 2, len: 3, horiz: false }
-        ],
-        [ 
-            { id: 0, x: 1, y: 2, len: 2, horiz: true, isRed: true },
-            { id: 1, x: 0, y: 0, len: 2, horiz: false },
-            { id: 2, x: 1, y: 0, len: 2, horiz: true },
-            { id: 3, x: 3, y: 0, len: 3, horiz: false },
-            { id: 4, x: 4, y: 0, len: 2, horiz: true },
-            { id: 5, x: 0, y: 3, len: 3, horiz: false },
-            { id: 6, x: 1, y: 4, len: 2, horiz: true },
-            { id: 7, x: 3, y: 3, len: 2, horiz: true },
-            { id: 8, x: 4, y: 2, len: 3, horiz: false },
-            { id: 9, x: 5, y: 1, len: 2, horiz: false }
-        ]
-    ];
-    let currentLevelIndex = 0;
-    let trafficLevel = [];
-    let activeCar = null, startMouse = 0, bounds = {}, initialPos = 0;
-
-    window.openTrafficGame = function() {
-        document.getElementById('gameModal').style.display = 'flex';
-        window.initTrafficGame();
-    }
-
-    window.closeTrafficGame = function() {
-        document.getElementById('gameModal').style.display = 'none';
-    }
-
-    window.initTrafficGame = function() {
-        let board = document.getElementById('gameBoard');
-        board.innerHTML = '<div class="game-exit"></div>';
-        document.getElementById('gameLevelDisplay').innerText = "Level " + (currentLevelIndex + 1);
-        
-        trafficLevel = JSON.parse(JSON.stringify(trafficLevels[currentLevelIndex]));
-
-        trafficLevel.forEach((c) => {
-            let el = document.createElement('div');
-            el.className = 'game-car ' + (c.isRed ? 'car-presto' : 'car-normal');
-            el.innerText = c.isRed ? '' : (c.len === 3 ? '🚚' : '🚙');
-            el.style.width = (c.horiz ? c.len * 50 : 50) + 'px';
-            el.style.height = (c.horiz ? 50 : c.len * 50) + 'px';
-            el.style.left = (c.x * 50) + 'px';
-            el.style.top = (c.y * 50) + 'px';
-            
-            el.onpointerdown = (e) => startDragCar(e, c, el);
-            c.el = el;
-            board.appendChild(el);
-        });
-    }
-
-    function getGameGrid(ignoreCar) {
-        let g = Array(6).fill(0).map(() => Array(6).fill(0));
-        trafficLevel.forEach(c => {
-            if (c === ignoreCar) return;
-            for(let i=0; i<c.len; i++) {
-                if (c.horiz) g[c.y][c.x + i] = 1;
-                else g[c.y + i][c.x] = 1;
-            }
-        });
-        return g;
-    }
-
-    function startDragCar(e, car, el) {
-        e.preventDefault();
-        activeCar = car;
-        startMouse = car.horiz ? e.clientX : e.clientY;
-        initialPos = car.horiz ? car.x : car.y;
-        
-        let g = getGameGrid(car);
-        let min = 0, max = 6 - car.len;
-        
-        if (car.horiz) {
-            for(let x = car.x - 1; x >= 0; x--) if(g[car.y][x]) { min = x + 1; break; }
-            for(let x = car.x + car.len; x < 6; x++) if(g[car.y][x]) { max = x - car.len; break; }
-        } else {
-            for(let y = car.y - 1; y >= 0; y--) if(g[y][car.x]) { min = y + 1; break; }
-            for(let y = car.y + car.len; y < 6; y++) if(g[y][car.x]) { max = y - car.len; break; }
-        }
-        bounds = { min, max };
-        el.style.zIndex = 100;
-        
-        window.addEventListener('pointermove', dragCar);
-        window.addEventListener('pointerup', endDragCar);
-    }
-
-    function dragCar(e) {
-        if (!activeCar) return;
-        let deltaPx = (activeCar.horiz ? e.clientX : e.clientY) - startMouse;
-        let deltaCells = deltaPx / 50;
-        let newVal = initialPos + deltaCells;
-        newVal = Math.max(bounds.min, Math.min(bounds.max, newVal));
-        activeCar.currentFloat = newVal;
-        activeCar.el.style[activeCar.horiz ? 'left' : 'top'] = (newVal * 50) + 'px';
-    }
-
-    function endDragCar(e) {
-        if (!activeCar) return;
-        window.removeEventListener('pointermove', dragCar);
-        window.removeEventListener('pointerup', endDragCar);
-        
-        let finalVal = Math.round(activeCar.currentFloat !== undefined ? activeCar.currentFloat : initialPos);
-        if (activeCar.horiz) activeCar.x = finalVal; else activeCar.y = finalVal;
-        activeCar.el.style[activeCar.horiz ? 'left' : 'top'] = (finalVal * 50) + 'px';
-        activeCar.el.style.zIndex = activeCar.isRed ? 10 : 1;
-        
-        if (activeCar.isRed && activeCar.x === 4) { 
-            setTimeout(() => {
-                window.shootConfetti();
-                currentLevelIndex++;
-                if (currentLevelIndex >= trafficLevels.length) {
-                    alert("🎉 Incredible! You beat all 5 rush levels!");
-                    currentLevelIndex = 0;
-                } else {
-                    alert("🎉 Level " + currentLevelIndex + " Cleared! Get ready for the next delivery.");
-                }
-                window.initTrafficGame(); 
-            }, 100);
-        }
-        activeCar = null;
-    }
-
-    // 13. TRIVIA WIDGET
-    const triviaDB = [
-        { q: "Customer Service Bingo: Who heard a dog barking on a call today?", a: "Free Space! Take a deep breath." },
-        { q: "I speak without a mouth and hear without ears. What am I?", a: "An echo." },
-        { q: "What has hands but cannot clap?", a: "A clock." },
-        { q: "I have keys but no locks. I have space but no room. What am I?", a: "A keyboard." },
-        { q: "What belongs to you, but other people use it more than you do?", a: "Your name." },
-        { q: "What has to be broken before you can use it?", a: "An egg." },
-        { q: "I’m tall when I’m young, and I’m short when I’m old. What am I?", a: "A candle." }
-    ];
-    let currentTriviaIndex = 0;
-    let showingTriviaAnswer = false;
-
-    function loadTrivia() {
-        document.getElementById('triviaQ').innerText = triviaDB[currentTriviaIndex].q;
-        document.getElementById('triviaQ').style.color = "var(--text-main)";
-        document.getElementById('triviaQ').style.fontWeight = "normal";
-        document.getElementById('triviaBtn').innerText = "Reveal Answer";
-        showingTriviaAnswer = false;
-    }
-
-    window.handleTrivia = function() {
-        if (!showingTriviaAnswer) {
-            document.getElementById('triviaQ').innerText = triviaDB[currentTriviaIndex].a;
-            document.getElementById('triviaQ').style.color = "#F8FAFC";
-            document.getElementById('triviaQ').style.fontWeight = "800";
-            document.getElementById('triviaBtn').innerText = "Next Question ⏭️";
-            showingTriviaAnswer = true;
-        } else {
-            currentTriviaIndex = (currentTriviaIndex + 1) % triviaDB.length;
-            loadTrivia();
-        }
-    };
-    loadTrivia();
-
-    // 14. TICKER & QUEUE ORB LISTENERS
-    onValue(ref(db, getDBPath('system/tickerMsg')), (snapshot) => {
-        let msg = snapshot.val();
-        if(!msg) msg = "Welcome to Presto CS Operations. Have a great shift!";
-        document.getElementById('tickerText').innerText = msg;
-    });
-
-    onValue(ref(db, getDBPath('system/queueStatus')), (snapshot) => {
-        let status = snapshot.val() || 'green';
-        
-        const orb = document.getElementById('queueOrb');
-        if(orb) {
-            orb.className = 'queue-orb';
-            orb.classList.add('orb-' + status);
-            orb.setAttribute('data-status', status);
-        }
-
-        const bigOrb = document.getElementById('bigQueueOrb');
-        const bigText = document.getElementById('bigQueueText');
-        const staffDisplay = document.getElementById('staffQueueStatusDisplay');
-        
-        if (bigOrb && bigText) {
-            bigOrb.className = 'big-orb big-orb-' + status;
-            if (status === 'green') {
-                bigText.innerText = "ALL CLEAR / NORMAL";
-                bigText.style.color = "#10B981";
-                bigText.style.textShadow = "0 0 15px rgba(16,185,129,0.5)";
-                staffDisplay.style.borderColor = "rgba(16,185,129,0.3)";
-                staffDisplay.style.background = "rgba(16,185,129,0.05)";
-            } else if (status === 'yellow') {
-                bigText.innerText = "STEADY / ELEVATED VOLUME";
-                bigText.style.color = "#FBBF24";
-                bigText.style.textShadow = "0 0 15px rgba(251,191,36,0.5)";
-                staffDisplay.style.borderColor = "rgba(251,191,36,0.3)";
-                staffDisplay.style.background = "rgba(251,191,36,0.05)";
-            } else if (status === 'red') {
-                bigText.innerText = "HIGH VOLUME / ALL HANDS";
-                bigText.style.color = "#EF4444";
-                bigText.style.textShadow = "0 0 15px rgba(239,68,68,0.5)";
-                staffDisplay.style.borderColor = "rgba(239,68,68,0.3)";
-                staffDisplay.style.background = "rgba(239,68,68,0.05)";
-            }
-        }
-    });
-
-    window.updateTicker = function() {
-        if (isStaffView || !requireAdmin()) return;
-        let currentMsg = document.getElementById('tickerText').innerText;
-        let defaultMsg = "Welcome to Presto CS Operations. Have a great shift!";
-        let prefill = (currentMsg === defaultMsg) ? "" : currentMsg;
-        
-        let newMsg = prompt("Update dispatch announcement (leave completely blank and hit OK to delete):", prefill);
-        if (newMsg !== null) {
-            if (newMsg.trim() === "") {
-                remove(ref(db, getDBPath('system/tickerMsg')));
-            } else {
-                set(ref(db, getDBPath('system/tickerMsg')), newMsg.trim());
-            }
-        }
-    };
-
-    window.cycleQueueStatus = function() {
-        if (isStaffView || !requireAdmin()) return;
-        const orb = document.getElementById('queueOrb');
-        let current = orb.getAttribute('data-status');
-        let next = 'green';
-        if(current === 'green') next = 'yellow';
-        else if(current === 'yellow') next = 'red';
-        set(ref(db, getDBPath('system/queueStatus')), next);
-    };
-
-    function requireAdmin() {
-        if (isUnlocked) return true;
-        
-        const sessionSupervisor = sessionStorage.getItem('supervisorAuthed');
-        
-        if (sessionSupervisor === SECRET_PIN) return true;
-
-        const pin = prompt("🔒 Restricted Access\nEnter Supervisor PIN to execute this operation:");
-        if (pin === SECRET_PIN) {
-            sessionStorage.setItem('supervisorAuthed', pin);
-            return true;
-        }
-        if (pin !== null) alert("Incorrect PIN. Action denied.");
-        return false;
-    }
-
-    // 15. TABLE DRAG AND DROP
-    let dragStartIndex = null;
-
-    window.handleDragStart = function(e, index) {
-        if (!isUnlocked || isStaffView) return;
-        dragStartIndex = index;
-        e.currentTarget.style.opacity = '0.4';
-        e.dataTransfer.effectAllowed = 'move';
-        e.dataTransfer.setData('text/plain', index);
-    };
-
-    window.handleDragEnd = function(e) {
-        e.currentTarget.style.opacity = '1';
-        let rows = document.querySelectorAll('#scheduleTable tbody tr');
-        rows.forEach(r => r.classList.remove('drag-over'));
-    };
-
-    window.handleDragOver = function(e) {
-        if (!isUnlocked || isStaffView) return;
-        e.preventDefault(); 
-        e.dataTransfer.dropEffect = 'move';
-        let row = e.currentTarget;
-        if (!row.classList.contains('drag-over')) {
-            row.classList.add('drag-over');
-        }
-    };
-
-    window.handleDragLeave = function(e) {
-        e.currentTarget.classList.remove('drag-over');
-    };
-
-    window.handleDrop = function(e, targetIndex) {
-        e.stopPropagation();
-        e.preventDefault();
-        
-        let rows = document.querySelectorAll('#scheduleTable tbody tr');
-        rows.forEach(r => r.classList.remove('drag-over'));
-
-        if (!isUnlocked || isStaffView || dragStartIndex === null) return;
-        if (dragStartIndex === targetIndex) return;
-
-        if (activeShiftFilter !== 'all' || document.getElementById('searchInput').value.trim() !== '') {
-            alert("Drag and Drop is disabled while searching or filtering. Please switch back to 'All Staff'.");
-            return;
-        }
-
-        let minIdx = Math.min(dragStartIndex, targetIndex);
-        let maxIdx = Math.max(dragStartIndex, targetIndex);
-        for(let i = minIdx; i <= maxIdx; i++) {
-            if(currentEmployees[i].isLocked) {
-                alert("Cannot drag here. One or more employees in the shifting range are LOCKED (🔒). Unlock them first to manually slide the schedule.");
-                return;
-            }
-        }
-
-        let timeSlots = currentEmployees.map(emp => ({
-            timeStart: emp.timeStart,
-            timeEnd: emp.timeEnd,
-            overlap: emp.overlap
-        }));
-
-        let draggedEmp = currentEmployees.splice(dragStartIndex, 1)[0];
-        currentEmployees.splice(targetIndex, 0, draggedEmp);
-
-        currentEmployees.forEach((emp, i) => {
-            emp.timeStart = timeSlots[i].timeStart;
-            emp.timeEnd = timeSlots[i].timeEnd;
-            emp.overlap = timeSlots[i].overlap;
-        });
-
-        set(ref(db, getDBPath('roster')), currentEmployees);
-        dragStartIndex = null;
-    };
-
     // 16. AUTO-HEAL ONVALUE LISTENER FOR CORRUPTED FIREBASE DATA
     onValue(ref(db, getDBPath('roster')), (snapshot) => {
         try {
@@ -2803,6 +2318,33 @@
         document.body.removeChild(downloadLink);
     };
 
+</script>
+
+<!-- ISOLATED FAIL-PROOF MASTER CLOCK SCRIPT -->
+<script>
+    function runMasterClock() {
+        const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
+        const now = new Date(tzStr);
+        let hours = now.getHours(), minutes = now.getMinutes(), seconds = now.getSeconds();
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12; hours = hours ? hours : 12; 
+        minutes = minutes < 10 ? '0' + minutes : minutes;
+        seconds = seconds < 10 ? '0' + seconds : seconds;
+        
+        const timeStr = hours + ':' + minutes + ':' + seconds + ' ' + ampm;
+        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        const dateStr = days[now.getDay()] + ', ' + months[now.getMonth()] + ' ' + now.getDate() + ', ' + now.getFullYear();
+
+        const timeEl = document.getElementById('osdTime');
+        const dateEl = document.getElementById('osdDate');
+        
+        if(timeEl) timeEl.innerText = timeStr;
+        if(dateEl) dateEl.innerText = dateStr;
+    }
+    // Run immediately, then update every second
+    runMasterClock();
+    setInterval(runMasterClock, 1000);
 </script>
 </body>
 </html>
