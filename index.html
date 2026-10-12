@@ -4,125 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Presto CS — Live Floor Operations</title>
-    
-    <!-- GLOBAL CRASH HANDLER -->
-    <script>
-        window.addEventListener('error', function(e) {
-            var tb = document.getElementById('tableBody');
-            if(tb) {
-                tb.innerHTML = '<tr><td colspan="9" style="color:#EF4444; text-align:center; padding:40px; font-size:16px;"><strong>🚨 CRITICAL SYSTEM CRASH 🚨</strong><br><br><span style="color:var(--text-main); font-size:14px;">Error: ' + e.message + '</span><br><span style="color:var(--text-muted); font-size:12px;">Line: ' + e.lineno + ' | Col: ' + e.colno + '</span><br><br>Please screenshot this error and share it with the developer.</td></tr>';
-            }
-        });
-        window.addEventListener('unhandledrejection', function(e) {
-            var tb = document.getElementById('tableBody');
-            if(tb) {
-                tb.innerHTML = '<tr><td colspan="9" style="color:#EF4444; text-align:center; padding:40px; font-size:16px;"><strong>🚨 FIREBASE NETWORK REJECTION 🚨</strong><br><br><span style="color:var(--text-main); font-size:14px;">Reason: ' + e.reason + '</span><br><br>Check your AdBlocker, VPN, or Browser Shields.</td></tr>';
-            }
-        });
-    </script>
-
-    <!-- SYNCHRONOUS STATE INITIALIZATION -->
-    <script>
-        window.currentEmployees = [];
-        window.currentBreaks = {};
-        window.timerInterval = null;
-        window.isUnlocked = false;
-        window.activeShiftFilter = 'all';
-        window.topAgent = ""; 
-        window.gamificationBadges = {};
-        window.rawKudosData = {};
-        window.kudosList = ["Great teamwork today everyone!", "Keep pushing, you're doing amazing."];
-        window.kudosIndex = 0;
-        window.currentLevelIndex = 0;
-        window.trafficLevel = [];
-        window.activeCar = null;
-        window.startMouse = 0;
-        window.bounds = {};
-        window.initialPos = 0;
-        window.currentTriviaIndex = 0;
-        window.showingTriviaAnswer = false;
-        window.dragStartIndex = null;
-        window.idleTime = 0;
-        
-        window.SECRET_PIN = "9949";
-        window.FACTION_ID = "";
-        
-        window.dayOffOptions = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "None"];
-        
-        window.shiftOptions = [
-            "Shift A (07:00 PM - 02:00 AM)", 
-            "Shift B (07:30 PM - 02:30 AM)", 
-            "Shift C (08:00 AM - 03:00 PM)",
-            "Shift D (04:00 PM - 11:00 PM)", 
-            "Shift E (09:00 AM - 03:00 PM)", 
-            "Shift G (12:00 PM - 07:00 PM)"
-        ];
-
-        window.fixedSlots = [
-            { timeStart: "08:30 PM", timeEnd: "09:00 PM", overlap: "2 Staff" }, 
-            { timeStart: "08:45 PM", timeEnd: "09:15 PM", overlap: "2 Staff" },
-            { timeStart: "09:00 PM", timeEnd: "09:30 PM", overlap: "2 Staff" }, 
-            { timeStart: "09:15 PM", timeEnd: "09:45 PM", overlap: "2 Staff" },
-            { timeStart: "09:30 PM", timeEnd: "10:00 PM", overlap: "2 Staff" }, 
-            { timeStart: "09:45 PM", timeEnd: "10:15 PM", overlap: "2 Staff" },
-            { timeStart: "10:00 PM", timeEnd: "10:30 PM", overlap: "2 Staff" }, 
-            { timeStart: "10:15 PM", timeEnd: "10:45 PM", overlap: "2 Staff" },
-            { timeStart: "10:30 PM", timeEnd: "11:00 PM", overlap: "2 Staff" }, 
-            { timeStart: "10:45 PM", timeEnd: "11:15 PM", overlap: "2 Staff" },
-            { timeStart: "11:00 PM", timeEnd: "11:30 PM", overlap: "2 Staff" }, 
-            { timeStart: "11:15 PM", timeEnd: "11:45 PM", overlap: "2 Staff" },
-            { timeStart: "11:30 PM", timeEnd: "12:00 AM", overlap: "2 Staff" }, 
-            { timeStart: "11:45 PM", timeEnd: "12:15 AM", overlap: "2 Staff" },
-            { timeStart: "12:00 AM", timeEnd: "12:30 AM", overlap: "2 Staff" }, 
-            { timeStart: "12:15 AM", timeEnd: "12:45 AM", overlap: "2 Staff" },
-            { timeStart: "12:30 AM", timeEnd: "01:00 AM", overlap: "2 Staff" }, 
-            { timeStart: "12:45 AM", timeEnd: "01:15 AM", overlap: "2 Staff" },
-            { timeStart: "01:00 AM", timeEnd: "01:30 AM", overlap: "1 Staff" }
-        ];
-
-        window.defaultEmployees = [
-            { name: "Sanad Ghaith", pcNumber: "PC-01", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Saturday" },
-            { name: "Mohammed Kharwat", pcNumber: "PC-02", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Sunday" },
-            { name: "Abdullah Dandi", pcNumber: "PC-03", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: true, dayOff: "None", assignedDayOff: "Monday" },
-            { name: "Abdullah Ali Al-Hamali", pcNumber: "PC-04", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Tuesday" },
-            { name: "Baraa Nader", pcNumber: "PC-05", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Sunday" },
-            { name: "Mohamed Hussein", pcNumber: "PC-06", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Saturday" },
-            { name: "Adam Al-Hudhiri", pcNumber: "PC-07", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Wednesday" },
-            { name: "Khalifa Abu Khabta", pcNumber: "PC-08", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Wednesday" },
-            { name: "Khaled Al-Osta", pcNumber: "PC-09", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Sunday" },
-            { name: "Basheer Al-Qanouni", pcNumber: "PC-10", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Wednesday" },
-            { name: "Abdulmaez Masoud", pcNumber: "PC-11", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Sunday" },
-            { name: "Mahmoud Farnana", pcNumber: "PC-12", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Saturday" },
-            { name: "Elyas Salem", pcNumber: "PC-13", shift: "Shift B (07:30 PM - 02:30 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Tuesday" },
-            { name: "Hisham Al-Fleit", pcNumber: "PC-14", shift: "Shift B (07:30 PM - 02:30 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Monday" },
-            { name: "Abdullah Al-Suwaib", pcNumber: "PC-15", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Monday" },
-            { name: "Mohammed Abu Kinda", pcNumber: "PC-16", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Tuesday" },
-            { name: "Mohamed Al-Tayeb", pcNumber: "PC-17", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Saturday" },
-            { name: "Ihab Al-Tarhouni", pcNumber: "PC-18", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Saturday" },
-            { name: "Tawfik Al-Jarushi", pcNumber: "PC-19", shift: "Shift A (07:00 PM - 02:00 AM)", teamName: "Main Team", isLocked: false, dayOff: "None", assignedDayOff: "Thursday" }
-        ];
-
-        window.urlParams = new URLSearchParams(window.location.search);
-        window.isStaffView = window.urlParams.get('view') === 'staff';
-        
-        window.isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        window.isSpoofedMac = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
-        window.isSpoofedAndroid = navigator.maxTouchPoints > 0 && screen.height > screen.width;
-        window.isTouchOnly = window.matchMedia("(pointer: coarse)").matches && !window.matchMedia("(pointer: fine)").matches;
-        window.isSmallScreen = Math.min(window.screen.width, window.screen.height) < 700; 
-        window.isMobile = window.isMobileUA || window.isSpoofedMac || window.isSpoofedAndroid || window.isTouchOnly || window.isSmallScreen || window.innerWidth < 800;
-
-        if (window.isStaffView) {
-            document.documentElement.classList.add('staff-mode');
-        }
-    </script>
-
     <!-- GOOGLE FONTS -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&family=Tajawal:wght@400;500;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
-    
-    <!-- MASTER CSS STYLESHEET -->
     <style>
         :root { 
             --primary: #06B6D4; 
@@ -148,23 +33,13 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', system-ui, sans-serif; }
 
         body { 
-            background: linear-gradient(135deg, #020617, #0F172A, #1E1B4B, #020617); 
-            background-size: 400% 400%; 
-            animation: gradientBG 15s ease infinite; 
-            color: var(--text-main); 
-            min-height: 100vh; 
-            padding: 30px 20px; 
-            display: flex; 
-            justify-content: center; 
+            background: linear-gradient(135deg, #020617, #0F172A, #1E1B4B, #020617); background-size: 400% 400%; animation: gradientBG 15s ease infinite;
+            color: var(--text-main); min-height: 100vh; padding: 30px 20px; display: flex; justify-content: center; 
         }
-
-        @keyframes gradientBG { 
-            0% { background-position: 0% 50%; } 
-            50% { background-position: 100% 50%; } 
-            100% { background-position: 0% 50%; } 
-        }
+        @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
         .workspace-wrapper { width: 100%; max-width: 1450px; display: flex; flex-direction: column; gap: 20px; z-index: 2; position: relative; }
+
         .glass-panel { background: rgba(30, 41, 59, 0.45); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid var(--border-color); border-radius: 12px; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); }
 
         .app-header { padding: 24px 30px; display: flex; justify-content: space-between; align-items: center; position: relative; overflow: hidden; flex-wrap: wrap; gap: 15px; }
@@ -177,21 +52,18 @@
         .orb-green { background: #10B981; box-shadow: 0 0 15px #10B981; }
         .orb-yellow { background: #FBBF24; box-shadow: 0 0 15px #FBBF24; animation: pulseYellow 2s infinite alternate; }
         .orb-red { background: #EF4444; box-shadow: 0 0 20px #EF4444; animation: pulseAlert 1s infinite alternate; }
-        
         @keyframes pulseYellow { from { opacity: 1; box-shadow: 0 0 10px #FBBF24; } to { opacity: 0.6; box-shadow: 0 0 20px #FBBF24; } }
 
         .big-orb { width: 80px; height: 80px; border-radius: 50%; margin: 0 auto; transition: all 0.5s ease; border: 4px solid rgba(255,255,255,0.1); }
         .big-orb-green { background: #10B981; box-shadow: 0 0 40px #10B981; }
         .big-orb-yellow { background: #FBBF24; box-shadow: 0 0 40px #FBBF24; animation: pulseYellowBig 2s infinite alternate; }
         .big-orb-red { background: #EF4444; box-shadow: 0 0 50px #EF4444; animation: pulseAlertBig 1s infinite alternate; }
-        
         @keyframes pulseYellowBig { from { box-shadow: 0 0 20px #FBBF24; } to { box-shadow: 0 0 50px #FBBF24; } }
         @keyframes pulseAlertBig { from { box-shadow: 0 0 20px #EF4444; } to { box-shadow: 0 0 70px #EF4444; } }
 
         .ticker-wrap { width: 100%; background: rgba(56, 189, 248, 0.05); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 8px; padding: 10px 15px; overflow: hidden; display: flex; align-items: center; cursor: pointer; position: relative; }
         .ticker-label { font-size: 10px; font-weight: 800; color: #38BDF8; text-transform: uppercase; letter-spacing: 1px; padding-right: 15px; border-right: 1px solid rgba(56,189,248,0.3); margin-right: 15px; white-space: nowrap; z-index: 2; background: rgba(15, 23, 42, 0.8); border-radius: 4px;}
         .ticker-text { white-space: nowrap; animation: ticker 25s linear infinite; font-size: 14px; font-weight: 600; color: var(--text-main); display: inline-block; padding-left: 100%; }
-        
         @keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
 
         .actions-group { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
@@ -249,7 +121,6 @@
         .break-timer.overtime { color: #EF4444; animation: pulseRed 1s infinite alternate; }
         .break-load-warning { color: #EF4444 !important; animation: pulseRed 1s infinite alternate; }
         
-        @keyframes pulse { from { opacity: 1; } to { opacity: 0.6; } }
         @keyframes pulseAlert { from { box-shadow: 0 0 5px rgba(239, 68, 68, 0.2); } to { box-shadow: 0 0 15px rgba(239, 68, 68, 0.6); } }
         @keyframes pulseRed { from { opacity: 1; text-shadow: 0 0 5px rgba(239,68,68,0.3); } to { opacity: 0.7; text-shadow: 0 0 15px rgba(239,68,68,0.8); } }
 
@@ -298,7 +169,7 @@
         
         .dayoff-select { background: rgba(0,0,0,0.4); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 6px; padding: 6px 10px; font-size: 12px; font-weight: 600; outline: none; cursor: pointer; }
         .dayoff-select:focus { border-color: var(--primary); }
-        .dayoff-select:disabled { cursor: not-allowed; opacity: 0.8; border-color: transparent; appearance: none; -moz-appearance: none; -webkit-appearance: none; background: transparent;}
+        .dayoff-select:disabled { cursor: not-allowed; opacity: 0.8; border-color: transparent; }
 
         .lock-badge { background: rgba(239, 68, 68, 0.15); color: #F87171; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(239, 68, 68, 0.3); }
         .status-badge { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; border: 1px solid transparent; }
@@ -314,7 +185,7 @@
         .badge-overlap { background: var(--overlap-bg); border-color: var(--overlap-border); color: var(--overlap-text); }
         .badge-single { background: var(--single-bg); border-color: var(--single-border); color: var(--single-text); }
         
-        /* MODALS */
+        /* --- MODALS & EXTRAS --- */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
         .modal-card { background: rgba(30, 41, 59, 0.85); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; padding: 24px; width: 95%; max-width: 650px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
         .modal-card-large { max-width: 850px; }
@@ -335,7 +206,7 @@
         .emp-list-name { font-weight: 600; font-size: 14px; color: var(--text-main); }
         .emp-list-meta { font-size: 11px; color: var(--text-muted); font-weight: 600; }
 
-        /* ZEN MODE */
+        /* --- ZEN MODE & CONFETTI --- */
         #zenMode { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #020617; z-index: 10000; display: none; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transition: opacity 1s ease-in-out; cursor: pointer; backdrop-filter: blur(20px); }
         #zenMode.active { display: flex; opacity: 1; }
         .zen-time { font-family: 'Orbitron', sans-serif; font-size: 140px; color: var(--primary); text-shadow: 0 0 40px var(--primary-glow); margin-bottom: 20px; transition: color 1s ease, text-shadow 1s ease;}
@@ -344,15 +215,29 @@
         .confetti { position: fixed; width: 10px; height: 10px; z-index: 9999; animation: fall 4s linear forwards; }
         @keyframes fall { to { transform: translateY(105vh) rotate(720deg); opacity: 0; } }
 
-        /* GAME BOARD */
+        /* --- PRESTO DELIVERY RUSH (GAME STYLES) --- */
         .game-board { width: 300px; height: 300px; background: rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.1); position: relative; border-radius: 8px; margin: 0 auto; overflow: hidden; box-shadow: inset 0 0 20px rgba(0,0,0,0.8); }
         .game-car { position: absolute; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: grab; user-select: none; touch-action: none; transition: transform 0.1s;}
         .game-car:active { cursor: grabbing; transform: scale(0.95); }
-        .car-presto { background: #FF3B00; border: 2px solid #FF3B00; z-index: 10; box-shadow: 0 0 15px rgba(255, 59, 0, 0.6); }
-        .car-normal { background: #334155; border: 1px solid #0F172A; box-shadow: inset 0 0 10px rgba(0,0,0,0.8); }
+        
+        /* THE DRIVER */
+        .car-presto { 
+            background: url('images (1).jpg') no-repeat center center; 
+            background-size: cover; 
+            border: 2px solid #FF3B00; 
+            z-index: 10; 
+            box-shadow: 0 0 15px rgba(255, 59, 0, 0.6);
+        }
+        
+        .car-normal { 
+            background: #334155; 
+            border: 1px solid #0F172A; 
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+        }
+        
         .game-exit { position: absolute; right: 0; top: 100px; height: 50px; width: 10px; background: rgba(16, 185, 129, 0.5); border-left: 2px dashed #10B981; }
 
-        /* LEADERBOARD TABLE */
+        /* --- LEADERBOARD & RULES --- */
         .leaderboard-table { width: 100%; border-collapse: collapse; font-size: 13px; }
         .leaderboard-table th { background: rgba(0,0,0,0.2); padding: 10px; text-transform: uppercase; font-size: 10px; color: var(--text-muted); text-align: left; }
         .leaderboard-table td { padding: 10px; border-bottom: 1px solid var(--border-color); }
@@ -360,7 +245,6 @@
         .score-bad { color: #EF4444; font-weight: 700; }
         .score-neutral { color: var(--text-muted); font-weight: 700; }
 
-        /* RULES CARD */
         .rules-card { padding: 24px; display: flex; flex-direction: column; gap: 12px; margin-top: 10px;}
         .rules-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 8px;}
         .rules-header h2 { font-size: 14px; font-weight: 700; text-transform: uppercase; color: var(--primary); transition: color 1s ease; }
@@ -371,7 +255,7 @@
         .rule-ar { direction: rtl; text-align: right; font-family: 'Cairo', 'Tajawal', sans-serif; font-size: 13px; font-weight: 600; color: #F1F5F9; line-height: 1.5; }
         .rule-en { direction: ltr; text-align: left; font-size: 11.5px; color: var(--text-muted); line-height: 1.4; }
 
-        /* MOBILE DASHBOARD */
+        /* --- MOBILE FOCUS DASHBOARD --- */
         #mobileFocusDashboard { display: none; flex-direction: column; gap: 20px; padding: 30px; border-radius: 16px; text-align: center; margin-top: 20px; }
         
         @media (max-width: 1000px) {
@@ -382,24 +266,6 @@
             .controls-bar, .admin-controls { flex-direction: column; align-items: stretch; gap: 12px; }
             .break-card { max-width: 100%; }
             .form-grid { grid-template-columns: 1fr; }
-        }
-
-        /* 🚨 CSS OVERRIDE FOR STAFF MODE (BULLETPROOF HIDING) 🚨 */
-        .staff-mode #adminControlsArea,
-        .staff-mode #adminHeaderActions,
-        .staff-mode #filterTabs,
-        .staff-mode #kudosAdminControls {
-            display: none !important;
-        }
-        
-        .staff-mode .ticker-wrap,
-        .staff-mode .queue-orb {
-            cursor: default !important;
-            pointer-events: none !important;
-        }
-
-        .staff-mode #staffQueueStatusDisplay {
-            display: flex !important;
         }
     </style>
 </head>
@@ -415,10 +281,10 @@
 <div id="clockInModal" class="modal-overlay">
     <div class="modal-card" style="max-width: 400px; text-align: center;">
         <div class="modal-header">
-            <h2 style="color: #10B981;">🕒 Daily Mandatory Sign In</h2>
+            <h2 style="color: #10B981;">🕒 Staff Sign In</h2>
             <button id="clockInCloseBtn" class="close-btn" onclick="document.getElementById('clockInModal').style.display='none'">×</button>
         </div>
-        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Select your Name/PC, and enter your 4-digit PIN to sign in for today's shift.</p>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Select your assigned PC Number / Name, and enter your 4-digit PIN to sign in.</p>
         
         <select id="clockInId" class="form-control" style="width: 100%; margin-bottom: 15px; font-size: 16px; text-align: center; cursor: pointer; background: rgba(0,0,0,0.5);">
             <option value="">-- Select Your Name / PC --</option>
@@ -426,24 +292,9 @@
         
         <input type="password" id="clockInPin" class="form-control" placeholder="4-Digit PIN" maxlength="4" style="width: 100%; margin-bottom: 10px; font-size: 18px; text-align: center; letter-spacing: 4px; background: rgba(0,0,0,0.5);" onkeypress="if(event.key === 'Enter') window.processClockIn()">
         
-        <p style="font-size: 10px; color: #38BDF8; margin-bottom: 20px; line-height: 1.4;">*Sign-in is mandatory every single day to unlock your breaks on the floor.</p>
+        <p style="font-size: 10px; color: #38BDF8; margin-bottom: 20px; line-height: 1.4;">*If this is your very first time signing in, the PIN you enter above will be permanently saved as your passkey.</p>
         
         <button class="btn btn-success" style="width: 100%; padding: 12px; font-size: 14px;" onclick="window.processClockIn()">Authenticate & Sign In</button>
-    </div>
-</div>
-
-<!-- KUDOS MANAGER MODAL -->
-<div id="kudosModal" class="modal-overlay">
-    <div class="modal-card">
-        <div class="modal-header">
-            <h2 style="color: #EC4899;">💖 Manage Team Kudos</h2>
-            <button class="close-btn" onclick="window.closeKudosManager()">×</button>
-        </div>
-        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">Edit existing team shoutouts, delete old ones, or add a new one.</p>
-        
-        <div id="kudosListContainer" style="display:flex; flex-direction:column; gap:10px; margin-bottom: 20px;"></div>
-        
-        <button class="btn btn-success" style="width:100%;" onclick="window.addKudoFromManager()">+ Add New Kudo</button>
     </div>
 </div>
 
@@ -459,6 +310,7 @@
         
         <div id="gameBoard" class="game-board">
             <div class="game-exit"></div>
+            <!-- Cars rendered via JS -->
         </div>
         
         <button class="btn btn-staff" style="width: 100%; margin-top: 15px;" onclick="window.initTrafficGame()">Reset Level</button>
@@ -552,10 +404,11 @@
 </div>
 
 <div class="workspace-wrapper">
-    <!-- TOP HEADER -->
     <header class="app-header glass-panel">
         <div class="header-title-group">
-            <h1>Presto CS Operations</h1>
+            <h1>
+                Presto CS Operations 
+            </h1>
             <p>Live Cloud Synchronized Roster & Smart Break Automation</p>
             <span class="brand-badge" id="viewBadge" style="margin-top: 8px; display: inline-block;">Admin Operations</span>
         </div>
@@ -565,15 +418,14 @@
             <div class="holo-date" id="osdDate">Loading Time...</div>
         </div>
 
-        <div class="actions-group" id="staffAuthContainer"></div>
-
-        <div class="actions-group" id="staffHeaderActions">
-            <button class="btn" style="background: rgba(139, 92, 246, 0.1); border-color: #8B5CF6; color: #8B5CF6;" onclick="window.openTrafficGame()">🛵 Mini Game</button>
-            <button class="btn btn-warning" onclick="window.openLeaderboard()">🏆 Gamification</button>
+        <div class="actions-group" id="staffAuthContainer">
+            <!-- Dynamically populated by JS based on sign-in status and device -->
         </div>
 
-        <div class="actions-group" id="adminHeaderActions">
+        <div class="actions-group" id="headerActions">
+            <button class="btn" style="background: rgba(139, 92, 246, 0.1); border-color: #8B5CF6; color: #8B5CF6;" onclick="window.openTrafficGame()">🛵 Mini Game</button>
             <button class="btn btn-audit" onclick="window.exportEmployeeHistory()">📅 90-Day Audit</button>
+            <button class="btn btn-warning" onclick="window.openLeaderboard()">🏆 Gamification</button>
             <button class="btn btn-staff" onclick="window.exportHistory()">📊 Export History</button>
             <button class="btn" onclick="window.exportCSV()">Export Roster</button>
             <button class="btn btn-primary" onclick="window.print()">Print PDF</button>
@@ -581,19 +433,18 @@
     </header>
 
     <!-- LIVE DISPATCH TICKER -->
-    <div class="ticker-wrap glass-panel" onclick="window.updateTicker()" title="Admin: Click to update or clear message">
+    <div class="ticker-wrap glass-panel" onclick="window.updateTicker()">
         <div class="ticker-label">📢 LIVE DISPATCH</div>
         <div class="ticker-text" id="tickerText">Connecting to Presto live network...</div>
     </div>
 
-    <!-- FLOOR STATUS BIG ORB -->
+    <!-- BIG STAFF QUEUE STATUS (ONLY SHOWN IN STAFF VIEW) -->
     <div id="staffQueueStatusDisplay" class="glass-panel" style="display: none; text-align: center; padding: 40px 20px; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 10px;">
         <h2 style="font-size: 14px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 3px; margin-bottom: 25px; font-weight: 800;">Current Floor Status</h2>
         <div id="bigQueueOrb" class="big-orb big-orb-green"></div>
         <h1 id="bigQueueText" style="margin-top: 25px; font-size: 32px; font-weight: 900; letter-spacing: 1px;">ALL CLEAR / NORMAL</h1>
     </div>
 
-    <!-- METRICS GRID -->
     <section class="metrics-grid">
         <div class="metric-card glass-panel">
             <span class="metric-label">Staff Presence</span>
@@ -617,14 +468,12 @@
         </div>
     </section>
 
-    <!-- KUDOS & TRIVIA WIDGETS -->
+    <!-- WIDGET GRID (Kudos + Trivia) -->
     <section class="widget-grid">
         <div class="metric-card glass-panel" style="background: rgba(236, 72, 153, 0.05); border-color: rgba(236, 72, 153, 0.2);">
             <span class="metric-label" style="color: #EC4899; display: flex; justify-content: space-between; align-items: center;">
                 💖 Team Kudos Board
-                <div style="display:flex; gap:5px;" id="kudosAdminControls">
-                    <button class="btn" style="padding: 2px 8px; font-size: 10px; background: rgba(236, 72, 153, 0.1); color: #EC4899; border-color: transparent;" onclick="window.openKudosManager()">⚙️ Manage</button>
-                </div>
+                <button class="btn" style="padding: 2px 8px; font-size: 10px; background: rgba(236, 72, 153, 0.1); color: #EC4899; border-color: transparent;" onclick="window.addKudo()">+ Add</button>
             </span>
             <span class="metric-value" id="kudosText" style="font-size: 15px; font-weight: 500; font-style: italic; margin-top: 8px; flex-grow: 1; display:flex; align-items:center;">Loading positive vibes...</span>
         </div>
@@ -635,23 +484,31 @@
         </div>
     </section>
 
-    <!-- MOBILE FOCUS UI -->
+    <!-- MOBILE FOCUS DASHBOARD (Only visible on phones for logged-in staff) -->
     <div id="mobileFocusDashboard" class="glass-panel">
         <h2 id="mobileFocusName" style="color: var(--primary); transition: color 1s ease;">Welcome</h2>
         <div style="font-size: 14px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-top: 10px;">Your Next Scheduled Break In:</div>
         <div id="mobileFocusTimer" style="font-family: 'Orbitron', sans-serif; font-size: 52px; font-weight: 700; color: #FFFFFF; text-shadow: 0 0 20px var(--primary-glow); margin: 10px 0; transition: text-shadow 1s ease;">--:--:--</div>
+        
         <hr style="border: 0; height: 1px; background: rgba(255,255,255,0.1); margin: 15px 0;">
+        
         <div style="font-size: 12px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 15px;">Floor Active Breaks</div>
-        <div id="mobileFocusFloor" style="display:flex; flex-direction: column; gap: 10px; width: 100%;"></div>
+        <div id="mobileFocusFloor" style="display:flex; flex-direction: column; gap: 10px; width: 100%;">
+            <!-- Mirrored break cards render here -->
+        </div>
     </div>
 
-    <!-- LIVE ACTIVE BREAK QUEUE -->
+    <!-- ACTIVE CLOUD BREAK TRACKER -->
     <section id="breakTrackerSection" class="tracker-section glass-panel">
-        <div class="tracker-header">⚡ Live Active Break Queue</div>
-        <div id="breakTrackerGrid" class="tracker-grid"></div>
+        <div class="tracker-header">
+            ⚡ Live Active Break Queue
+        </div>
+        <div id="breakTrackerGrid" class="tracker-grid">
+            <!-- Dynamic cards generated here -->
+        </div>
     </section>
 
-    <!-- ADMIN CONTROLS BAR -->
+    <!-- ADMIN CONTROLS -->
     <div class="admin-controls glass-panel" id="adminControlsArea">
         <div class="admin-status">
             <span id="statusDot" class="status-dot"></span>
@@ -667,7 +524,6 @@
         </div>
     </div>
 
-    <!-- FILTER TABS & SEARCH BAR -->
     <div class="controls-bar glass-panel">
         <div class="search-input-wrapper">
             <input type="text" id="searchInput" class="search-input" placeholder="Search employee by name, PC, team or shift..." onkeyup="window.filterTable()">
@@ -685,7 +541,6 @@
         </div>
     </div>
 
-    <!-- MASTER ROSTER TABLE -->
     <main class="table-card glass-panel">
         <table id="scheduleTable">
             <thead>
@@ -702,16 +557,11 @@
                 </tr>
             </thead>
             <tbody id="tableBody">
-                <tr>
-                    <td colspan="9" id="statusMessage" style="text-align: center; padding: 40px; font-weight: bold; color: #38BDF8; font-size: 16px;">
-                        Establishing Cloud Connection...
-                    </td>
-                </tr>
+                <tr><td colspan="9" style="text-align: center; padding: 30px;">Connecting to Live Cloud...</td></tr>
             </tbody>
         </table>
     </main>
 
-    <!-- OPERATIONAL RULES CARD -->
     <section class="rules-card glass-panel">
         <div class="rules-header">
             <h2>Operational Conduct & Policy Rules</h2>
@@ -743,14 +593,22 @@
         </div>
     </section>
 
-</div> <!-- END WORKSPACE WRAPPER -->
+</div>
 
-<!-- MASTER SCRIPT LOGIC -->
 <script type="module">
+    localStorage.removeItem('prestoStaffAuth');
+
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
     import { getDatabase, ref, set, onValue, remove, push, get } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
-    // EXPLICIT FIREBASE CONFIGURATION TO PREVENT (app/no-options) ERROR
+    document.addEventListener('contextmenu', event => event.preventDefault());
+    document.onkeydown = function(e) {
+        if(e.keyCode == 123) return false; 
+        if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) return false; 
+        if(e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) return false; 
+        if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false; 
+    };
+
     const firebaseConfig = {
         apiKey: "AIzaSyCmlKjghDehj9L5aw1dJGa1WLjPRT2o-Yc",
         authDomain: "presto-phoenix-team.firebaseapp.com",
@@ -761,126 +619,561 @@
         appId: "1:828847025710:web:72f00f90f45fe20f1f79bf"
     };
 
-    let app, db;
-    try {
-        app = initializeApp(firebaseConfig);
-        db = getDatabase(app);
-    } catch(err) {
-        document.getElementById('statusMessage').innerHTML = "<span style='color:#EF4444;'>CRITICAL FIREBASE INITIALIZATION ERROR: " + err.message + "</span>";
-        throw err; 
+    const FACTION_ID = "Phoenix_Team"; 
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    
+    const SECRET_PIN = "2242";         
+
+    let isUnlocked = false;
+    let activeShiftFilter = 'all';
+    let topAgent = ""; 
+    let gamificationBadges = {};
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const isStaffView = urlParams.get('view') === 'staff';
+    
+    const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isSpoofedMac = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+    const isSpoofedAndroid = navigator.maxTouchPoints > 0 && screen.height > screen.width;
+    const isTouchOnly = window.matchMedia("(pointer: coarse)").matches && !window.matchMedia("(pointer: fine)").matches;
+    const isSmallScreen = Math.min(window.screen.width, window.screen.height) < 700; 
+    const isMobile = isMobileUA || isSpoofedMac || isSpoofedAndroid || isTouchOnly || isSmallScreen || window.innerWidth < 800;
+
+    function enforcePCWorkstation() {
+        if (isStaffView && isMobile) {
+            alert("📱 Mobile Blocked: You must physically use your designated PC workstation to sign in, request breaks, or return from breaks.");
+            return true;
+        }
+        return false;
     }
 
-    const connectedRef = ref(db, ".info/connected");
-    onValue(connectedRef, (snap) => {
-        const msgEl = document.getElementById('statusMessage');
-        if (!msgEl) return;
+    if (isStaffView) {
+        document.getElementById('adminControlsArea').style.display = 'none';
+        document.getElementById('headerActions').style.display = 'none';
+        document.getElementById('filterTabs').style.display = 'none'; 
+        document.getElementById('viewBadge').innerText = "Staff Dashboard";
+        document.getElementById('viewBadge').style.background = "rgba(59, 130, 246, 0.15)";
+        document.getElementById('viewBadge').style.color = "#3B82F6";
+        document.getElementById('viewBadge').style.borderColor = "rgba(59, 130, 246, 0.3)";
         
-        if (snap.val() === true) {
-            if (msgEl.innerText.includes('Establishing')) {
-                msgEl.innerText = "Connection Established. Fetching Data...";
-            }
-        } else {
-            setTimeout(() => {
-                const currentText = msgEl.innerText;
-                if(currentText.includes('Establishing') || currentText.includes('Fetching')) {
-                    msgEl.innerHTML = "<h2 style='color: #EF4444; margin-bottom: 10px;'>🚨 DATABASE CONNECTION BLOCKED</h2><p style='color: var(--text-main); font-size: 14px;'>Firebase is unable to reach your database.</p><p style='color: var(--text-muted); font-size: 13px; margin-top: 15px;'>Check your browser's Ad-Blocker, VPN, or Brave Shields, then refresh the page.</p>";
-                }
-            }, 6000);
-        }
-    });
+        document.getElementById('staffQueueStatusDisplay').style.display = 'flex';
+    }
 
-    onValue(ref(db, getDBPath('roster')), (snapshot) => {
-        try {
-            const data = snapshot.val();
-            let isValidData = false;
-            
-            if (data && typeof data === 'object') { 
-                let dataArray = Array.isArray(data) ? data : Object.values(data);
-                dataArray = dataArray.filter(e => e !== null && e !== undefined && typeof e === 'object');
-                
-                if (dataArray.length > 0) {
-                    isValidData = true;
-                    window.currentEmployees = dataArray.map((emp, i) => {
-                        if (!emp.assignedDayOff) emp.assignedDayOff = (window.defaultEmployees[i] && window.defaultEmployees[i].assignedDayOff) || "None";
-                        if (!emp.timeStart) emp.timeStart = (window.fixedSlots[i] && window.fixedSlots[i].timeStart) || "12:00 AM";
-                        if (!emp.timeEnd) emp.timeEnd = (window.fixedSlots[i] && window.fixedSlots[i].timeEnd) || "12:30 AM";
-                        if (!emp.overlap) emp.overlap = "1 Staff";
-                        if (!emp.pcNumber) emp.pcNumber = "PC-" + (i+1).toString().padStart(2, '0');
-                        if (!emp.teamName) emp.teamName = "Main Team"; 
-                        if (typeof emp.isLocked === 'undefined') emp.isLocked = (window.defaultEmployees[i] && typeof window.defaultEmployees[i].isLocked !== 'undefined') ? window.defaultEmployees[i].isLocked : false;
-                        if (typeof emp.quota30 === 'undefined') emp.quota30 = 0;
-                        if (typeof emp.quota10 === 'undefined') emp.quota10 = 0;
-                        if (typeof emp.clockInTime === 'undefined') emp.clockInTime = null;
-                        if (typeof emp.passkey === 'undefined') emp.passkey = "";
-                        
-                        if (emp.shift === 'Shift A') emp.shift = 'Shift A (07:00 PM - 02:00 AM)';
-                        if (emp.shift === 'Shift B') emp.shift = 'Shift B (07:30 PM - 02:30 AM)';
-                        if (emp.shift === 'Shift C (08:00 AM - 04:00 PM)') emp.shift = 'Shift C (08:00 AM - 03:00 PM)';
-                        if (emp.shift === 'Shift D (04:00 PM - 12:00 AM)') emp.shift = 'Shift D (04:00 PM - 11:00 PM)';
-                        return emp;
-                    });
-                }
-            } 
-            
-            if (!isValidData) {
-                console.warn("Corrupted or dummy roster data detected. Auto-healing to default structural layout.");
-                const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
-                const businessTime = new Date(new Date(tzStr).getTime() - (3 * 3600 * 1000));
-                const todayDayStr = businessTime.toLocaleString('en-US', { weekday: 'long' });
-                
-                window.currentEmployees = window.defaultEmployees.map((emp, i) => {
-                    emp.dayOff = (emp.assignedDayOff === todayDayStr) ? todayDayStr : "None";
-                    emp.timeStart = window.fixedSlots[i] ? window.fixedSlots[i].timeStart : "12:00 AM";
-                    emp.timeEnd = window.fixedSlots[i] ? window.fixedSlots[i].timeEnd : "12:30 AM";
-                    emp.overlap = "1 Staff";
-                    emp.pcNumber = "PC-" + (i+1).toString().padStart(2, '0');
-                    emp.teamName = "Main Team";
-                    emp.quota30 = 0;
-                    emp.quota10 = 0;
-                    emp.clockInTime = null;
-                    emp.passkey = "";
-                    return emp;
-                });
-                set(ref(db, getDBPath('roster')), window.currentEmployees);
-            }
-        } catch(e) {
-            console.error("Roster rendering failed: " + e.message);
+    function updateCircadianTheme() {
+        const hour = new Date().getHours();
+        const root = document.documentElement;
+        if (hour >= 6 && hour < 12) { 
+            root.style.setProperty('--primary', '#06B6D4');
+            root.style.setProperty('--primary-hover', '#0891B2');
+            root.style.setProperty('--primary-glow', 'rgba(6, 182, 212, 0.15)');
+        } else if (hour >= 12 && hour < 17) { 
+            root.style.setProperty('--primary', '#F59E0B');
+            root.style.setProperty('--primary-hover', '#D97706');
+            root.style.setProperty('--primary-glow', 'rgba(245, 158, 11, 0.15)');
+        } else { 
+            root.style.setProperty('--primary', '#8B5CF6');
+            root.style.setProperty('--primary-hover', '#7C3AED');
+            root.style.setProperty('--primary-glow', 'rgba(139, 92, 246, 0.15)');
         }
-        
-        const clockInSelect = document.getElementById('clockInId');
-        if (clockInSelect) {
-            const currentSelection = clockInSelect.value;
-            let optionsHtml = '<option value="">-- Select Your Name / PC --</option>';
-            window.currentEmployees.forEach(emp => {
-                optionsHtml += '<option value="' + emp.name + '">' + emp.pcNumber + ' | ' + emp.name + '</option>';
-            });
-            clockInSelect.innerHTML = optionsHtml;
-            if (currentSelection) clockInSelect.value = currentSelection;
+    }
+    setInterval(updateCircadianTheme, 60000);
+    updateCircadianTheme();
+
+    const shiftOptions = [
+        "Shift A (07:00 PM - 02:00 AM)", "Shift B (07:30 PM - 02:30 AM)", "Shift C (08:00 AM - 03:00 PM)",
+        "Shift D (04:00 PM - 11:00 PM)", "Shift E (09:00 AM - 03:00 PM)", "Shift G (12:00 PM - 07:00 PM)"
+    ];
+
+    const fixedSlots = [
+        { timeStart: "08:30 PM", timeEnd: "09:00 PM", overlap: "2 Staff" }, { timeStart: "08:45 PM", timeEnd: "09:15 PM", overlap: "2 Staff" },
+        { timeStart: "09:00 PM", timeEnd: "09:30 PM", overlap: "2 Staff" }, { timeStart: "09:15 PM", timeEnd: "09:45 PM", overlap: "2 Staff" },
+        { timeStart: "09:30 PM", timeEnd: "10:00 PM", overlap: "2 Staff" }, { timeStart: "09:45 PM", timeEnd: "10:15 PM", overlap: "2 Staff" },
+        { timeStart: "10:00 PM", timeEnd: "10:30 PM", overlap: "2 Staff" }, { timeStart: "10:15 PM", timeEnd: "10:45 PM", overlap: "2 Staff" },
+        { timeStart: "10:30 PM", timeEnd: "11:00 PM", overlap: "2 Staff" }, { timeStart: "10:45 PM", timeEnd: "11:15 PM", overlap: "2 Staff" },
+        { timeStart: "11:00 PM", timeEnd: "11:30 PM", overlap: "2 Staff" }, { timeStart: "11:15 PM", timeEnd: "11:45 PM", overlap: "2 Staff" },
+        { timeStart: "11:30 PM", timeEnd: "12:00 AM", overlap: "2 Staff" }, { timeStart: "11:45 PM", timeEnd: "12:15 AM", overlap: "2 Staff" },
+        { timeStart: "12:00 AM", timeEnd: "12:30 AM", overlap: "2 Staff" }, { timeStart: "12:15 AM", timeEnd: "12:45 AM", overlap: "2 Staff" },
+        { timeStart: "12:30 AM", timeEnd: "01:00 AM", overlap: "2 Staff" }, { timeStart: "12:45 AM", timeEnd: "01:15 AM", overlap: "2 Staff" },
+        { timeStart: "01:00 AM", timeEnd: "01:30 AM", overlap: "1 Staff" }
+    ];
+
+    const defaultEmployees = [
+        { name: "Sanad Ghaith", shift: "Shift A (07:00 PM - 02:00 AM)", isLocked: false, dayOff: "None", assignedDayOff: "Saturday" },
+        { name: "Mohammed Kharwat", shift: "Shift A (07:00 PM - 02:00 AM)", isLocked: false, dayOff: "None", assignedDayOff: "Sunday" },
+        { name: "Abdullah Dandi", shift: "Shift A (07:00 PM - 02:00 AM)", isLocked: true, dayOff: "None", assignedDayOff: "Monday" },
+        { name: "Abdullah Ali Al-Hamali", shift: "Shift A (07:00 PM - 02:00 AM)", isLocked: false, dayOff: "None", assignedDayOff: "Tuesday" },
+        { name: "Baraa Nader", shift: "Shift A (07:00 PM - 02:00 AM)", isLocked: false, dayOff: "None", assignedDayOff: "Sunday" },
+        { name: "Mohamed Hussein", shift: "Shift A (07:00 PM - 02:00 AM)", isLocked: false, dayOff: "None", assignedDayOff: "Saturday" },
+        { name: "Adam Al-Hudhiri", shift: "Shift A (07:00 PM - 02:00 AM)", isLocked: false, dayOff: "None", assignedDayOff: "Wednesday" },
+        { name: "Khalifa Abu Khabta", shift: "Shift A (07:00 PM - 02:00 AM)", isLocked: false, dayOff: "None", assignedDayOff: "Wednesday" },
+        { name: "Khaled Al-Osta", shift: "Shift A (07:00 PM - 02:00 AM)", isLocked: false, dayOff: "None", assignedDayOff: "Sunday" },
+        { name: "Basheer Al-Qanouni", shift: "Shift A (07:00 PM - 02:00 AM)", isLocked: false, dayOff: "None", assignedDayOff: "Wednesday" },
+        { name: "Abdulmaez Masoud", shift: "Shift A (07:00 PM - 02:00 AM)", isLocked: false, dayOff: "None", assignedDayOff: "Sunday" },
+        { name: "Mahmoud Farnana", shift: "Shift A (07:00 PM - 02:00 AM)", isLocked: false, dayOff: "None", assignedDayOff: "Saturday" },
+        { name: "Elyas Salem", shift: "Shift B (07:30 PM - 02:30 AM)", isLocked: false, dayOff: "None", assignedDayOff: "Tuesday" },
+        { name: "Hisham Al-Fleit", shift: "Shift B (07:30 PM - 02:30 AM)", isLocked: false, dayOff: "None", assignedDayOff: "Monday" },
+        { name: "Abdullah Al-Suwaib", shift: "Shift A (07:00 PM - 02:00 AM)", isLocked: false, dayOff: "None", assignedDayOff: "Monday" },
+        { name: "Mohammed Abu Kinda", shift: "Shift A (07:00 PM - 02:00 AM)", isLocked: false, dayOff: "None", assignedDayOff: "Tuesday" },
+        { name: "Mohamed Al-Tayeb", shift: "Shift A (07:00 PM - 02:00 AM)", isLocked: false, dayOff: "None", assignedDayOff: "Saturday" },
+        { name: "Ihab Al-Tarhouni", shift: "Shift A (07:00 PM - 02:00 AM)", isLocked: false, dayOff: "None", assignedDayOff: "Saturday" },
+        { name: "Tawfik Al-Jarushi", shift: "Shift A (07:00 PM - 02:00 AM)", isLocked: false, dayOff: "None", assignedDayOff: "Thursday" }
+    ];
+
+    const dayOffOptions = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "None"];
+    let currentEmployees = [];
+    let currentBreaks = {};
+    let timerInterval = null;
+
+    let idleTime = 0;
+    const zenDiv = document.getElementById('zenMode');
+    const zenTimeEl = document.getElementById('zenTime');
+    
+    function resetIdle() {
+        idleTime = 0;
+        if (zenDiv.classList.contains('active')) {
+            zenDiv.classList.remove('active');
         }
+    }
+    window.wakeUp = resetIdle;
+    window.addEventListener('mousemove', resetIdle);
+    window.addEventListener('keydown', resetIdle);
+    window.addEventListener('touchstart', resetIdle);
+    window.addEventListener('click', resetIdle);
 
-        renderTable();
-    });
+    setInterval(() => {
+        if (isStaffView && isMobile) return; 
+        idleTime++;
+        if (idleTime >= 300) { 
+            zenDiv.classList.add('active');
+            const d = new Date().toLocaleTimeString('en-US', { timeZone: 'Africa/Tripoli', hour: '2-digit', minute:'2-digit' });
+            zenTimeEl.innerText = d;
+        }
+    }, 1000);
 
-    onValue(ref(db, getDBPath('breaks')), (snapshot) => {
-        window.currentBreaks = snapshot.val() || {};
-        renderActiveBreaks();
+    window.shootConfetti = function() {
+        const colors = ['#38BDF8', '#10B981', '#FBBF24', '#EF4444', '#A855F7'];
+        for(let i=0; i<60; i++) {
+            let conf = document.createElement('div');
+            conf.className = 'confetti';
+            conf.style.left = Math.random() * 100 + 'vw';
+            conf.style.top = '-10px';
+            conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            conf.style.animationDuration = (Math.random() * 2 + 2) + 's';
+            document.body.appendChild(conf);
+            setTimeout(() => conf.remove(), 5000);
+        }
+    };
+
+    let kudosList = ["Great teamwork today everyone!", "Keep pushing, you're doing amazing."];
+    let kudosIndex = 0;
+    
+    onValue(ref(db, `${FACTION_ID}/system/kudos`), (snapshot) => {
+        const data = snapshot.val();
+        if (data) kudosList = Object.values(data);
     });
 
     setInterval(() => {
-        if (window.currentEmployees.length === 0) return; 
+        if(kudosList.length > 0) {
+            kudosIndex = (kudosIndex + 1) % kudosList.length;
+            const el = document.getElementById('kudosText');
+            if(el) {
+                el.style.opacity = 0;
+                setTimeout(() => {
+                    el.innerText = `"${kudosList[kudosIndex]}"`;
+                    el.style.opacity = 1;
+                }, 500);
+            }
+        }
+    }, 8000);
+
+    window.addKudo = function() {
+        if (!requireAdmin()) return;
+        const note = prompt("Submit a quick shoutout or kudo for the team:");
+        if (note && note.trim() !== "") {
+            push(ref(db, `${FACTION_ID}/system/kudos`), note.trim());
+        }
+    };
+
+    // --- PRESTO DELIVERY RUSH (GAME) ---
+    const trafficLevels = [
+        [ // Level 1 (Easy)
+            { id: 0, x: 1, y: 2, len: 2, horiz: true, isRed: true },
+            { id: 1, x: 0, y: 0, len: 3, horiz: false },
+            { id: 2, x: 1, y: 0, len: 2, horiz: true },
+            { id: 3, x: 3, y: 1, len: 2, horiz: false },
+            { id: 4, x: 4, y: 0, len: 2, horiz: false },
+            { id: 5, x: 4, y: 2, len: 2, horiz: true },
+            { id: 6, x: 2, y: 4, len: 2, horiz: false },
+            { id: 7, x: 3, y: 3, len: 2, horiz: true },
+            { id: 8, x: 4, y: 4, len: 2, horiz: true }
+        ],
+        [ // Level 2 (Medium)
+            { id: 0, x: 0, y: 2, len: 2, horiz: true, isRed: true },
+            { id: 1, x: 2, y: 1, len: 3, horiz: false },
+            { id: 2, x: 0, y: 0, len: 2, horiz: true },
+            { id: 3, x: 3, y: 0, len: 2, horiz: false },
+            { id: 4, x: 4, y: 0, len: 2, horiz: true },
+            { id: 5, x: 5, y: 1, len: 3, horiz: false },
+            { id: 6, x: 3, y: 3, len: 2, horiz: true },
+            { id: 7, x: 0, y: 5, len: 3, horiz: true },
+            { id: 8, x: 3, y: 4, len: 2, horiz: false }
+        ],
+        [ // Level 3 (Hard)
+            { id: 0, x: 1, y: 2, len: 2, horiz: true, isRed: true },
+            { id: 1, x: 0, y: 1, len: 3, horiz: false },
+            { id: 2, x: 1, y: 1, len: 2, horiz: true },
+            { id: 3, x: 3, y: 0, len: 3, horiz: false },
+            { id: 4, x: 4, y: 0, len: 2, horiz: true },
+            { id: 5, x: 5, y: 1, len: 2, horiz: false },
+            { id: 6, x: 4, y: 3, len: 2, horiz: true },
+            { id: 7, x: 3, y: 4, len: 2, horiz: false },
+            { id: 8, x: 0, y: 5, len: 3, horiz: true }
+        ]
+    ];
+    let currentLevelIndex = 0;
+    let trafficLevel = [];
+    let activeCar = null, startMouse = 0, bounds = {}, initialPos = 0;
+
+    window.openTrafficGame = function() {
+        document.getElementById('gameModal').style.display = 'flex';
+        window.initTrafficGame();
+    }
+
+    window.closeTrafficGame = function() {
+        document.getElementById('gameModal').style.display = 'none';
+    }
+
+    window.initTrafficGame = function() {
+        let board = document.getElementById('gameBoard');
+        board.innerHTML = '<div class="game-exit"></div>';
+        document.getElementById('gameLevelDisplay').innerText = `Level ${currentLevelIndex + 1}`;
+        
+        // Deep copy the level so restarting works
+        trafficLevel = JSON.parse(JSON.stringify(trafficLevels[currentLevelIndex]));
+
+        trafficLevel.forEach((c) => {
+            let el = document.createElement('div');
+            el.className = 'game-car ' + (c.isRed ? 'car-presto' : 'car-normal');
+            el.innerText = c.isRed ? '' : '🚙';
+            el.style.width = (c.horiz ? c.len * 50 : 50) + 'px';
+            el.style.height = (c.horiz ? 50 : c.len * 50) + 'px';
+            el.style.left = (c.x * 50) + 'px';
+            el.style.top = (c.y * 50) + 'px';
+            
+            el.onpointerdown = (e) => startDragCar(e, c, el);
+            c.el = el;
+            board.appendChild(el);
+        });
+    }
+
+    function getGameGrid(ignoreCar) {
+        let g = Array(6).fill(0).map(() => Array(6).fill(0));
+        trafficLevel.forEach(c => {
+            if (c === ignoreCar) return;
+            for(let i=0; i<c.len; i++) {
+                if (c.horiz) g[c.y][c.x + i] = 1;
+                else g[c.y + i][c.x] = 1;
+            }
+        });
+        return g;
+    }
+
+    function startDragCar(e, car, el) {
+        e.preventDefault();
+        activeCar = car;
+        startMouse = car.horiz ? e.clientX : e.clientY;
+        initialPos = car.horiz ? car.x : car.y;
+        
+        let g = getGameGrid(car);
+        let min = 0, max = 6 - car.len;
+        
+        if (car.horiz) {
+            for(let x = car.x - 1; x >= 0; x--) if(g[car.y][x]) { min = x + 1; break; }
+            for(let x = car.x + car.len; x < 6; x++) if(g[car.y][x]) { max = x - car.len; break; }
+        } else {
+            for(let y = car.y - 1; y >= 0; y--) if(g[y][car.x]) { min = y + 1; break; }
+            for(let y = car.y + car.len; y < 6; y++) if(g[y][car.x]) { max = y - car.len; break; }
+        }
+        bounds = { min, max };
+        el.style.zIndex = 100;
+        
+        window.addEventListener('pointermove', dragCar);
+        window.addEventListener('pointerup', endDragCar);
+    }
+
+    function dragCar(e) {
+        if (!activeCar) return;
+        let deltaPx = (activeCar.horiz ? e.clientX : e.clientY) - startMouse;
+        let deltaCells = deltaPx / 50;
+        let newVal = initialPos + deltaCells;
+        newVal = Math.max(bounds.min, Math.min(bounds.max, newVal));
+        activeCar.currentFloat = newVal;
+        activeCar.el.style[activeCar.horiz ? 'left' : 'top'] = (newVal * 50) + 'px';
+    }
+
+    function endDragCar(e) {
+        if (!activeCar) return;
+        window.removeEventListener('pointermove', dragCar);
+        window.removeEventListener('pointerup', endDragCar);
+        
+        let finalVal = Math.round(activeCar.currentFloat !== undefined ? activeCar.currentFloat : initialPos);
+        if (activeCar.horiz) activeCar.x = finalVal; else activeCar.y = finalVal;
+        activeCar.el.style[activeCar.horiz ? 'left' : 'top'] = (finalVal * 50) + 'px';
+        activeCar.el.style.zIndex = activeCar.isRed ? 10 : 1;
+        
+        if (activeCar.isRed && activeCar.x === 4) { 
+            setTimeout(() => {
+                window.shootConfetti();
+                currentLevelIndex++;
+                if (currentLevelIndex >= trafficLevels.length) {
+                    alert("🎉 Incredible! You beat all the delivery rushes!");
+                    currentLevelIndex = 0;
+                } else {
+                    alert("🎉 Delivery Successful! Get ready for the next rush.");
+                }
+                window.initTrafficGame(); 
+            }, 100);
+        }
+        activeCar = null;
+    }
+
+    // --- CYCLING TRIVIA WIDGET ---
+    const triviaDB = [
+        { q: "Customer Service Bingo: Who heard a dog barking on a call today?", a: "Free Space! Take a deep breath." },
+        { q: "I speak without a mouth and hear without ears. What am I?", a: "An echo." },
+        { q: "What has hands but cannot clap?", a: "A clock." },
+        { q: "I have keys but no locks. I have space but no room. What am I?", a: "A keyboard." },
+        { q: "What belongs to you, but other people use it more than you do?", a: "Your name." },
+        { q: "What has to be broken before you can use it?", a: "An egg." },
+        { q: "I’m tall when I’m young, and I’m short when I’m old. What am I?", a: "A candle." }
+    ];
+    let currentTriviaIndex = 0;
+    let showingTriviaAnswer = false;
+
+    function loadTrivia() {
+        document.getElementById('triviaQ').innerText = triviaDB[currentTriviaIndex].q;
+        document.getElementById('triviaQ').style.color = "var(--text-main)";
+        document.getElementById('triviaQ').style.fontWeight = "normal";
+        document.getElementById('triviaBtn').innerText = "Reveal Answer";
+        showingTriviaAnswer = false;
+    }
+
+    window.handleTrivia = function() {
+        if (!showingTriviaAnswer) {
+            document.getElementById('triviaQ').innerText = triviaDB[currentTriviaIndex].a;
+            document.getElementById('triviaQ').style.color = "#F8FAFC";
+            document.getElementById('triviaQ').style.fontWeight = "800";
+            document.getElementById('triviaBtn').innerText = "Next Question ⏭️";
+            showingTriviaAnswer = true;
+        } else {
+            currentTriviaIndex = (currentTriviaIndex + 1) % triviaDB.length;
+            loadTrivia();
+        }
+    };
+    loadTrivia(); // Init on start
+
+    // --- FIREBASE LISTENERS FOR TICKER & ORB ---
+    onValue(ref(db, `${FACTION_ID}/system/tickerMsg`), (snapshot) => {
+        let msg = snapshot.val();
+        if(!msg) msg = "Welcome to Presto CS Operations. Have a great shift!";
+        document.getElementById('tickerText').innerText = msg;
+    });
+
+    onValue(ref(db, `${FACTION_ID}/system/queueStatus`), (snapshot) => {
+        let status = snapshot.val() || 'green';
+        
+        const orb = document.getElementById('queueOrb');
+        if(orb) {
+            orb.className = 'queue-orb';
+            orb.classList.add('orb-' + status);
+            orb.setAttribute('data-status', status);
+        }
+
+        const bigOrb = document.getElementById('bigQueueOrb');
+        const bigText = document.getElementById('bigQueueText');
+        const staffDisplay = document.getElementById('staffQueueStatusDisplay');
+        
+        if (bigOrb && bigText) {
+            bigOrb.className = 'big-orb big-orb-' + status;
+            if (status === 'green') {
+                bigText.innerText = "ALL CLEAR / NORMAL";
+                bigText.style.color = "#10B981";
+                bigText.style.textShadow = "0 0 15px rgba(16,185,129,0.5)";
+                staffDisplay.style.borderColor = "rgba(16,185,129,0.3)";
+                staffDisplay.style.background = "rgba(16,185,129,0.05)";
+            } else if (status === 'yellow') {
+                bigText.innerText = "STEADY / ELEVATED VOLUME";
+                bigText.style.color = "#FBBF24";
+                bigText.style.textShadow = "0 0 15px rgba(251,191,36,0.5)";
+                staffDisplay.style.borderColor = "rgba(251,191,36,0.3)";
+                staffDisplay.style.background = "rgba(251,191,36,0.05)";
+            } else if (status === 'red') {
+                bigText.innerText = "HIGH VOLUME / ALL HANDS";
+                bigText.style.color = "#EF4444";
+                bigText.style.textShadow = "0 0 15px rgba(239,68,68,0.5)";
+                staffDisplay.style.borderColor = "rgba(239,68,68,0.3)";
+                staffDisplay.style.background = "rgba(239,68,68,0.05)";
+            }
+        }
+    });
+
+    window.updateTicker = function() {
+        if (!requireAdmin()) return;
+        let newMsg = prompt("Enter a new live dispatch announcement:");
+        if (newMsg !== null && newMsg.trim() !== "") {
+            set(ref(db, `${FACTION_ID}/system/tickerMsg`), newMsg.trim());
+        }
+    };
+
+    window.cycleQueueStatus = function() {
+        if (!requireAdmin()) return;
+        const orb = document.getElementById('queueOrb');
+        let current = orb.getAttribute('data-status');
+        let next = 'green';
+        if(current === 'green') next = 'yellow';
+        else if(current === 'yellow') next = 'red';
+        set(ref(db, `${FACTION_ID}/system/queueStatus`), next);
+    };
+
+    // --- ADMIN LAZY GATEKEEPER ---
+    function requireAdmin() {
+        if (isUnlocked) return true;
+        const sessionAdmin = sessionStorage.getItem('adminAuthed');
+        
+        if (sessionAdmin === SECRET_PIN) return true;
+
+        const pin = prompt("🔒 Restricted Access\nEnter Supervisor PIN to execute this operation:");
+        if (pin === SECRET_PIN) {
+            sessionStorage.setItem('adminAuthed', pin);
+            return true;
+        }
+        if (pin !== null) alert("Incorrect PIN. Action denied.");
+        return false;
+    }
+
+    // --- HEADER AUTH UI ---
+    function updateHeaderAuthUI() {
+        const authBtnContainer = document.getElementById('staffAuthContainer');
+        const clockInModal = document.getElementById('clockInModal');
+        const closeBtn = document.getElementById('clockInCloseBtn');
+
+        if (!authBtnContainer) return;
+
+        if (isStaffView && isMobile) {
+            authBtnContainer.innerHTML = `<span class="brand-badge" style="background: rgba(148, 163, 184, 0.15); color: #94A3B8; border-color: rgba(148, 163, 184, 0.3); padding: 8px 16px; font-size: 13px;">📱 Mobile Mode Active</span>`;
+            if (clockInModal) clockInModal.style.display = 'none';
+            return;
+        }
+
+        const localUser = sessionStorage.getItem('prestoStaffAuth');
+        if (localUser) {
+            authBtnContainer.innerHTML = `<button class="btn btn-warning" style="font-size: 14px; padding: 10px 20px;" onclick="window.processClockOut()">🚪 Sign Out (${localUser.split(' ')[0]})</button>`;
+            if (clockInModal) clockInModal.style.display = 'none'; 
+        } else {
+            authBtnContainer.innerHTML = `<button class="btn btn-success" style="font-size: 14px; padding: 10px 20px;" onclick="document.getElementById('clockInModal').style.display='flex'">🕒 Sign In</button>`;
+            
+            if (isStaffView && clockInModal) {
+                clockInModal.style.display = 'flex';
+                if (closeBtn) closeBtn.style.display = 'none'; 
+            } else {
+                if (closeBtn) closeBtn.style.display = 'block'; 
+            }
+        }
+    }
+
+    function updateHoloClock() {
         const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
         const now = new Date(tzStr);
-        const businessTime = new Date(now.getTime() - (3 * 3600 * 1000));
+        let hours = now.getHours(), minutes = now.getMinutes(), seconds = now.getSeconds();
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12; hours = hours ? hours : 12; 
+        minutes = minutes < 10 ? '0' + minutes : minutes;
+        seconds = seconds < 10 ? '0' + seconds : seconds;
+        
+        const timeStr = hours + ':' + minutes + ':' + seconds + ' ' + ampm;
+        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        const dateStr = days[now.getDay()] + ', ' + months[now.getMonth()] + ' ' + now.getDate() + ', ' + now.getFullYear();
+
+        const timeEl = document.getElementById('osdTime');
+        const dateEl = document.getElementById('osdDate');
+        if(timeEl) timeEl.innerText = timeStr;
+        if(dateEl) dateEl.innerText = dateStr;
+    }
+    setInterval(updateHoloClock, 1000);
+    updateHoloClock(); 
+    updateHeaderAuthUI();
+
+    function formatAMPM(timestamp) {
+        if (!timestamp) return '--:--';
+        const d = new Date(timestamp);
+        let hours = d.getHours(), minutes = d.getMinutes();
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12; hours = hours ? hours : 12; 
+        minutes = minutes < 10 ? '0' + minutes : minutes;
+        return hours + ':' + minutes + ' ' + ampm;
+    }
+
+    // --- RPG GAMIFICATION ENGINE ---
+    async function calculateCrownBadge() {
+        try {
+            const snapshot = await get(ref(db, `${FACTION_ID}/history`));
+            if (!snapshot.exists()) return;
+
+            const allHistory = snapshot.val();
+            let stats = {};
+
+            Object.values(allHistory).forEach(dayRecord => {
+                Object.values(dayRecord).forEach(log => {
+                    if (!stats[log.name]) stats[log.name] = { earlyMins: 0, lateMins: 0 };
+                    
+                    if (log.variance.includes('LATE by')) {
+                        const mins = parseInt(log.variance.replace(/[^0-9]/g, ''));
+                        if (!isNaN(mins)) stats[log.name].lateMins += mins;
+                    } else if (log.variance.includes('EARLY by')) {
+                        const mins = parseInt(log.variance.replace(/[^0-9]/g, ''));
+                        if (!isNaN(mins)) stats[log.name].earlyMins += mins;
+                    }
+                });
+            });
+
+            let topScore = -9999;
+            let leader = "";
+            gamificationBadges = {};
+
+            Object.keys(stats).forEach(name => {
+                const score = stats[name].earlyMins - stats[name].lateMins;
+                if(score > topScore) { topScore = score; leader = name; }
+                
+                if(score > 100) gamificationBadges[name] = '💎';
+                else if(score > 50) gamificationBadges[name] = '🥈';
+                else if(score > 20) gamificationBadges[name] = '🥉';
+            });
+            
+            topAgent = leader;
+            if(topAgent) gamificationBadges[topAgent] = '👑';
+            renderTable(); 
+        } catch(e) { console.log("Leaderboard badge calc skipped."); }
+    }
+    setTimeout(calculateCrownBadge, 2000);
+
+    // --- DAILY AUTO-RESET LOGIC ---
+    setInterval(() => {
+        if (isStaffView || currentEmployees.length === 0) return; 
+        const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
+        const now = new Date(tzStr);
+        const businessTime = new Date(now.getTime() - (4 * 3600 * 1000));
         const businessDateStr = businessTime.toLocaleDateString('en-US'); 
         const businessDayStr = businessTime.toLocaleString('en-US', { weekday: 'long' }); 
 
-        onValue(ref(db, getDBPath('system/lastBusinessDate')), (snapshot) => {
+        onValue(ref(db, `${FACTION_ID}/system/lastBusinessDate`), (snapshot) => {
             const dbLastDate = snapshot.val();
             if (dbLastDate !== businessDateStr) {
-                set(ref(db, getDBPath('system/lastBusinessDate')), businessDateStr);
-                remove(ref(db, getDBPath('breaks'))); 
+                set(ref(db, `${FACTION_ID}/system/lastBusinessDate`), businessDateStr);
+                remove(ref(db, `${FACTION_ID}/breaks`)); 
                 
-                let resetRoster = window.currentEmployees.map(emp => {
+                let resetRoster = currentEmployees.map(emp => {
                     let permOff = emp.assignedDayOff || "None";
                     emp.dayOff = (permOff === businessDayStr) ? businessDayStr : "None";
                     emp.quota30 = 0;
@@ -888,28 +1181,311 @@
                     emp.clockInTime = null;
                     return emp;
                 });
-                set(ref(db, getDBPath('roster')), resetRoster);
-                sessionStorage.removeItem('prestoStaffAuth');
-                updateHeaderAuthUI();
+                set(ref(db, `${FACTION_ID}/roster`), resetRoster);
             }
         }, { onlyOnce: true });
-    }, 30000);
+    }, 60000);
 
+    function parseTimeToday(timeStr) {
+        if(!timeStr || timeStr === '--:--') return new Date();
+        const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
+        let cleaned = timeStr.trim().replace(/\s+/g, ' ');
+        const parts = cleaned.split(' ');
+        if(parts.length < 2) return new Date(); 
+        const time = parts[0], modifier = parts[1].toUpperCase();
+        let timeParts = time.split(':');
+        let hours = parseInt(timeParts[0], 10), minutes = parseInt(timeParts[1], 10);
+        if (hours === 12) hours = modifier === 'AM' ? 0 : 12;
+        else if (modifier === 'PM') hours += 12;
+        let d = new Date(tzStr);
+        d.setHours(hours, minutes, 0, 0);
+        return d;
+    }
+
+    function convertTimeFormat(time24) {
+        if(!time24) return "12:00 AM";
+        let [h, m] = time24.split(':');
+        let hours = parseInt(h);
+        let ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12;
+        return `${hours.toString().padStart(2, '0')}:${m} ${ampm}`;
+    }
+
+    function isCurrentlyOnShift(shiftString) {
+        const regex = /([0-1]?[0-9]:[0-5][0-9]\s*(?:AM|PM|am|pm))/gi;
+        const times = shiftString.match(regex);
+        if (!times || times.length < 2) return true;
+        const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
+        const now = new Date(tzStr).getTime();
+        let tStart = parseTimeToday(times[0]).getTime();
+        let tEnd = parseTimeToday(times[1]).getTime();
+        if (tStart > tEnd) {
+            if (new Date(tzStr).getHours() < 12) tStart -= 24 * 3600 * 1000; 
+            else tEnd += 24 * 3600 * 1000; 
+        }
+        tStart -= (30 * 60000); 
+        return now >= tStart && now <= tEnd;
+    }
+
+    function isOfficialBreakTime(index) {
+        const emp = currentEmployees[index];
+        if (!emp.timeStart || emp.timeStart === '--:--') return false;
+        const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
+        const now = new Date(tzStr).getTime();
+        let bStart = parseTimeToday(emp.timeStart).getTime();
+        let bEnd = parseTimeToday(emp.timeEnd).getTime();
+        if (bStart > bEnd) {
+            if (new Date(tzStr).getHours() < 12) bStart -= 24 * 3600 * 1000; 
+            else bEnd += 24 * 3600 * 1000; 
+        }
+        bStart -= (15 * 60000); 
+        return now >= bStart && now <= bEnd;
+    }
+
+    // --- CLOCK IN LOGIC & AUTH ---
+    window.processClockIn = function() {
+        if (enforcePCWorkstation()) return;
+
+        const inputId = document.getElementById('clockInId').value; 
+        const inputPin = document.getElementById('clockInPin').value.trim();
+
+        if (!inputId || !inputPin) {
+            alert("Please select your Name/PC from the list and enter your 4-digit PIN.");
+            return;
+        }
+
+        let empIndex = currentEmployees.findIndex(e => e.name === inputId);
+
+        if (empIndex === -1) {
+            alert("❌ Name not found in system.");
+            return;
+        }
+
+        let emp = currentEmployees[empIndex];
+        let isFirstTime = false;
+
+        if (!emp.passkey || emp.passkey === "") {
+            if (inputPin.length !== 4 || isNaN(inputPin)) {
+                alert("Please enter a valid 4-digit numeric PIN to setup your account.");
+                return;
+            }
+            emp.passkey = inputPin;
+            isFirstTime = true;
+        } else if (emp.passkey !== inputPin) {
+            alert("❌ Incorrect PIN. Please try again.");
+            return;
+        }
+
+        if (!isCurrentlyOnShift(emp.shift)) {
+            if (isFirstTime) {
+                set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
+                alert("✅ PIN successfully registered!\n\nHowever, you are outside your scheduled shift window, so you cannot fully sign in to the floor yet. Please return closer to your shift time.");
+            } else {
+                alert("❌ You cannot sign in right now. You are currently outside of your scheduled shift window.");
+            }
+            return; 
+        }
+
+        const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
+        const nowMs = new Date(tzStr).getTime();
+        const nowTime = formatAMPM(nowMs);
+        const businessDate = new Date(nowMs - (4 * 3600 * 1000)).toISOString().split('T')[0];
+
+        if (!emp.clockInTime) {
+            emp.clockInTime = nowTime;
+            
+            const historyRef = ref(db, `${FACTION_ID}/history/${businessDate}`);
+            push(historyRef, {
+                name: emp.name,
+                clockInTime: nowTime,
+                type: "Shift Sign-In",       
+                startTime: nowTime,
+                expectedEnd: "N/A",
+                actualReturn: "N/A",
+                variance: "N/A",
+                adminNote: "Staff Clocked In via PIN", 
+                timestamp: nowMs
+            });
+        }
+        
+        emp.dayOff = "None"; 
+
+        sessionStorage.setItem('prestoStaffAuth', emp.name);
+        updateHeaderAuthUI();
+
+        set(ref(db, `${FACTION_ID}/roster`), currentEmployees).then(() => {
+            document.getElementById('clockInId').value = '';
+            document.getElementById('clockInPin').value = '';
+            document.getElementById('clockInModal').style.display = 'none';
+            
+            if (isFirstTime) {
+                alert(`✅ PIN Registered & Sign-In Successful!\n\nWelcome, ${emp.name}. You are now authenticated.`);
+            } else {
+                alert(`✅ Welcome back, ${emp.name}!\n\nYou are now authenticated on this device.`);
+            }
+            
+            renderTable();
+        }).catch(err => {
+            alert("Error saving clock-in data: " + err.message);
+        });
+    };
+
+    window.processClockOut = function() {
+        if (enforcePCWorkstation()) return;
+
+        if(confirm("Are you sure you want to sign out of this device?")) {
+            sessionStorage.removeItem('prestoStaffAuth');
+            updateHeaderAuthUI();
+            renderTable();
+        }
+    };
+
+    window.voidClockIn = function(index) {
+        if (isStaffView) return;
+        if (!requireAdmin()) return;
+        
+        if (confirm(`Are you sure you want to VOID the clock-in for ${currentEmployees[index].name}? This will mark them as not signed in and force them to re-enter their PIN.`)) {
+            currentEmployees[index].clockInTime = null;
+            set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
+        }
+    };
+
+    // --- FIREBASE LISTENERS ---
+    onValue(ref(db, `${FACTION_ID}/roster`), (snapshot) => {
+        const data = snapshot.val();
+        if (data) { 
+            let dataArray = Array.isArray(data) ? data : Object.values(data);
+            dataArray = dataArray.filter(e => e !== null && e !== undefined);
+            
+            currentEmployees = dataArray.map((emp, i) => {
+                if (!emp.assignedDayOff) emp.assignedDayOff = (defaultEmployees[i] && defaultEmployees[i].assignedDayOff) || "None";
+                if (!emp.timeStart) emp.timeStart = (fixedSlots[i] && fixedSlots[i].timeStart) || "12:00 AM";
+                if (!emp.timeEnd) emp.timeEnd = (fixedSlots[i] && fixedSlots[i].timeEnd) || "12:30 AM";
+                if (!emp.overlap) emp.overlap = "1 Staff";
+                if (!emp.pcNumber) emp.pcNumber = "PC-" + (i+1).toString().padStart(2, '0');
+                if (!emp.teamName) emp.teamName = "Main Team"; 
+                if (typeof emp.isLocked === 'undefined') emp.isLocked = (defaultEmployees[i] && typeof defaultEmployees[i].isLocked !== 'undefined') ? defaultEmployees[i].isLocked : false;
+                if (typeof emp.quota30 === 'undefined') emp.quota30 = 0;
+                if (typeof emp.quota10 === 'undefined') emp.quota10 = 0;
+                if (typeof emp.clockInTime === 'undefined') emp.clockInTime = null;
+                if (typeof emp.passkey === 'undefined') emp.passkey = "";
+                
+                if (emp.shift === 'Shift A') emp.shift = 'Shift A (07:00 PM - 02:00 AM)';
+                if (emp.shift === 'Shift B') emp.shift = 'Shift B (07:30 PM - 02:30 AM)';
+                if (emp.shift === 'Shift C (08:00 AM - 04:00 PM)') emp.shift = 'Shift C (08:00 AM - 03:00 PM)';
+                if (emp.shift === 'Shift D (04:00 PM - 12:00 AM)') emp.shift = 'Shift D (04:00 PM - 11:00 PM)';
+                return emp;
+            });
+        } 
+        else {
+            const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
+            const businessTime = new Date(new Date(tzStr).getTime() - (4 * 3600 * 1000));
+            const todayDayStr = businessTime.toLocaleString('en-US', { weekday: 'long' });
+            
+            currentEmployees = defaultEmployees.map((emp, i) => {
+                emp.dayOff = (emp.assignedDayOff === todayDayStr) ? todayDayStr : "None";
+                emp.timeStart = fixedSlots[i] ? fixedSlots[i].timeStart : "12:00 AM";
+                emp.timeEnd = fixedSlots[i] ? fixedSlots[i].timeEnd : "12:30 AM";
+                emp.overlap = "1 Staff";
+                emp.pcNumber = "PC-" + (i+1).toString().padStart(2, '0');
+                emp.teamName = "Main Team";
+                emp.quota30 = 0;
+                emp.quota10 = 0;
+                emp.clockInTime = null;
+                emp.passkey = "";
+                return emp;
+            });
+            set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
+        }
+        
+        const clockInSelect = document.getElementById('clockInId');
+        if (clockInSelect) {
+            const currentSelection = clockInSelect.value;
+            clockInSelect.innerHTML = '<option value="">-- Select Your Name / PC --</option>';
+            currentEmployees.forEach(emp => {
+                const opt = document.createElement('option');
+                opt.value = emp.name; 
+                opt.innerText = `${emp.pcNumber} | ${emp.name}`;
+                clockInSelect.appendChild(opt);
+            });
+            if (currentSelection) clockInSelect.value = currentSelection;
+        }
+
+        renderTable();
+    });
+
+    onValue(ref(db, `${FACTION_ID}/breaks`), (snapshot) => {
+        currentBreaks = snapshot.val() || {};
+        renderActiveBreaks();
+    });
+
+    // --- MOBILE FOCUS DASHBOARD LOGIC ---
+    function updateMobileFocusDashboard() {
+        if (!isStaffView || !isMobile) return;
+        const authUser = sessionStorage.getItem('prestoStaffAuth');
+        
+        if (!authUser) {
+            document.getElementById('mobileFocusDashboard').style.display = 'none';
+            if(document.querySelector('.table-card')) document.querySelector('.table-card').style.display = '';
+            return;
+        }
+
+        document.querySelector('.table-card').style.display = 'none';
+        document.querySelector('.controls-bar').style.display = 'none';
+        document.querySelector('.rules-card').style.display = 'none';
+        
+        document.getElementById('mobileFocusDashboard').style.display = 'flex';
+        document.getElementById('mobileFocusName').innerText = `Welcome, ${authUser.split(' ')[0]}`;
+
+        const emp = currentEmployees.find(e => e.name === authUser);
+        if(emp && emp.timeStart && emp.timeStart !== '--:--') {
+            const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
+            let startMs = parseTimeToday(emp.timeStart).getTime();
+            let endMs = parseTimeToday(emp.timeEnd).getTime();
+            if (startMs > endMs) {
+                if (new Date(tzStr).getHours() < 12) startMs -= 24 * 3600 * 1000;
+            }
+            let now = Date.now();
+            
+            if(startMs > now) {
+                let diff = Math.floor((startMs - now)/1000);
+                let h = Math.floor(diff/3600);
+                let m = Math.floor((diff%3600)/60);
+                let s = diff%60;
+                document.getElementById('mobileFocusTimer').innerText = `${h>0?h+':':''}${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+                document.getElementById('mobileFocusTimer').style.color = '#FFFFFF';
+                document.getElementById('mobileFocusTimer').style.textShadow = '0 0 20px var(--primary-glow)';
+            } else if(now >= startMs && now <= endMs) {
+                document.getElementById('mobileFocusTimer').innerText = "IT'S TIME!";
+                document.getElementById('mobileFocusTimer').style.color = '#10B981';
+                document.getElementById('mobileFocusTimer').style.textShadow = '0 0 20px rgba(16, 185, 129, 0.4)';
+            } else {
+                document.getElementById('mobileFocusTimer').innerText = "COMPLETED";
+                document.getElementById('mobileFocusTimer').style.color = 'var(--text-muted)';
+                document.getElementById('mobileFocusTimer').style.textShadow = 'none';
+            }
+        } else {
+            document.getElementById('mobileFocusTimer').innerText = "NO BREAK";
+        }
+    }
+
+    // --- RENDERING ---
     function renderTable() {
-        if (!window.currentEmployees || window.currentEmployees.length === 0) return;
+        if (!currentEmployees || currentEmployees.length === 0) return;
         const tbody = document.getElementById('tableBody');
         tbody.innerHTML = '';
 
         const localAuthUser = sessionStorage.getItem('prestoStaffAuth');
-        const isDraggableList = !window.isStaffView && window.isUnlocked && window.activeShiftFilter === 'all' && document.getElementById('searchInput').value.trim() === '';
+        const isDraggableList = !isStaffView && isUnlocked && activeShiftFilter === 'all' && document.getElementById('searchInput').value.trim() === '';
         const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
         const nowTimeMs = new Date(tzStr).getTime();
 
-        window.currentEmployees.forEach((emp, index) => {
+        currentEmployees.forEach((emp, index) => {
             const isOffToday = emp.dayOff !== 'None';
             const isOffShift = !isCurrentlyOnShift(emp.shift);
 
-            if (window.isStaffView && (isOffToday || isOffShift)) return;
+            if (isStaffView && (isOffToday || isOffShift)) return;
 
             let shiftClass = 'badge-shift-custom';
             if (emp.shift.includes('Shift A')) shiftClass = 'badge-shift-a';
@@ -919,35 +1495,32 @@
             else if (emp.shift.includes('Shift E')) shiftClass = 'badge-shift-e';
             else if (emp.shift.includes('Shift G')) shiftClass = 'badge-shift-g';
 
-            let shiftSelectOptionsHtml = "";
-            window.shiftOptions.forEach(opt => {
-                let isSelected = emp.shift === opt ? 'selected' : '';
-                shiftSelectOptionsHtml += '<option value="' + opt + '" ' + isSelected + '>' + opt.split(' (')[0] + '</option>';
-            });
+            let shiftSelectOptionsHtml = shiftOptions.map(opt => {
+                const isSelected = emp.shift === opt;
+                return `<option value="${opt}" ${isSelected ? 'selected' : ''}>${opt.split(' (')[0]}</option>`;
+            }).join('');
             
-            if (!window.shiftOptions.includes(emp.shift)) {
-                shiftSelectOptionsHtml = '<option value="' + emp.shift + '" selected>' + emp.shift.split(' (')[0] + ' (Custom)</option>' + shiftSelectOptionsHtml;
+            if (!shiftOptions.includes(emp.shift)) {
+                shiftSelectOptionsHtml = `<option value="${emp.shift}" selected>${emp.shift.split(' (')[0]} (Custom)</option>` + shiftSelectOptionsHtml;
             }
 
-            let shiftBadgeHtml = "";
-            if (window.isStaffView) {
-                shiftBadgeHtml = '<span class="status-badge ' + shiftClass + '">' + emp.shift.split(' (')[0] + '</span>';
-            } else {
-                shiftBadgeHtml = '<select class="dayoff-select" style="margin-bottom: 4px; font-size: 11px; padding: 4px; width: 100%;" onchange="window.updateShift(' + index + ', this.value)">' + shiftSelectOptionsHtml + '</select>';
-            }
+            let shiftBadgeHtml = isStaffView 
+                ? `<span class="status-badge ${shiftClass}">${emp.shift.split(' (')[0]}</span>`
+                : `<select class="dayoff-select" style="margin-bottom: 4px; font-size: 11px; padding: 4px; width: 100%;" onchange="window.updateShift(${index}, this.value)">
+                     ${shiftSelectOptionsHtml}
+                   </select>`;
 
             if (isOffShift && !isOffToday) {
-                shiftBadgeHtml += ' <br><span style="font-size:10px; color:#EF4444; font-weight:700;">(OFF SHIFT)</span>';
+                shiftBadgeHtml += ` <br><span style="font-size:10px; color:#EF4444; font-weight:700;">(OFF SHIFT)</span>`;
             }
 
             const overlapClass = emp.overlap === '2 Staff' ? 'badge-overlap' : 'badge-single';
             
-            let selectOptionsHtml = "";
-            window.dayOffOptions.forEach(opt => {
-                let label = opt === 'None' ? 'No Permanent Day Off' : 'Perm Off: ' + opt;
-                let isSelected = emp.assignedDayOff === opt ? 'selected' : '';
-                selectOptionsHtml += '<option value="' + opt + '" ' + isSelected + '>' + label + '</option>';
-            });
+            const selectOptionsHtml = dayOffOptions.map(opt => {
+                const label = opt === 'None' ? 'No Permanent Day Off' : `Perm Off: ${opt}`;
+                const isSelected = emp.assignedDayOff === opt;
+                return `<option value="${opt}" ${isSelected ? 'selected' : ''}>${label}</option>`;
+            }).join('');
 
             const tr = document.createElement('tr');
             if (isOffToday || isOffShift) tr.classList.add('row-off-duty');
@@ -965,14 +1538,16 @@
             if (isDraggableList) {
                 tr.setAttribute('draggable', 'true');
                 tr.classList.add('draggable');
-                tr.setAttribute('ondragstart', 'window.handleDragStart(event, ' + index + ')');
-                tr.setAttribute('ondragend', 'window.handleDragEnd(event)');
-                tr.setAttribute('ondragover', 'window.handleDragOver(event)');
-                tr.setAttribute('ondragleave', 'window.handleDragLeave(event)');
-                tr.setAttribute('ondrop', 'window.handleDrop(event, ' + index + ')');
+                tr.setAttribute('ondragstart', `window.handleDragStart(event, ${index})`);
+                tr.setAttribute('ondragend', `window.handleDragEnd(event)`);
+                tr.setAttribute('ondragover', `window.handleDragOver(event)`);
+                tr.setAttribute('ondragleave', `window.handleDragLeave(event)`);
+                tr.setAttribute('ondrop', `window.handleDrop(event, ${index})`);
             }
 
-            let breakDisabled = (isOffToday || isOffShift || !emp.clockInTime) ? 'disabled style="opacity:0.3; cursor:not-allowed;" title="MANDATORY: Must Sign In first"' : 'title="Request Break"';
+            const editableAttr = isStaffView ? 'contenteditable="false"' : 'contenteditable="true"';
+            const selectDisabled = isStaffView ? 'disabled' : '';
+            const breakDisabled = (isOffToday || isOffShift || !emp.clockInTime) ? 'disabled title="Employee is absent, off shift, or has not signed in"' : 'title="Request Break"';
 
             const presentBtnStyle = isOffToday ? 'color: #F87171; border-color: #F87171;' : 'color: #10B981; border-color: #10B981;';
             const presentBtnText = isOffToday ? '🔴 Absent Today' : '🟢 Present Today';
@@ -987,91 +1562,89 @@
             const q10Color = q10Maxed ? '#EF4444' : '#38BDF8';
             const q10Border = q10Maxed ? 'rgba(239, 68, 68, 0.3)' : 'rgba(56, 189, 248, 0.3)';
 
-            let clockInHtml = "";
-            if (emp.clockInTime) {
-                if (!window.isStaffView) {
-                    clockInHtml = '<div style="font-size: 10px; color: #10B981; font-weight: 700; margin-top: 6px; cursor:pointer;" onclick="window.voidClockIn(' + index + ')" title="Admin: Click to VOID this sign-in">▶ In: ' + emp.clockInTime + '</div>';
-                } else {
-                    clockInHtml = '<div style="font-size: 10px; color: #10B981; font-weight: 700; margin-top: 6px;">▶ In: ' + emp.clockInTime + '</div>';
-                }
-            } else {
-                clockInHtml = '<div style="font-size: 10px; color: #EF4444; font-weight: 700; margin-top: 6px;">❌ Not Signed In</div>';
-            }
+            let clockInHtml = emp.clockInTime 
+                ? `<div style="font-size: 10px; color: #10B981; font-weight: 700; margin-top: 6px; ${!isStaffView ? 'cursor:pointer;' : ''}" ${!isStaffView ? `onclick="window.voidClockIn(${index})"` : ''} title="${!isStaffView ? 'Admin: Click to VOID this sign-in' : ''}">▶ In: ${emp.clockInTime}</div>` 
+                : `<div style="font-size: 10px; color: var(--text-muted); font-weight: 600; margin-top: 6px;">No Sign-In</div>`;
 
             let canViewButtons = true;
-            if (window.isStaffView && localAuthUser !== emp.name) {
+            if (isStaffView && localAuthUser !== emp.name) {
                 canViewButtons = false;
             }
-            if (window.isStaffView && window.isMobile) {
+            if (isStaffView && isMobile) {
                 canViewButtons = false;
             }
 
-            const safeEmpName = emp.name.replace(/'/g, "\\'");
             let actionButtonsHtml = '';
-            
             if (canViewButtons) {
-                actionButtonsHtml += '<button class="btn-mini-break" onclick="window.startBreak(\'' + safeEmpName + '\', ' + index + ', \'standard\')" ' + breakDisabled + '>☕ Break</button>';
-                actionButtonsHtml += '<button class="btn-mini-break" style="color: #38BDF8; border-color: rgba(56, 189, 248, 0.3);" onclick="window.startBreak(\'' + safeEmpName + '\', ' + index + ', \'prayer\')" ' + breakDisabled + '>🕌 Prayer</button>';
+                actionButtonsHtml = `
+                    <button class="btn-mini-break" onclick="window.startBreak('${emp.name.replace(/'/g, "\\'")}', ${index}, 'standard')" ${breakDisabled}>☕ Break</button>
+                    <button class="btn-mini-break" style="color: #38BDF8; border-color: rgba(56, 189, 248, 0.3);" onclick="window.startBreak('${emp.name.replace(/'/g, "\\'")}', ${index}, 'prayer')" ${breakDisabled}>🕌 Prayer</button>
+                `;
             } else {
-                if (window.isStaffView && window.isMobile) {
-                    actionButtonsHtml = '<span style="font-size: 10px; color: var(--text-muted); padding: 4px;">📱 PC Sign-in Required</span>';
+                if (isStaffView && isMobile) {
+                    actionButtonsHtml = `<span style="font-size: 10px; color: var(--text-muted); padding: 4px;">📱 PC Sign-in Required</span>`;
                 } else {
-                    actionButtonsHtml = '<span style="font-size: 10px; color: var(--text-muted); padding: 4px;">🔒 Sign in to access</span>';
+                    actionButtonsHtml = `<span style="font-size: 10px; color: var(--text-muted); padding: 4px;">🔒 Sign in to access</span>`;
                 }
             }
 
-            if (!window.isStaffView) {
-                let lockStyle = emp.isLocked ? 'border-color: #F59E0B; color: #F59E0B;' : 'opacity: 0.6;';
-                let lockText = emp.isLocked ? '🔒 Locked' : '🔓 Unlock';
-                actionButtonsHtml += '<button class="btn-mini-break" style="' + lockStyle + '" onclick="window.toggleLock(' + index + ')" title="Prevent from Reshuffling">' + lockText + '</button>';
+            if (!isStaffView) {
+                actionButtonsHtml += `<button class="btn-mini-break" style="${emp.isLocked ? 'border-color: #F59E0B; color: #F59E0B;' : 'opacity: 0.6;'}" onclick="window.toggleLock(${index})" title="Prevent from Reshuffling">${emp.isLocked ? '🔒 Locked' : '🔓 Unlock'}</button>`;
             } else if (emp.isLocked && canViewButtons) {
                 actionButtonsHtml += '<span class="lock-badge">🔒 FIXED</span>';
             }
 
-            let badgeHtml = window.gamificationBadges[emp.name] ? '<span title="Punctuality Level" style="cursor:help; font-size:16px;">' + window.gamificationBadges[emp.name] + '</span>' : '';
+            let badgeHtml = gamificationBadges[emp.name] ? `<span title="Punctuality Level" style="cursor:help; font-size:16px;">${gamificationBadges[emp.name]}</span>` : '';
 
-            const pcEdit = !window.isStaffView ? ' contenteditable="true" onblur="window.updatePC(' + index + ', this.innerText)"' : '';
-            const nameEdit = !window.isStaffView ? ' contenteditable="true" onblur="window.updateName(' + index + ', this.innerText)"' : '';
-            const teamEdit = !window.isStaffView ? ' contenteditable="true" onblur="window.updateTeam(' + index + ', this.innerText)"' : '';
-
-            let permOffHtml = "";
-            if (window.isStaffView) {
-                let offText = emp.assignedDayOff === 'None' ? 'No Perm Off' : 'Perm Off: ' + emp.assignedDayOff;
-                permOffHtml = '<span style="font-size: 11px; font-weight: 600; color: var(--text-muted);">' + offText + '</span>';
-            } else {
-                permOffHtml = '<select class="dayoff-select" onchange="window.updatePermanentDayOff(' + index + ', this.value)">' + selectOptionsHtml + '</select>';
-            }
-
-            let presentBtnHtml = "";
-            if (window.isStaffView) {
-                let borderColor = isOffToday ? 'rgba(248,113,113,0.3)' : 'rgba(16,185,129,0.3)';
-                let textColor = isOffToday ? '#F87171' : '#10B981';
-                presentBtnHtml = '<span style="display:inline-block; margin-top:6px; padding:4px 8px; border-radius:4px; border:1px solid ' + borderColor + '; color:' + textColor + '; font-size:11px; font-weight:700;">' + presentBtnText + '</span>';
-            } else {
-                presentBtnHtml = '<button class="btn-mini-break" style="margin-top:6px; text-align: center; ' + presentBtnStyle + '" onclick="window.toggleForceAbsent(' + index + ')">' + presentBtnText + '</button>';
-            }
-
-            let q30Click = !window.isStaffView ? 'onclick="window.resetQuota(' + index + ', \'30\')"' : '';
-            let q10Click = !window.isStaffView ? 'onclick="window.resetQuota(' + index + ', \'10\')"' : '';
-
-            let rowHtml = '<td class="col-id">' + (index + 1) + '</td>';
-            rowHtml += '<td class="col-pc"><span class="editable-name"' + pcEdit + '>' + emp.pcNumber + '</span>' + clockInHtml + '</td>';
-            rowHtml += '<td class="col-name"><div style="display: flex; flex-direction: column; align-items: flex-start; gap: 6px;"><div><span class="editable-name"' + nameEdit + '>' + emp.name + '</span>' + badgeHtml + '</div><div style="display: flex; gap: 4px; flex-wrap: wrap; align-items: center;">' + actionButtonsHtml + '</div></div></td>';
-            rowHtml += '<td class="col-quotas"><div style="display: flex; flex-direction: column; gap: 4px;">';
-            rowHtml += '<span style="background: ' + q30Bg + '; color: ' + q30Color + '; border: 1px solid ' + q30Border + '; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; cursor: ' + (window.isStaffView ? 'default' : 'pointer') + ';" ' + q30Click + ' title="Official 30-Min Breaks">30 Min: ' + emp.quota30 + ' / 1</span>';
-            rowHtml += '<span style="background: ' + q10Bg + '; color: ' + q10Color + '; border: 1px solid ' + q10Border + '; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; cursor: ' + (window.isStaffView ? 'default' : 'pointer') + ';" ' + q10Click + ' title="Quick 10-Min Breaks">10 Min: ' + emp.quota10 + ' / 3</span>';
-            rowHtml += '</div></td>';
-            rowHtml += '<td class="col-dayoff"><div style="display: flex; flex-direction: column;">' + permOffHtml + presentBtnHtml + '</div></td>';
-            rowHtml += '<td class="col-shift">' + shiftBadgeHtml + '<br><span class="status-badge badge-team editable-name"' + teamEdit + '>' + (emp.teamName || 'No Team') + '</span></td>';
-            rowHtml += '<td class="col-time">' + emp.timeStart + '</td>';
-            rowHtml += '<td class="col-time">' + emp.timeEnd + '</td>';
-            rowHtml += '<td class="col-overlap"><span class="status-badge ' + overlapClass + '">' + emp.overlap + '</span></td>';
-
-            tr.innerHTML = rowHtml;
+            tr.innerHTML = `
+                <td class="col-id">${index + 1}</td>
+                <td class="col-pc">
+                    <span class="editable-name" ${editableAttr} onblur="window.updatePC(${index}, this.innerText)">${emp.pcNumber}</span>
+                    ${clockInHtml}
+                </td>
+                <td class="col-name">
+                    <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 6px;">
+                        <div>
+                            <span class="editable-name" ${editableAttr} onblur="window.updateName(${index}, this.innerText)">${emp.name}</span>
+                            ${badgeHtml}
+                        </div>
+                        <div style="display: flex; gap: 4px; flex-wrap: wrap; align-items: center;">
+                            ${actionButtonsHtml}
+                        </div>
+                    </div>
+                </td>
+                <td class="col-quotas">
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <span style="background: ${q30Bg}; color: ${q30Color}; border: 1px solid ${q30Border}; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; cursor: ${isStaffView ? 'default' : 'pointer'};" ${!isStaffView ? `onclick="window.resetQuota(${index}, '30')"` : ''} title="Official 30-Min Breaks">
+                            30 Min: ${emp.quota30} / 1
+                        </span>
+                        <span style="background: ${q10Bg}; color: ${q10Color}; border: 1px solid ${q10Border}; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; cursor: ${isStaffView ? 'default' : 'pointer'};" ${!isStaffView ? `onclick="window.resetQuota(${index}, '10')"` : ''} title="Quick 10-Min Breaks">
+                            10 Min: ${emp.quota10} / 3
+                        </span>
+                    </div>
+                </td>
+                <td class="col-dayoff">
+                    <div style="display: flex; flex-direction: column; gap: 6px;">
+                        <select class="dayoff-select" ${selectDisabled} onchange="window.updatePermanentDayOff(${index}, this.value)">
+                            ${selectOptionsHtml}
+                        </select>
+                        <button class="btn-mini-break" ${selectDisabled} style="text-align: center; ${presentBtnStyle}" onclick="window.toggleForceAbsent(${index})">
+                            ${presentBtnText}
+                        </button>
+                    </div>
+                </td>
+                <td class="col-shift">
+                    ${shiftBadgeHtml}
+                    <br>
+                    <span class="status-badge badge-team editable-name" ${editableAttr} onblur="window.updateTeam(${index}, this.innerText)">${emp.teamName || 'No Team'}</span>
+                </td>
+                <td class="col-time">${emp.timeStart}</td>
+                <td class="col-time">${emp.timeEnd}</td>
+                <td class="col-overlap"><span class="status-badge ${overlapClass}">${emp.overlap}</span></td>
+            `;
             tbody.appendChild(tr);
         });
 
-        window.updateAdminUI();
         updateAutomatedMetrics();
         window.filterTable();
     }
@@ -1081,19 +1654,19 @@
         const grid = document.getElementById('breakTrackerGrid');
         const mobileFloor = document.getElementById('mobileFocusFloor'); 
         
-        const breakKeys = Object.keys(window.currentBreaks);
+        const breakKeys = Object.keys(currentBreaks);
         const localAuthUser = sessionStorage.getItem('prestoStaffAuth');
         
-        const visibleBreaks = breakKeys.filter(key => window.currentBreaks[key].status !== 'completed');
+        const visibleBreaks = breakKeys.filter(key => currentBreaks[key].status !== 'completed');
 
         const pendingList = visibleBreaks
-            .filter(key => window.currentBreaks[key].status === 'pending')
-            .sort((a,b) => (window.currentBreaks[a].requestTime || 0) - (window.currentBreaks[b].requestTime || 0));
+            .filter(key => currentBreaks[key].status === 'pending')
+            .sort((a,b) => (currentBreaks[a].requestTime || 0) - (currentBreaks[b].requestTime || 0));
 
         if (visibleBreaks.length === 0) {
             section.style.display = 'none';
             if(mobileFloor) mobileFloor.innerHTML = '<div style="color:var(--text-muted); font-size:13px; font-weight:600; text-transform:uppercase;">No one is on break right now. Floor is full.</div>';
-            if (window.timerInterval) clearInterval(window.timerInterval);
+            if (timerInterval) clearInterval(timerInterval);
             return;
         }
 
@@ -1102,68 +1675,100 @@
         if(mobileFloor) mobileFloor.innerHTML = '';
 
         visibleBreaks.forEach(key => {
-            const b = window.currentBreaks[key];
+            const b = currentBreaks[key];
             const card = document.createElement('div');
             
-            const empMatch = window.currentEmployees.find(e => e.name === b.name);
-            const shiftBadge = empMatch ? '<span class="break-shift-badge">' + empMatch.shift.split(' ')[0] + ' ' + (empMatch.shift.split(' ')[1] || '') + '</span>' : '';
-            const pcBadge = empMatch && empMatch.pcNumber ? '<span class="break-shift-badge" style="background: rgba(251, 191, 36, 0.2); color: #FBBF24;">' + empMatch.pcNumber + '</span>' : '';
-            const teamBadge = empMatch && empMatch.teamName && empMatch.teamName !== 'No Team' ? '<span class="break-shift-badge" style="background: rgba(16, 185, 129, 0.15); color: #10B981;">' + empMatch.teamName + '</span>' : '';
+            const empMatch = currentEmployees.find(e => e.name === b.name);
+            const shiftBadge = empMatch ? `<span class="break-shift-badge">${empMatch.shift.split(' ')[0]} ${empMatch.shift.split(' ')[1] || ''}</span>` : '';
+            const pcBadge = empMatch && empMatch.pcNumber ? `<span class="break-shift-badge" style="background: rgba(251, 191, 36, 0.2); color: #FBBF24;">${empMatch.pcNumber}</span>` : '';
+            const teamBadge = empMatch && empMatch.teamName && empMatch.teamName !== 'No Team' ? `<span class="break-shift-badge" style="background: rgba(16, 185, 129, 0.15); color: #10B981;">${empMatch.teamName}</span>` : '';
             
             const isPrayer = b.type === 'Prayer';
-            const startedText = b.startTime ? '▶ Start: ' + formatAMPM(b.startTime) : '▶ Start: --:--';
+            const startedText = b.startTime ? `▶ Start: ${formatAMPM(b.startTime)}` : '▶ Start: --:--';
             
             const endTimeMs = b.endTime || (b.startTime && b.limit > 0 ? b.startTime + (b.limit * 60000) : 0);
-            const endText = isPrayer ? '⏱️ Open Return' : (endTimeMs ? '🎯 Due: ' + formatAMPM(endTimeMs) : '🎯 Due: --:--');
+            const endText = isPrayer ? `⏱️ Open Return` : (endTimeMs ? `🎯 Due: ${formatAMPM(endTimeMs)}` : '🎯 Due: --:--');
 
             if (b.status === 'pending') {
                 const pos = pendingList.indexOf(key) + 1;
                 const waitEst = pos * 10;
 
-                card.className = 'break-card card-pending';
+                card.className = `break-card card-pending`;
                 let adminControls = '';
-                if (!window.isStaffView) {
-                    adminControls = '<div style="display: flex; gap: 8px;"><button class="btn btn-success" onclick="window.approveBreak(\'' + key + '\')">Approve</button><button class="btn btn-danger" onclick="window.denyBreak(\'' + key + '\')">Deny</button></div>';
+                if (!isStaffView) {
+                    adminControls = `
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-success" onclick="window.approveBreak('${key}')">Approve</button>
+                        <button class="btn btn-danger" onclick="window.denyBreak('${key}')">Deny</button>
+                    </div>`;
                 }
-                
-                card.innerHTML = '<div class="break-info"><span class="break-name">' + b.name + ' ' + pcBadge + ' ' + teamBadge + ' ' + shiftBadge + '</span><span class="break-type" style="color: #EF4444;">🔴 QUEUE POSITION: #' + pos + ' (Est Wait: ~' + waitEst + 'm)</span><div style="font-size:11px; color:#EF4444; margin-top:4px; font-weight:700;">Type: ' + b.type + '</div></div>' + adminControls;
-                
+                card.innerHTML = `
+                    <div class="break-info">
+                        <span class="break-name">${b.name} ${pcBadge} ${teamBadge} ${shiftBadge}</span>
+                        <span class="break-type" style="color: #EF4444;">🔴 QUEUE POSITION: #${pos} (Est Wait: ~${waitEst}m)</span>
+                        <div style="font-size:11px; color:#EF4444; margin-top:4px; font-weight:700;">Type: ${b.type}</div>
+                    </div>
+                    ${adminControls}
+                `;
             } 
             else if (b.status === 'return_pending') {
-                card.className = 'break-card card-unofficial'; 
-                let adminControls = window.isStaffView ? 
-                    '<button class="btn btn-staff" disabled>Pending Admin Auth...</button>' : 
-                    '<button class="btn btn-success" onclick="window.approveReturn(\'' + key + '\')">Approve Return</button>';
+                card.className = `break-card card-unofficial`; 
+                let adminControls = isStaffView ? 
+                    `<button class="btn btn-staff" disabled>Pending Admin Auth...</button>` : 
+                    `<button class="btn btn-success" onclick="window.approveReturn('${key}')">Approve Return</button>`;
                 
-                let inner = '<div class="break-info"><span class="break-name">' + b.name + ' ' + pcBadge + ' ' + teamBadge + ' ' + shiftBadge + '</span><span class="break-type" style="color: #F59E0B;">🟡 RETURN REQUESTED</span><div class="break-meta"><span>' + startedText + '</span><span>' + endText + '</span><span style="color: #F59E0B;">🛑 Req: ' + formatAMPM(b.returnRequestedTime) + '</span></div></div>';
-                inner += '<div class="break-timer-group"><span class="break-timer" data-start="' + b.startTime + '" data-endtime="' + endTimeMs + '" data-end="' + b.returnRequestedTime + '"></span>' + adminControls + '</div>';
-                card.innerHTML = inner;
+                card.innerHTML = `
+                    <div class="break-info">
+                        <span class="break-name">${b.name} ${pcBadge} ${teamBadge} ${shiftBadge}</span>
+                        <span class="break-type" style="color: #F59E0B;">🟡 RETURN REQUESTED</span>
+                        <div class="break-meta">
+                            <span>${startedText}</span>
+                            <span>${endText}</span>
+                            <span style="color: #F59E0B;">🛑 Req: ${formatAMPM(b.returnRequestedTime)}</span>
+                        </div>
+                    </div>
+                    <div class="break-timer-group">
+                        <span class="break-timer" data-start="${b.startTime}" data-endtime="${endTimeMs}" data-end="${b.returnRequestedTime}"></span>
+                        ${adminControls}
+                    </div>
+                `;
             }
             else {
                 const isOfficial = b.limit === 30;
-                card.className = 'break-card ' + (isOfficial ? 'card-official' : 'card-unofficial');
+                card.className = `break-card ${isOfficial ? 'card-official' : 'card-unofficial'}`;
                 
                 let returnBtnHtml = '';
                 let canReturn = true;
 
-                if (window.isStaffView && localAuthUser !== b.name) canReturn = false;
-                if (window.isStaffView && window.isMobile) canReturn = false; 
+                if (isStaffView && localAuthUser !== b.name) canReturn = false;
+                if (isStaffView && isMobile) canReturn = false; 
 
                 if (canReturn) {
-                    returnBtnHtml = '<button class="btn btn-primary" onclick="window.requestReturn(\'' + key + '\')">Request Return</button>';
-                } else if (!window.isStaffView) {
-                    returnBtnHtml = '<button class="btn btn-primary" style="background: #F59E0B; border-color: #F59E0B;" onclick="if(confirm(\'Admin Override: Force return?\')) window.requestReturn(\'' + key + '\')" title="Admin Override">Force Return</button>';
+                    returnBtnHtml = `<button class="btn btn-primary" onclick="window.requestReturn('${key}')">Request Return</button>`;
+                } else if (!isStaffView) {
+                    returnBtnHtml = `<button class="btn btn-primary" style="background: #F59E0B; border-color: #F59E0B;" onclick="if(confirm('Admin Override: Force return for ${b.name}?')) window.requestReturn('${key}')" title="Admin Override">Force Return</button>`;
                 } else {
-                    if (window.isStaffView && window.isMobile) {
-                        returnBtnHtml = '<span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">📱 PC Sign-in Required</span>';
+                    if (isStaffView && isMobile) {
+                        returnBtnHtml = `<span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">📱 PC Sign-in Required</span>`;
                     } else {
-                        returnBtnHtml = '<span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">🔒 Waiting for ' + b.name.split(' ')[0] + '</span>';
+                        returnBtnHtml = `<span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">🔒 Waiting for ${b.name.split(' ')[0]}</span>`;
                     }
                 }
 
-                let inner = '<div class="break-info"><span class="break-name">' + b.name + ' ' + pcBadge + ' ' + teamBadge + ' ' + shiftBadge + '</span><span class="break-type" style="color: ' + (isOfficial ? '#10B981' : '#38BDF8') + '">' + b.type + ' (ON BREAK)</span><div class="break-meta"><span>' + startedText + '</span><span>' + endText + '</span></div></div>';
-                inner += '<div class="break-timer-group"><span class="break-timer" data-start="' + b.startTime + '" data-endtime="' + endTimeMs + '"></span>' + returnBtnHtml + '</div>';
-                card.innerHTML = inner;
+                card.innerHTML = `
+                    <div class="break-info">
+                        <span class="break-name">${b.name} ${pcBadge} ${teamBadge} ${shiftBadge}</span>
+                        <span class="break-type" style="color: ${isOfficial ? '#10B981' : '#38BDF8'}">${b.type} (ON BREAK)</span>
+                        <div class="break-meta">
+                            <span>${startedText}</span>
+                            <span>${endText}</span>
+                        </div>
+                    </div>
+                    <div class="break-timer-group">
+                        <span class="break-timer" data-start="${b.startTime}" data-endtime="${endTimeMs}"></span>
+                        ${returnBtnHtml}
+                    </div>
+                `;
             }
             grid.appendChild(card);
 
@@ -1176,9 +1781,9 @@
             }
         });
 
-        if (window.timerInterval) clearInterval(window.timerInterval);
+        if (timerInterval) clearInterval(timerInterval);
         updateTimers(); 
-        window.timerInterval = setInterval(updateTimers, 1000);
+        timerInterval = setInterval(updateTimers, 1000);
         updateAutomatedMetrics(); 
     }
 
@@ -1203,7 +1808,7 @@
                 let elapsedSecs = Math.floor((currentOrFrozen - start) / 1000);
                 const mins = Math.floor(elapsedSecs / 60);
                 const secs = elapsedSecs % 60;
-                timerEl.innerText = mins.toString().padStart(2, '0') + ":" + secs.toString().padStart(2, '0');
+                timerEl.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
                 
                 if (mins >= 10) timerEl.classList.add('overtime');
                 else timerEl.classList.remove('overtime');
@@ -1218,62 +1823,13 @@
             const secs = absSecs % 60;
             
             const sign = isOvertime ? "-" : "";
-            timerEl.innerText = sign + mins.toString().padStart(2, '0') + ":" + secs.toString().padStart(2, '0');
+            timerEl.innerText = `${sign}${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
             
             if (isOvertime) timerEl.classList.add('overtime');
             else timerEl.classList.remove('overtime');
         });
 
         updateMobileFocusDashboard();
-    }
-
-    function updateMobileFocusDashboard() {
-        if (!window.isStaffView || !window.isMobile) return;
-        const authUser = sessionStorage.getItem('prestoStaffAuth');
-        
-        if (!authUser) {
-            document.getElementById('mobileFocusDashboard').style.display = 'none';
-            if(document.querySelector('.table-card')) document.querySelector('.table-card').style.display = '';
-            return;
-        }
-
-        document.querySelector('.table-card').style.display = 'none';
-        document.querySelector('.controls-bar').style.display = 'none';
-        document.querySelector('.rules-card').style.display = 'none';
-        
-        document.getElementById('mobileFocusDashboard').style.display = 'flex';
-        document.getElementById('mobileFocusName').innerText = "Welcome, " + authUser.split(' ')[0];
-
-        const emp = window.currentEmployees.find(e => e.name === authUser);
-        if(emp && emp.timeStart && emp.timeStart !== '--:--') {
-            const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
-            let startMs = parseTimeToday(emp.timeStart).getTime();
-            let endMs = parseTimeToday(emp.timeEnd).getTime();
-            if (startMs > endMs) {
-                if (new Date(tzStr).getHours() < 12) startMs -= 24 * 3600 * 1000;
-            }
-            let now = Date.now();
-            
-            if(startMs > now) {
-                let diff = Math.floor((startMs - now)/1000);
-                let h = Math.floor(diff/3600);
-                let m = Math.floor((diff%3600)/60);
-                let s = diff%60;
-                document.getElementById('mobileFocusTimer').innerText = (h>0 ? h+':' : '') + m.toString().padStart(2,'0') + ":" + s.toString().padStart(2,'0');
-                document.getElementById('mobileFocusTimer').style.color = '#FFFFFF';
-                document.getElementById('mobileFocusTimer').style.textShadow = '0 0 20px var(--primary-glow)';
-            } else if(now >= startMs && now <= endMs) {
-                document.getElementById('mobileFocusTimer').innerText = "IT'S TIME!";
-                document.getElementById('mobileFocusTimer').style.color = '#10B981';
-                document.getElementById('mobileFocusTimer').style.textShadow = '0 0 20px rgba(16, 185, 129, 0.4)';
-            } else {
-                document.getElementById('mobileFocusTimer').innerText = "COMPLETED";
-                document.getElementById('mobileFocusTimer').style.color = 'var(--text-muted)';
-                document.getElementById('mobileFocusTimer').style.textShadow = 'none';
-            }
-        } else {
-            document.getElementById('mobileFocusTimer').innerText = "NO BREAK";
-        }
     }
 
     function updateAutomatedMetrics() {
@@ -1287,7 +1843,7 @@
         let otherActive = 0;
         let offCount = 0;
 
-        window.currentEmployees.forEach(e => {
+        currentEmployees.forEach(e => {
             if (e.dayOff !== 'None') {
                 offCount++;
                 return; 
@@ -1304,27 +1860,27 @@
             else otherActive++;
         });
 
-        const activeBreaksCount = Object.values(window.currentBreaks).filter(b => b.status === 'active' || b.status === 'return_pending').length;
+        const activeBreaksCount = Object.values(currentBreaks).filter(b => b.status === 'active' || b.status === 'return_pending').length;
         const liveFloorStaff = Math.max(0, presentCount - activeBreaksCount);
-        const total = window.currentEmployees.length;
+        const total = currentEmployees.length;
 
-        document.getElementById('metricStaffCount').innerText = presentCount + " Present";
-        let shiftStr = shiftAActive + " A | " + shiftBActive + " B";
-        if (shiftCActive > 0) shiftStr += " | " + shiftCActive + " C";
-        if (shiftDActive > 0) shiftStr += " | " + shiftDActive + " D";
-        if (shiftEActive > 0) shiftStr += " | " + shiftEActive + " E";
-        if (shiftGActive > 0) shiftStr += " | " + shiftGActive + " G";
-        if (otherActive > 0) shiftStr += " | " + otherActive + " Oth";
+        document.getElementById('metricStaffCount').innerText = `${presentCount} Present`;
+        let shiftStr = `${shiftAActive} A | ${shiftBActive} B`;
+        if (shiftCActive > 0) shiftStr += ` | ${shiftCActive} C`;
+        if (shiftDActive > 0) shiftStr += ` | ${shiftDActive} D`;
+        if (shiftEActive > 0) shiftStr += ` | ${shiftEActive} E`;
+        if (shiftGActive > 0) shiftStr += ` | ${shiftGActive} G`;
+        if (otherActive > 0) shiftStr += ` | ${otherActive} Oth`;
         document.getElementById('metricShiftBreakdown').innerText = shiftStr;
         
-        document.getElementById('metricOffCount').innerText = offCount + " Staff Off";
-        document.getElementById('metricOffSub').innerText = offCount === 0 ? '100% Floor Attendance' : ((presentCount / (total - offCount || 1)) * 100).toFixed(1) + "% Shift Fill";
+        document.getElementById('metricOffCount').innerText = `${offCount} Staff Off`;
+        document.getElementById('metricOffSub').innerText = offCount === 0 ? '100% Floor Attendance' : `${((presentCount / (total - offCount || 1)) * 100).toFixed(1)}% Shift Fill`;
 
-        document.getElementById('metricFloorStaff').innerText = liveFloorStaff + " Active";
-        document.getElementById('metricFloorSub').innerText = activeBreaksCount + " Currently on Break";
+        document.getElementById('metricFloorStaff').innerText = `${liveFloorStaff} Active`;
+        document.getElementById('metricFloorSub').innerText = `${activeBreaksCount} Currently on Break`;
 
         const loadEl = document.getElementById('metricBreakLoad');
-        loadEl.innerText = activeBreaksCount + " / 2 Slots";
+        loadEl.innerText = `${activeBreaksCount} / 2 Slots`;
         if (activeBreaksCount >= 2) loadEl.classList.add('break-load-warning');
         else loadEl.classList.remove('break-load-warning');
 
@@ -1333,404 +1889,212 @@
         document.getElementById('countDayOff').innerText = offCount;
     }
 
-    function parseTimeToday(timeStr) {
-        if(!timeStr || timeStr === '--:--') return new Date();
-        const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
-        let cleaned = timeStr.trim().replace(/\s+/g, ' ');
-        const parts = cleaned.split(' ');
-        if(parts.length < 2) return new Date(); 
-        const time = parts[0], modifier = parts[1].toUpperCase();
-        let timeParts = time.split(':');
-        let hours = parseInt(timeParts[0], 10), minutes = parseInt(timeParts[1], 10);
-        if (hours === 12) hours = modifier === 'AM' ? 0 : 12;
-        else if (modifier === 'PM') hours += 12;
-        let d = new Date(tzStr);
-        d.setHours(hours, minutes, 0, 0);
-        return d;
-    }
-
-    function isCurrentlyOnShift(shiftString) {
-        const regex = /([0-1]?[0-9]:[0-5][0-9]\s*(?:AM|PM|am|pm))/gi;
-        const times = shiftString.match(regex);
-        if (!times || times.length < 2) return true;
-        const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
-        const now = new Date(tzStr).getTime();
-        let tStart = parseTimeToday(times[0]).getTime();
-        let tEnd = parseTimeToday(times[1]).getTime();
-        if (tStart > tEnd) {
-            if (new Date(tzStr).getHours() < 12) tStart -= 24 * 3600 * 1000; 
-            else tEnd += 24 * 3600 * 1000; 
+    window.resetQuota = function(index, type) {
+        if(isStaffView) return;
+        if(!requireAdmin()) return;
+        
+        const emp = currentEmployees[index];
+        if (type === '30') {
+            let newVal = prompt(`Set total 30-Min breaks taken for ${emp.name} (Max 1):`, emp.quota30 || 0);
+            if (newVal !== null && !isNaN(newVal)) {
+                emp.quota30 = parseInt(newVal);
+                set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
+            }
+        } else {
+            let newVal = prompt(`Set total 10-Min breaks taken for ${emp.name} (Max 3):`, emp.quota10 || 0);
+            if (newVal !== null && !isNaN(newVal)) {
+                emp.quota10 = parseInt(newVal);
+                set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
+            }
         }
-        tStart -= (30 * 60000); 
-        return now >= tStart && now <= tEnd;
-    }
+    };
 
-    function isOfficialBreakTime(index) {
-        const emp = window.currentEmployees[index];
-        if (!emp.timeStart || emp.timeStart === '--:--') return false;
-        const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
-        const now = new Date(tzStr).getTime();
-        let bStart = parseTimeToday(emp.timeStart).getTime();
-        let bEnd = parseTimeToday(emp.timeEnd).getTime();
-        if (bStart > bEnd) {
-            if (new Date(tzStr).getHours() < 12) bStart -= 24 * 3600 * 1000; 
-            else bEnd += 24 * 3600 * 1000; 
-        }
-        bStart -= (15 * 60000); 
-        return now >= bStart && now <= bEnd;
-    }
-
-    // 20. CLOCK IN / AUTH / BREAK SYSTEM
-    window.processClockIn = function() {
+    window.startBreak = function(empName, index, requestedType = 'standard') {
         if (enforcePCWorkstation()) return;
 
-        const inputId = document.getElementById('clockInId').value; 
-        const inputPin = document.getElementById('clockInPin').value.trim();
-
-        if (!inputId || !inputPin) {
-            alert("Please select your Name/PC from the list and enter your 4-digit PIN.");
+        const safeKey = empName.replace(/[.#$[\]]/g, '');
+        if (currentBreaks[safeKey] && currentBreaks[safeKey].status !== 'completed') {
+            alert(`🚨 BLOCK: ${empName} already has an active or pending break request.`);
             return;
         }
 
-        let empIndex = window.currentEmployees.findIndex(e => e.name === inputId);
+        const activeBreaksList = Object.values(currentBreaks).filter(b => b.status !== 'completed');
+        const currentPrayers = activeBreaksList.filter(b => b.type === 'Prayer').length;
+        const current10Mins = activeBreaksList.filter(b => b.type === 'Unscheduled (10m)').length;
 
-        if (empIndex === -1) {
-            alert("❌ Name not found in system.");
-            return;
-        }
+        const emp = currentEmployees[index];
+        const q30 = emp.quota30 || 0;
+        const q10 = emp.quota10 || 0;
+        const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
 
-        let emp = window.currentEmployees[empIndex];
-        let isFirstTime = false;
-
-        if (!emp.passkey || emp.passkey === "") {
-            if (inputPin.length !== 4 || isNaN(inputPin)) {
-                alert("Please enter a valid 4-digit numeric PIN to setup your account.");
+        if (requestedType === 'prayer') {
+            if (currentPrayers >= 2) {
+                alert(`🚨 BLOCK: Maximum prayer capacity reached! (2 employees are currently on or waiting for prayer). Please wait until someone returns.`);
                 return;
             }
-            emp.passkey = inputPin;
-            isFirstTime = true;
-        } else if (emp.passkey !== inputPin) {
-            alert("❌ Incorrect PIN. Please try again.");
+            alert(`A request for a Prayer break has been sent to the Admin.`);
+            set(ref(db, `${FACTION_ID}/breaks/` + safeKey), {
+                name: empName,
+                startTime: 0,
+                requestTime: Date.now(), 
+                limit: 0, 
+                type: "Prayer",
+                status: "pending"
+            });
             return;
         }
 
-        if (!isCurrentlyOnShift(emp.shift)) {
-            if (isFirstTime) {
-                set(ref(db, getDBPath('roster')), window.currentEmployees);
-                alert("✅ PIN successfully registered!\n\nHowever, you are outside your scheduled shift window, so you cannot fully sign in to the floor yet. Please return closer to your shift time.");
-            } else {
-                alert("❌ You cannot sign in right now. You are currently outside of your scheduled shift window.");
+        const isOfficial = isOfficialBreakTime(index);
+
+        if (isOfficial) {
+            if (q30 >= 1) {
+                alert(`🚨 BLOCK: ${empName} has already used their 1 official 30-minute break for today!`);
+                return;
             }
-            return; 
-        }
 
-        const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
-        const nowMs = new Date(tzStr).getTime();
-        const nowTime = formatAMPM(nowMs);
-        const businessDate = new Date(nowMs - (3 * 3600 * 1000)).toISOString().split('T')[0];
+            emp.quota30 = q30 + 1;
+            set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
 
-        if (!emp.clockInTime) {
-            emp.clockInTime = nowTime;
-            
-            const historyRef = ref(db, getDBPath('history/' + businessDate));
-            push(historyRef, {
-                name: emp.name,
-                clockInTime: nowTime,
-                type: "Shift Sign-In",       
-                startTime: nowTime,
-                expectedEnd: "N/A",
-                actualReturn: "N/A",
-                variance: "N/A",
-                adminNote: "Staff Clocked In via PIN", 
-                timestamp: nowMs
+            let bStart = parseTimeToday(emp.timeStart).getTime();
+            let bEnd = parseTimeToday(emp.timeEnd).getTime();
+            if (bStart > bEnd) {
+                if (new Date(tzStr).getHours() >= 12) {
+                    bEnd += 24 * 3600 * 1000; 
+                }
+            }
+            const endTimeMs = bEnd;
+
+            set(ref(db, `${FACTION_ID}/breaks/` + safeKey), {
+                name: empName,
+                startTime: new Date(tzStr).getTime(), 
+                endTime: endTimeMs, 
+                limit: 30, 
+                type: "Scheduled Slot",
+                status: "active"
+            });
+        } else {
+            if (q10 >= 3) {
+                alert(`🚨 BLOCK: ${empName} has already used all 3 of their 10-minute quick breaks today!`);
+                return;
+            }
+
+            if (current10Mins >= 1) {
+                alert(`🚨 BLOCK: Maximum 10-minute break capacity reached! (1 employee is currently on or waiting for a quick break). Please wait until they return.`);
+                return;
+            }
+
+            alert(`It is currently not the scheduled break time for ${empName}.\n\nA request for a 10-minute quick break has been sent to the Admin.`);
+            set(ref(db, `${FACTION_ID}/breaks/` + safeKey), {
+                name: empName,
+                startTime: 0,
+                requestTime: Date.now(), 
+                limit: 10,
+                type: "Unscheduled (10m)",
+                status: "pending"
             });
         }
+    };
+
+    window.approveBreak = function(key) {
+        if (!requireAdmin()) return;
+        const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
+        const nowMs = new Date(tzStr).getTime();
         
-        emp.dayOff = "None"; 
-
-        sessionStorage.setItem('prestoStaffAuth', emp.name);
-        updateHeaderAuthUI();
-
-        set(ref(db, getDBPath('roster')), window.currentEmployees).then(() => {
-            document.getElementById('clockInId').value = '';
-            document.getElementById('clockInPin').value = '';
-            document.getElementById('clockInModal').style.display = 'none';
-            
-            if (isFirstTime) {
-                alert("✅ PIN Registered & Sign-In Successful!\n\nWelcome, " + emp.name + ". You are now authenticated for today.");
-            } else {
-                alert("✅ Welcome back, " + emp.name + "!\n\nYou are signed in for today's shift.");
+        const breakData = currentBreaks[key];
+        breakData.status = 'active';
+        breakData.startTime = nowMs; 
+        
+        if (breakData.limit > 0) {
+            breakData.endTime = nowMs + (breakData.limit * 60000); 
+        } else {
+            breakData.endTime = 0; 
+        }
+        
+        if (breakData.limit === 10) {
+            const empIndex = currentEmployees.findIndex(e => e.name === breakData.name);
+            if (empIndex > -1) {
+                currentEmployees[empIndex].quota10 = (currentEmployees[empIndex].quota10 || 0) + 1;
+                set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
             }
-            
-            renderTable();
-        }).catch(err => {
-            alert("Error saving clock-in data: " + err.message);
-        });
+        }
+        
+        set(ref(db, `${FACTION_ID}/breaks/` + key), breakData);
     };
 
-    window.processClockOut = function() {
+    window.denyBreak = function(key) {
+        if (!requireAdmin()) return;
+        remove(ref(db, `${FACTION_ID}/breaks/` + key)); 
+    };
+
+    window.requestReturn = function(key) {
         if (enforcePCWorkstation()) return;
 
-        if(confirm("Are you sure you want to sign out of this device?")) {
-            sessionStorage.removeItem('prestoStaffAuth');
-            updateHeaderAuthUI();
-            renderTable();
+        const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
+        const breakData = currentBreaks[key];
+        if (breakData) {
+            
+            const now = new Date(tzStr).getTime();
+            if (breakData.endTime > 0) {
+                const diffMs = now - breakData.endTime;
+                const varianceMins = Math.round(diffMs / 60000);
+                if (varianceMins === 0) window.shootConfetti(); 
+            }
+
+            breakData.status = 'return_pending'; 
+            breakData.returnRequestedTime = now; 
+            set(ref(db, `${FACTION_ID}/breaks/` + key), breakData);
         }
     };
 
-    window.voidClockIn = function(index) {
-        if (window.isStaffView) return;
+    window.approveReturn = function(key) {
         if (!requireAdmin()) return;
         
-        if (confirm("Are you sure you want to VOID the clock-in for " + window.currentEmployees[index].name + "? This will mark them as not signed in and force them to re-enter their PIN.")) {
-            window.currentEmployees[index].clockInTime = null;
-            set(ref(db, getDBPath('roster')), window.currentEmployees);
-        }
-    };
-
-    window.startBreak = function(empName, index, requestedType) {
-        if (enforcePCWorkstation()) return;
-
-        const emp = window.currentEmployees[index];
-
-        if (!emp.clockInTime) {
-            alert("🚨 MANDATORY SIGN-IN REQUIRED: " + empName + " has not signed in for today's shift yet!\n\nPlease click the \"Sign In\" button at the top of the dashboard and enter your 4-digit PIN first.");
-            document.getElementById('clockInModal').style.display = 'flex';
-            return;
-        }
-
-        try {
-            const safeKey = empName.replace(/[.#$[\]]/g, '');
-            if (window.currentBreaks[safeKey] && window.currentBreaks[safeKey].status !== 'completed') {
-                alert("🚨 BLOCK: " + empName + " already has an active or pending break request.");
-                return;
-            }
-
-            const activeBreaksList = Object.values(window.currentBreaks).filter(b => b.status !== 'completed');
-            const currentPrayers = activeBreaksList.filter(b => b.type === 'Prayer').length;
-            const current10Mins = activeBreaksList.filter(b => b.type === 'Unscheduled (10m)').length;
-
-            const q30 = emp.quota30 || 0;
-            const q10 = emp.quota10 || 0;
-            const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
-
-            if (requestedType === 'prayer') {
-                if (currentPrayers >= 4) {
-                    alert("🚨 BLOCK: Maximum prayer capacity reached! (4 employees are currently on or waiting for prayer). Please wait until someone returns.");
-                    return;
-                }
-                alert("A request for a Prayer break has been sent to the Admin.");
-                set(ref(db, getDBPath('breaks/' + safeKey)), {
-                    name: empName,
-                    startTime: 0,
-                    requestTime: Date.now(), 
-                    limit: 0, 
-                    type: "Prayer",
-                    status: "pending"
-                }).catch(err => alert("Error communicating with cloud: " + err.message));
-                return;
-            }
-
-            const isOfficial = isOfficialBreakTime(index);
-
-            if (isOfficial) {
-                if (q30 >= 1) {
-                    alert("🚨 BLOCK: " + empName + " has already used their 1 official 30-minute break for today!");
-                    return;
-                }
-
-                emp.quota30 = q30 + 1;
-                set(ref(db, getDBPath('roster')), window.currentEmployees);
-
-                let bStart = parseTimeToday(emp.timeStart).getTime();
-                let bEnd = parseTimeToday(emp.timeEnd).getTime();
-                if (bStart > bEnd) {
-                    if (new Date(tzStr).getHours() >= 12) {
-                        bEnd += 24 * 3600 * 1000; 
-                    }
-                }
-                const endTimeMs = bEnd;
-
-                set(ref(db, getDBPath('breaks/' + safeKey)), {
-                    name: empName,
-                    startTime: new Date(tzStr).getTime(), 
-                    endTime: endTimeMs, 
-                    limit: 30, 
-                    type: "Scheduled Slot",
-                    status: "active"
-                }).catch(err => alert("Error communicating with cloud: " + err.message));
-            } else {
-                if (q10 >= 3) {
-                    alert("🚨 BLOCK: " + empName + " has already used all 3 of their 10-minute quick breaks today!");
-                    return;
-                }
-
-                if (current10Mins >= 3) {
-                    alert("🚨 BLOCK: Maximum 10-minute break capacity reached! (3 employees are currently on or waiting for a quick break). Please wait until they return.");
-                    return;
-                }
-
-                alert("It is currently not the scheduled break time for " + empName + ".\n\nA request for a 10-minute quick break has been sent to the Admin.");
-                set(ref(db, getDBPath('breaks/' + safeKey)), {
-                    name: empName,
-                    startTime: 0,
-                    requestTime: Date.now(), 
-                    limit: 10,
-                    type: "Unscheduled (10m)",
-                    status: "pending"
-                }).catch(err => alert("Error communicating with cloud: " + err.message));
-            }
-        } catch(err) {
-            alert("An unexpected error occurred while requesting break: " + err.message);
-        }
-    };
-
-    window.approveBreak = function(rawKey) {
-        if (!requireAdmin()) return;
-        try {
-            const key = rawKey.replace(/'/g, ""); 
-            const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
-            const nowMs = new Date(tzStr).getTime();
-            
-            const breakData = window.currentBreaks[key];
-            if(!breakData) { alert("Break request no longer exists."); return; }
-
-            breakData.status = 'active';
-            breakData.startTime = nowMs; 
-            
-            if (breakData.limit > 0) {
-                breakData.endTime = nowMs + (breakData.limit * 60000); 
-            } else {
-                breakData.endTime = 0; 
-            }
-            
-            if (breakData.limit === 10) {
-                const empIndex = window.currentEmployees.findIndex(e => e.name === breakData.name);
-                if (empIndex > -1) {
-                    window.currentEmployees[empIndex].quota10 = (window.currentEmployees[empIndex].quota10 || 0) + 1;
-                    set(ref(db, getDBPath('roster')), window.currentEmployees);
-                }
-            }
-            
-            set(ref(db, getDBPath('breaks/' + key)), breakData).catch(err => alert("Sync Error: " + err.message));
-        } catch(err) {
-            alert("Error approving break: " + err.message);
-        }
-    };
-
-    window.denyBreak = function(rawKey) {
-        if (!requireAdmin()) return;
-        const key = rawKey.replace(/'/g, "");
-        remove(ref(db, getDBPath('breaks/' + key))); 
-    };
-
-    window.requestReturn = function(rawKey) {
-        if (enforcePCWorkstation()) return;
-        try {
-            const key = rawKey.replace(/'/g, "");
-            const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
-            const breakData = window.currentBreaks[key];
-            if (breakData) {
-                const now = new Date(tzStr).getTime();
-                if (breakData.endTime > 0) {
-                    const diffMs = now - breakData.endTime;
-                    const varianceMins = Math.round(diffMs / 60000);
-                    if (varianceMins === 0) window.shootConfetti(); 
-                }
-
-                breakData.status = 'return_pending'; 
-                breakData.returnRequestedTime = now; 
-                set(ref(db, getDBPath('breaks/' + key)), breakData);
-            }
-        } catch(err) {
-            alert("Error requesting return: " + err.message);
-        }
-    };
-
-    window.approveReturn = function(rawKey) {
-        if (!requireAdmin()) return;
         setTimeout(() => {
-            try {
-                const key = rawKey.replace(/'/g, "");
-                const breakData = window.currentBreaks[key];
-                if (breakData) {
-                    const adminNote = prompt("Optional: Enter a note for this return (or leave blank):") || "";
-                    const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
-                    const businessDate = new Date(new Date(tzStr).getTime() - (3 * 3600 * 1000)).toISOString().split('T')[0];
+            const breakData = currentBreaks[key];
+            if (breakData) {
+                const adminNote = prompt("Optional: Enter a note for this return (or leave blank):") || "";
+                const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
+                const businessDate = new Date(new Date(tzStr).getTime() - (4 * 3600 * 1000)).toISOString().split('T')[0];
 
-                    let variance = "N/A";
-                    let varianceMins = 0;
+                let variance = "N/A";
+                let varianceMins = 0;
 
-                    if (breakData.endTime > 0) {
-                        const diffMs = breakData.returnRequestedTime - breakData.endTime;
-                        varianceMins = Math.round(diffMs / 60000);
+                if (breakData.endTime > 0) {
+                    const diffMs = breakData.returnRequestedTime - breakData.endTime;
+                    varianceMins = Math.round(diffMs / 60000);
 
-                        if (varianceMins > 0) variance = "LATE by " + varianceMins + " min";
-                        else if (varianceMins < 0) variance = "EARLY by " + Math.abs(varianceMins) + " min";
-                        else variance = "EXACT ON TIME";
-                    } else {
-                        varianceMins = Math.round((breakData.returnRequestedTime - breakData.startTime) / 60000);
-                        variance = "Took " + varianceMins + " min total";
-                    }
-
-                    if (variance === "EXACT ON TIME") window.shootConfetti();
-
-                    const emp = window.currentEmployees.find(e => e.name === breakData.name);
-                    const clockInToSave = (emp && emp.clockInTime) ? emp.clockInTime : "No Sign-In";
-
-                    const historyRef = ref(db, getDBPath('history/' + businessDate));
-                    push(historyRef, {
-                        name: breakData.name,
-                        clockInTime: clockInToSave,
-                        type: breakData.type,
-                        startTime: formatAMPM(breakData.startTime),
-                        expectedEnd: breakData.endTime > 0 ? formatAMPM(breakData.endTime) : "Open Return",
-                        actualReturn: formatAMPM(breakData.returnRequestedTime),
-                        variance: variance,
-                        adminNote: adminNote.replace(/"/g, "'"), 
-                        timestamp: new Date(tzStr).getTime()
-                    });
-
-                    breakData.status = 'completed'; 
-                    set(ref(db, getDBPath('breaks/' + key)), breakData);
+                    if (varianceMins > 0) variance = `LATE by ${varianceMins} min`;
+                    else if (varianceMins < 0) variance = `EARLY by ${Math.abs(varianceMins)} min`;
+                    else variance = "EXACT ON TIME";
+                } else {
+                    varianceMins = Math.round((breakData.returnRequestedTime - breakData.startTime) / 60000);
+                    variance = `Took ${varianceMins} min total`;
                 }
-            } catch(err) {
-                alert("Error approving return: " + err.message);
+
+                if (variance === "EXACT ON TIME") window.shootConfetti();
+
+                const emp = currentEmployees.find(e => e.name === breakData.name);
+                const clockInToSave = (emp && emp.clockInTime) ? emp.clockInTime : "No Sign-In";
+
+                const historyRef = ref(db, `${FACTION_ID}/history/${businessDate}`);
+                push(historyRef, {
+                    name: breakData.name,
+                    clockInTime: clockInToSave,
+                    type: breakData.type,
+                    startTime: formatAMPM(breakData.startTime),
+                    expectedEnd: breakData.endTime > 0 ? formatAMPM(breakData.endTime) : "Open Return",
+                    actualReturn: formatAMPM(breakData.returnRequestedTime),
+                    variance: variance,
+                    adminNote: adminNote.replace(/"/g, "'"), 
+                    timestamp: new Date(tzStr).getTime()
+                });
+
+                breakData.status = 'completed'; 
+                set(ref(db, `${FACTION_ID}/breaks/` + key), breakData);
             }
         }, 100);
     };
 
-    function updateHeaderAuthUI() {
-        const authBtnContainer = document.getElementById('staffAuthContainer');
-        const clockInModal = document.getElementById('clockInModal');
-        const closeBtn = document.getElementById('clockInCloseBtn');
-
-        if (!authBtnContainer) return;
-
-        if (window.isStaffView && window.isMobile) {
-            authBtnContainer.innerHTML = '<span class="brand-badge" style="background: rgba(148, 163, 184, 0.15); color: #94A3B8; border-color: rgba(148, 163, 184, 0.3); padding: 8px 16px; font-size: 13px;">📱 Mobile Mode Active</span>';
-            if (clockInModal) clockInModal.style.display = 'none';
-            return;
-        }
-
-        const localUser = sessionStorage.getItem('prestoStaffAuth');
-        if (localUser) {
-            authBtnContainer.innerHTML = '<button class="btn btn-warning" style="font-size: 14px; padding: 10px 20px;" onclick="window.processClockOut()">🚪 Sign Out (' + localUser.split(' ')[0] + ')</button>';
-            if (clockInModal) clockInModal.style.display = 'none'; 
-        } else {
-            authBtnContainer.innerHTML = '<button class="btn btn-success" style="font-size: 14px; padding: 10px 20px;" onclick="document.getElementById(\'clockInModal\').style.display=\'flex\'">🕒 Mandatory Daily Sign In</button>';
-            
-            if (window.isStaffView && clockInModal) {
-                clockInModal.style.display = 'flex';
-                if (closeBtn) closeBtn.style.display = 'none'; 
-            } else {
-                if (closeBtn) closeBtn.style.display = 'block'; 
-            }
-        }
-    }
-    updateHeaderAuthUI();
-
-    // 21. LEADERBOARD & EXPORT AUDIT SYSTEMS
     window.openLeaderboard = async function() {
         if (!requireAdmin()) return;
         document.getElementById('leaderboardModal').style.display = 'flex';
@@ -1738,7 +2102,7 @@
         contentDiv.innerHTML = '<p style="text-align: center; color: var(--primary);">Fetching historical data...</p>';
 
         try {
-            const snapshot = await get(ref(db, getDBPath('history')));
+            const snapshot = await get(ref(db, `${FACTION_ID}/history`));
             if (!snapshot.exists()) {
                 contentDiv.innerHTML = '<p style="text-align: center; color: var(--text-muted);">No break history has been recorded yet.</p>';
                 return;
@@ -1776,16 +2140,27 @@
                 };
             }).sort((a, b) => b.score - a.score);
 
-            let html = '<table class="leaderboard-table"><thead><tr><th>Rank</th><th>Employee Name</th><th>Net Balance</th><th>Level</th></tr></thead><tbody>';
+            let html = `
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Employee Name</th>
+                            <th>Net Balance</th>
+                            <th>Level</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
 
             sortedStaff.forEach((emp, index) => {
-                let rankStr = (index + 1).toString();
+                let rankStr = `${index + 1}`;
                 if (index === 0) rankStr = '🥇 1';
                 
                 let scoreClass = 'score-neutral';
-                let scoreText = emp.score + " min";
-                if (emp.score > 0) { scoreClass = 'score-good'; scoreText = "+" + emp.score + " min"; }
-                if (emp.score < 0) { scoreClass = 'score-bad'; scoreText = emp.score + " min"; }
+                let scoreText = `${emp.score} min`;
+                if (emp.score > 0) { scoreClass = 'score-good'; scoreText = `+${emp.score} min`; }
+                if (emp.score < 0) { scoreClass = 'score-bad'; scoreText = `${emp.score} min`; }
 
                 let badge = 'Novice';
                 if(index === 0) badge = '👑 Champion';
@@ -1793,14 +2168,21 @@
                 else if (emp.score > 50) badge = '🥈 Silver';
                 else if (emp.score > 20) badge = '🥉 Bronze';
 
-                html += '<tr><td style="font-weight: 800;">' + rankStr + '</td><td style="font-weight: 700; color: var(--text-main);">' + emp.name + '</td><td class="' + scoreClass + '">' + scoreText + '</td><td style="color: var(--text-muted);">' + badge + '</td></tr>';
+                html += `
+                    <tr>
+                        <td style="font-weight: 800;">${rankStr}</td>
+                        <td style="font-weight: 700; color: var(--text-main);">${emp.name}</td>
+                        <td class="${scoreClass}">${scoreText}</td>
+                        <td style="color: var(--text-muted);">${badge}</td>
+                    </tr>
+                `;
             });
 
-            html += '</tbody></table>';
+            html += `</tbody></table>`;
             contentDiv.innerHTML = html;
 
         } catch (e) {
-            contentDiv.innerHTML = '<p style="color: #EF4444;">Error loading leaderboard: ' + e.message + '</p>';
+            contentDiv.innerHTML = `<p style="color: #EF4444;">Error loading leaderboard: ${e.message}</p>`;
         }
     };
 
@@ -1808,6 +2190,379 @@
         document.getElementById('leaderboardModal').style.display = 'none';
     };
 
+    window.openEmployeeManager = function() {
+        if (!requireAdmin()) return;
+        document.getElementById('employeeModal').style.display = 'flex';
+        renderModalList();
+    };
+
+    window.closeEmployeeManager = function() {
+        document.getElementById('employeeModal').style.display = 'none';
+    };
+
+    window.autoAssignBreaks = function() {
+        const shiftName = document.getElementById('autoShiftName').value.trim();
+        const startRaw = document.getElementById('autoShiftStart').value;
+        
+        if (!shiftName || !startRaw) {
+            alert("Please fill in both the Shift Name and the First Break Start Time to calculate.");
+            return;
+        }
+
+        const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
+        let startTimeMs = parseTimeToday(convertTimeFormat(startRaw)).getTime();
+
+        const baseShiftSearch = shiftName.split(' (')[0];
+        let shiftStaff = currentEmployees.filter(e => e.shift.includes(baseShiftSearch));
+        
+        if(shiftStaff.length === 0) {
+            alert("No employees found assigned to a shift containing: " + baseShiftSearch);
+            return;
+        }
+
+        let currentIndex = 0;
+
+        currentEmployees.forEach(emp => {
+            if (emp.shift.includes(baseShiftSearch)) {
+                let empStartMs = startTimeMs + (currentIndex * 15 * 60000);
+                let empEndMs = empStartMs + (30 * 60000);
+
+                emp.timeStart = formatAMPM(empStartMs);
+                emp.timeEnd = formatAMPM(empEndMs);
+                emp.overlap = "2 Staff"; 
+
+                currentIndex++;
+            }
+        });
+
+        currentEmployees.sort((a, b) => {
+            if (a.shift !== b.shift) return a.shift.localeCompare(b.shift);
+            const getSortTime = (t) => {
+                if (!t || t === '--:--') return 9999999999999;
+                let d = parseTimeToday(t);
+                if (d.getHours() < 6) d.setDate(d.getDate() + 1);
+                return d.getTime();
+            };
+            return getSortTime(a.timeStart) - getSortTime(b.timeStart);
+        });
+
+        set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
+        alert(`Successfully generated sequential breaks for ${currentIndex} employees in ${baseShiftSearch}!`);
+        renderModalList();
+    };
+
+    window.addEmployee = function() {
+        const name = document.getElementById('newEmpName').value.trim();
+        const pc = document.getElementById('newEmpPC').value.trim() || "PC-XX";
+        const team = document.getElementById('newEmpTeam').value.trim() || "Main Team";
+        const shift = document.getElementById('newEmpShift').value.trim() || "Shift A (07:00 PM - 02:00 AM)";
+        const pOff = document.getElementById('newEmpDayOff').value;
+        const startRaw = document.getElementById('newEmpStart').value;
+        const endRaw = document.getElementById('newEmpEnd').value;
+
+        if (!name) { alert("Please enter an employee name."); return; }
+        
+        const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
+        const businessTime = new Date(new Date(tzStr).getTime() - (4 * 3600 * 1000));
+        const todayDayStr = businessTime.toLocaleString('en-US', { weekday: 'long' });
+
+        let finalStart = "12:00 AM";
+        let finalEnd = "12:30 AM";
+
+        if (startRaw && endRaw) {
+            finalStart = convertTimeFormat(startRaw);
+            finalEnd = convertTimeFormat(endRaw);
+        } else {
+            const baseShiftSearch = shift.split(' (')[0];
+            let shiftStaff = currentEmployees.filter(e => e.shift.includes(baseShiftSearch));
+
+            const match = shift.match(/([0-1]?[0-9]:[0-5][0-9]\s*(?:AM|PM|am|pm))/);
+            if (match) {
+                let shiftStartMs = parseTimeToday(match[1].toUpperCase()).getTime();
+                let targetStartMs = shiftStartMs;
+
+                if (shiftStaff.length > 0) {
+                    let maxTimeMs = shiftStartMs;
+                    shiftStaff.forEach(e => {
+                        let eTimeMs = parseTimeToday(e.timeStart).getTime();
+                        if (eTimeMs < shiftStartMs && (shiftStartMs - eTimeMs) > 12 * 3600 * 1000) {
+                            eTimeMs += 24 * 3600 * 1000;
+                        }
+                        if (eTimeMs > maxTimeMs) {
+                            maxTimeMs = eTimeMs;
+                        }
+                    });
+                    targetStartMs = maxTimeMs + (15 * 60000);
+                }
+
+                finalStart = formatAMPM(targetStartMs);
+                finalEnd = formatAMPM(targetStartMs + (30 * 60000));
+            }
+        }
+
+        const newEmp = {
+            name: name,
+            pcNumber: pc,
+            teamName: team,
+            shift: shift,
+            assignedDayOff: pOff,
+            dayOff: (pOff === todayDayStr) ? todayDayStr : "None",
+            timeStart: finalStart, 
+            timeEnd: finalEnd,
+            overlap: "1 Staff",
+            isLocked: false,
+            quota30: 0,
+            quota10: 0,
+            clockInTime: null,
+            passkey: ""
+        };
+
+        try {
+            currentEmployees.push(newEmp);
+            
+            currentEmployees.sort((a, b) => {
+                if (a.shift !== b.shift) return a.shift.localeCompare(b.shift);
+                const getSortTime = (t) => {
+                    if (!t || t === '--:--') return 9999999999999;
+                    let d = parseTimeToday(t);
+                    if (d.getHours() < 6) d.setDate(d.getDate() + 1);
+                    return d.getTime();
+                };
+                return getSortTime(a.timeStart) - getSortTime(b.timeStart);
+            });
+
+            set(ref(db, `${FACTION_ID}/roster`), currentEmployees).then(() => {
+                document.getElementById('newEmpName').value = '';
+                document.getElementById('newEmpPC').value = '';
+                document.getElementById('newEmpStart').value = '';
+                document.getElementById('newEmpEnd').value = '';
+                alert(`✅ SUCCESS: Employee ${name} has been securely saved to the live cloud database!\n\nTheir break was automatically staggered and set to ${finalStart} - ${finalEnd}.`);
+                renderModalList();
+            }).catch((error) => {
+                alert(`❌ FAILURE: Could not save employee to the cloud.\nError Details: ${error.message}`);
+            });
+        } catch (err) {
+            alert(`❌ FAILURE: An unexpected error occurred.\nError Details: ${err.message}`);
+        }
+    };
+
+    window.deleteEmployee = function(index) {
+        if (!requireAdmin()) return;
+        if(confirm(`Are you sure you want to completely remove ${currentEmployees[index].name} from the database?`)) {
+            currentEmployees.splice(index, 1);
+            set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
+            renderModalList();
+        }
+    };
+
+    window.toggleLock = function(index) {
+        if (isStaffView) return;
+        if (!requireAdmin()) return; 
+        currentEmployees[index].isLocked = !currentEmployees[index].isLocked;
+        set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
+    };
+
+    window.resetPIN = function(index) {
+        if (!requireAdmin()) return;
+        if(confirm(`Reset the 4-digit PIN for ${currentEmployees[index].name}? They will be prompted to create a new one on their next sign-in.`)) {
+            currentEmployees[index].passkey = "";
+            set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
+            renderModalList();
+        }
+    };
+
+    function renderModalList() {
+        const listDiv = document.getElementById('modalEmpList');
+        listDiv.innerHTML = '';
+        currentEmployees.forEach((emp, index) => {
+            listDiv.innerHTML += `
+                <div class="emp-list-item">
+                    <div class="emp-list-info">
+                        <span class="emp-list-name">${emp.pcNumber} | ${emp.name}</span>
+                        <span class="emp-list-meta">${emp.shift.split(' (')[0]} | ${emp.teamName} | Break: ${emp.timeStart} - ${emp.timeEnd}</span>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-warning" style="padding: 6px 12px; font-size: 11px;" onclick="window.resetPIN(${index})">Reset PIN</button>
+                        <button class="btn btn-staff" style="padding: 6px 12px; font-size: 11px;" onclick="window.toggleLock(${index})">${emp.isLocked ? '🔒 Locked' : '🔓 Unlock'}</button>
+                        <button class="btn btn-danger" style="padding: 6px 12px; font-size: 11px;" onclick="window.deleteEmployee(${index})">Remove</button>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    window.updateShift = function(index, newVal) {
+        if (isStaffView || !requireAdmin()) return; 
+        currentEmployees[index].shift = newVal;
+        set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
+    };
+
+    window.updatePC = function(index, newVal) {
+        if (isStaffView || !requireAdmin()) return; 
+        currentEmployees[index].pcNumber = newVal.trim() || "PC-XX";
+        set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
+    };
+
+    window.updateTeam = function(index, newVal) {
+        if (isStaffView || !requireAdmin()) return; 
+        currentEmployees[index].teamName = newVal.trim() || "No Team";
+        set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
+    };
+
+    window.updatePermanentDayOff = function(index, newStatus) {
+        if (isStaffView || !requireAdmin()) return; 
+        currentEmployees[index].assignedDayOff = newStatus;
+        const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
+        const businessTime = new Date(new Date(tzStr).getTime() - (4 * 3600 * 1000));
+        const todayDayStr = businessTime.toLocaleString('en-US', { weekday: 'long' });
+        currentEmployees[index].dayOff = (newStatus === todayDayStr) ? newStatus : "None";
+        set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
+    };
+
+    window.toggleForceAbsent = function(index) {
+        if (isStaffView || !requireAdmin()) return;
+        if (currentEmployees[index].dayOff === "None") currentEmployees[index].dayOff = "Off Duty"; 
+        else currentEmployees[index].dayOff = "None"; 
+        set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
+    };
+
+    window.updateName = function(index, newName) {
+        if (isStaffView || !requireAdmin()) return; 
+        const cleanedName = newName.trim();
+        if (cleanedName && currentEmployees[index].name !== cleanedName) {
+            currentEmployees[index].name = cleanedName;
+            set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
+        }
+    };
+
+    window.toggleAuth = function() {
+        if (!isUnlocked) {
+            if (requireAdmin()) {
+                isUnlocked = true;
+                document.getElementById('statusDot').classList.add('unlocked');
+                document.getElementById('statusText').innerText = "Roster Controls: UNLOCKED (Drag & Drop to reorder breaks)";
+                document.getElementById('authBtn').innerText = "🔒 Lock Controls";
+                
+                const btn = document.getElementById('reshuffleBtn');
+                btn.disabled = false; btn.style.opacity = "1"; btn.style.cursor = "pointer";
+                renderTable(); 
+            }
+        } else {
+            isUnlocked = false;
+            document.getElementById('statusDot').classList.remove('unlocked');
+            document.getElementById('statusText').innerText = "Roster Controls: Locked (PIN Protected)";
+            document.getElementById('authBtn').innerText = "🔑 Unlock Controls";
+            
+            const btn = document.getElementById('reshuffleBtn');
+            btn.disabled = true; btn.style.opacity = "0.5"; btn.style.cursor = "not-allowed";
+            renderTable();
+        }
+    };
+
+    window.reshuffleSchedule = function() {
+        if (!isUnlocked || isStaffView || !requireAdmin()) return;
+        
+        let shiftGroups = {};
+        
+        currentEmployees.forEach((emp, idx) => {
+            if (!emp.isLocked) {
+                let baseShift = emp.shift.split(' (')[0];
+                if (!shiftGroups[baseShift]) {
+                    shiftGroups[baseShift] = {
+                        unlockedIndices: [],
+                        timeSlots: []
+                    };
+                }
+                shiftGroups[baseShift].unlockedIndices.push(idx);
+                shiftGroups[baseShift].timeSlots.push({
+                    timeStart: emp.timeStart,
+                    timeEnd: emp.timeEnd,
+                    overlap: emp.overlap
+                });
+            }
+        });
+        
+        Object.keys(shiftGroups).forEach(shift => {
+            let group = shiftGroups[shift];
+            
+            group.timeSlots.sort((a, b) => {
+                const getSortTime = (t) => {
+                    if (!t || t === '--:--') return 9999999999999;
+                    let d = parseTimeToday(t);
+                    if (d.getHours() < 6) d.setDate(d.getDate() + 1);
+                    return d.getTime();
+                };
+                return getSortTime(a.timeStart) - getSortTime(b.timeStart);
+            });
+            
+            for (let i = group.unlockedIndices.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [group.unlockedIndices[i], group.unlockedIndices[j]] = [group.unlockedIndices[j], group.unlockedIndices[i]];
+            }
+            
+            group.unlockedIndices.forEach((idx, i) => {
+                currentEmployees[idx].timeStart = group.timeSlots[i].timeStart;
+                currentEmployees[idx].timeEnd = group.timeSlots[i].timeEnd;
+                currentEmployees[idx].overlap = group.timeSlots[i].overlap;
+            });
+        });
+        
+        currentEmployees.sort((a, b) => {
+            if (a.shift !== b.shift) return a.shift.localeCompare(b.shift);
+            const getSortTime = (t) => {
+                if (!t || t === '--:--') return 9999999999999;
+                let d = parseTimeToday(t);
+                if (d.getHours() < 6) d.setDate(d.getDate() + 1);
+                return d.getTime();
+            };
+            return getSortTime(a.timeStart) - getSortTime(b.timeStart);
+        });
+        
+        set(ref(db, `${FACTION_ID}/roster`), currentEmployees);
+    };
+
+    window.copyStaffLink = function() {
+        const staffUrl = window.location.origin + window.location.pathname + "?view=staff";
+        navigator.clipboard.writeText(staffUrl).then(() => {
+            alert("✅ Staff Link Copied to Clipboard!");
+        }).catch(err => {
+            prompt("Copy this URL manually:", staffUrl);
+        });
+    };
+
+    window.filterTable = function() {
+        const inputEl = document.getElementById('searchInput');
+        if(!inputEl) return;
+        const input = inputEl.value.toLowerCase();
+        const rows = document.querySelectorAll('#scheduleTable tbody tr');
+
+        rows.forEach((row, idx) => {
+            const nameEl = row.querySelector('.col-name .editable-name');
+            if(!nameEl) return;
+            const emp = currentEmployees[idx];
+            const searchText = (emp.name + " " + (emp.pcNumber || "") + " " + emp.shift + " " + (emp.teamName || "")).toLowerCase();
+            const shiftText = emp.shift; 
+            const isOff = emp && emp.dayOff !== 'None';
+
+            const matchesSearch = searchText.includes(input);
+            let matchesShift = true;
+
+            if (activeShiftFilter === 'present') matchesShift = !isOff;
+            else if (activeShiftFilter === 'dayoff') matchesShift = isOff;
+            else if (activeShiftFilter !== 'all') matchesShift = shiftText.includes(activeShiftFilter);
+
+            row.style.display = (matchesSearch && matchesShift) ? '' : 'none';
+        });
+    };
+
+    window.filterShift = function(shift, el) {
+        activeShiftFilter = shift;
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        el.classList.add('active');
+        window.filterTable();
+    };
+
+    // --- 90-DAY EMPLOYEE AUDIT ---
     window.exportEmployeeHistory = async function() {
         if (!requireAdmin()) return;
         
@@ -1815,7 +2570,7 @@
         if (!empName) return;
 
         try {
-            const snapshot = await get(ref(db, getDBPath('history')));
+            const snapshot = await get(ref(db, `${FACTION_ID}/history`));
             if (!snapshot.exists()) {
                 alert("No history found in database.");
                 return;
@@ -1837,8 +2592,7 @@
                     const dailyRecords = allHistory[dateStr];
                     Object.values(dailyRecords).forEach(log => {
                         if (log.name.toLowerCase().includes(empName.toLowerCase().trim())) {
-                            let rLog = '"' + dateStr + '","' + log.name + '","' + (log.clockInTime || 'N/A') + '","' + log.type + '","' + log.startTime + '","' + log.expectedEnd + '","' + log.actualReturn + '","' + log.variance + '","' + (log.adminNote || '') + '"';
-                            csv.push(rLog);
+                            csv.push(`"${dateStr}","${log.name}","${log.clockInTime || 'N/A'}","${log.type}","${log.startTime}","${log.expectedEnd}","${log.actualReturn}","${log.variance}","${log.adminNote || ''}"`);
                             matchCount++;
                         }
                     });
@@ -1846,20 +2600,20 @@
             });
 
             if (matchCount === 0) {
-                alert("No records found for \"" + empName + "\" in the last 90 days.");
+                alert(`No records found for "${empName}" in the last 90 days.`);
                 return;
             }
 
             const csvFile = new Blob([csv.join('\n')], { type: 'text/csv' });
             const downloadLink = document.createElement('a');
-            downloadLink.download = "Audit_" + empName.replace(/\s+/g, '_') + "_90Days.csv";
+            downloadLink.download = `Audit_${empName.replace(/\s+/g, '_')}_90Days.csv`;
             downloadLink.href = window.URL.createObjectURL(csvFile);
             downloadLink.style.display = 'none';
             document.body.appendChild(downloadLink);
             downloadLink.click();
             document.body.removeChild(downloadLink);
             
-            alert("✅ Successfully exported " + matchCount + " historical break records for " + empName + "!");
+            alert(`✅ Successfully exported ${matchCount} historical break records for ${empName}!`);
             
         } catch (e) {
             alert("Error generating report: " + e.message);
@@ -1869,10 +2623,10 @@
     window.exportHistory = async function() {
         if (!requireAdmin()) return;
         const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
-        const businessDate = new Date(new Date(tzStr).getTime() - (3 * 3600 * 1000)).toISOString().split('T')[0];
+        const businessDate = new Date(new Date(tzStr).getTime() - (4 * 3600 * 1000)).toISOString().split('T')[0];
 
         try {
-            const snapshot = await get(ref(db, getDBPath('history/' + businessDate)));
+            const snapshot = await get(ref(db, `${FACTION_ID}/history/${businessDate}`));
             if (!snapshot.exists()) {
                 alert("No break history logged for today yet!");
                 return;
@@ -1882,13 +2636,12 @@
             let csv = ["Employee Name,Clock In Time,Break Type,Start Time,Expected Return,Actual Return,Variance Log,Admin Notes"];
             
             Object.values(data).forEach(log => {
-                let rLog = '"' + log.name + '","' + (log.clockInTime || 'N/A') + '","' + log.type + '","' + log.startTime + '","' + log.expectedEnd + '","' + log.actualReturn + '","' + log.variance + '","' + (log.adminNote || '') + '"';
-                csv.push(rLog);
+                csv.push(`"${log.name}","${log.clockInTime || 'N/A'}","${log.type}","${log.startTime}","${log.expectedEnd}","${log.actualReturn}","${log.variance}","${log.adminNote || ''}"`);
             });
             
             const csvFile = new Blob([csv.join('\n')], { type: 'text/csv' });
             const downloadLink = document.createElement('a');
-            downloadLink.download = "Presto_Break_History_" + businessDate + ".csv";
+            downloadLink.download = `Presto_Break_History_${businessDate}.csv`;
             downloadLink.href = window.URL.createObjectURL(csvFile);
             downloadLink.style.display = 'none';
             document.body.appendChild(downloadLink);
@@ -1921,7 +2674,7 @@
         }
         const csvFile = new Blob([csv.join('\n')], { type: 'text/csv' });
         const downloadLink = document.createElement('a');
-        downloadLink.download = "Presto_Eat_Live_Schedule.csv";
+        downloadLink.download = `Presto_Eat_Live_Schedule_${FACTION_ID}.csv`;
         downloadLink.href = window.URL.createObjectURL(csvFile);
         downloadLink.style.display = 'none';
         document.body.appendChild(downloadLink);
@@ -1929,32 +2682,6 @@
         document.body.removeChild(downloadLink);
     };
 
-</script>
-
-<!-- ISOLATED FAIL-PROOF MASTER CLOCK SCRIPT -->
-<script>
-    function runMasterClock() {
-        const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
-        const now = new Date(tzStr);
-        let hours = now.getHours(), minutes = now.getMinutes(), seconds = now.getSeconds();
-        const ampm = hours >= 12 ? 'PM' : 'AM';
-        hours = hours % 12; hours = hours ? hours : 12; 
-        minutes = minutes < 10 ? '0' + minutes : minutes;
-        seconds = seconds < 10 ? '0' + seconds : seconds;
-        
-        const timeStr = hours + ':' + minutes + ':' + seconds + ' ' + ampm;
-        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-        const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-        const dateStr = days[now.getDay()] + ', ' + months[now.getMonth()] + ' ' + now.getDate() + ', ' + now.getFullYear();
-
-        const timeEl = document.getElementById('osdTime');
-        const dateEl = document.getElementById('osdDate');
-        
-        if(timeEl) timeEl.innerText = timeStr;
-        if(dateEl) dateEl.innerText = dateStr;
-    }
-    runMasterClock();
-    setInterval(runMasterClock, 1000);
 </script>
 </body>
 </html>
