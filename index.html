@@ -438,10 +438,10 @@
 
         <div class="actions-group" id="headerActions">
             <button class="btn" style="background: rgba(139, 92, 246, 0.1); border-color: #8B5CF6; color: #8B5CF6;" onclick="window.openTrafficGame()">🛵 Mini Game</button>
-            <button class="btn btn-audit" onclick="window.exportEmployeeHistory()">📅 90-Day Audit</button>
-            <button class="btn btn-warning" onclick="window.openLeaderboard()">🏆 Gamification</button>
-            <button class="btn btn-staff" onclick="window.exportHistory()">📊 Export History</button>
-            <button class="btn" onclick="window.exportCSV()">Export Roster</button>
+            <button class="btn btn-audit admin-only-btn" style="display: none;" onclick="window.exportEmployeeHistory()">📅 90-Day Audit</button>
+            <button class="btn btn-warning admin-only-btn" style="display: none;" onclick="window.openLeaderboard()">🏆 Gamification</button>
+            <button class="btn btn-staff admin-only-btn" style="display: none;" onclick="window.exportHistory()">📊 Export History</button>
+            <button class="btn admin-only-btn" style="display: none;" onclick="window.exportCSV()">Export Roster</button>
             <button class="btn btn-primary" onclick="window.print()">Print PDF</button>
         </div>
     </header>
@@ -487,7 +487,7 @@
         <div class="metric-card glass-panel" style="background: rgba(236, 72, 153, 0.05); border-color: rgba(236, 72, 153, 0.2);">
             <span class="metric-label" style="color: #EC4899; display: flex; justify-content: space-between; align-items: center;">
                 💖 Team Kudos Board
-                <button class="btn" style="padding: 2px 8px; font-size: 10px; background: rgba(236, 72, 153, 0.1); color: #EC4899; border-color: transparent;" onclick="window.addKudo()">+ Add</button>
+                <button class="btn admin-only-btn" style="display: none; padding: 2px 8px; font-size: 10px; background: rgba(236, 72, 153, 0.1); color: #EC4899; border-color: transparent;" onclick="window.addKudo()">+ Add</button>
             </span>
             <span class="metric-value" id="kudosText" style="font-size: 15px; font-weight: 500; font-style: italic; margin-top: 8px; flex-grow: 1; display:flex; align-items:center;">Loading positive vibes...</span>
         </div>
@@ -530,10 +530,10 @@
         </div>
         <div class="actions-group">
             <div class="cloud-badge">🟢 Live Database Synced</div>
-            <span id="queueOrb" class="queue-orb orb-green" onclick="window.cycleQueueStatus()" title="Admin: Cycle Floor Queue Status" style="margin-right:10px;"></span>
-            <button class="btn btn-staff" onclick="window.copyStaffLink()">📱 Copy Staff Link</button>
-            <button class="btn" style="background: rgba(56, 189, 248, 0.1); border-color: #38BDF8; color: #38BDF8;" onclick="window.openEmployeeManager()">⚙️ Manage Roster & Shifts</button>
-            <button id="reshuffleBtn" class="btn btn-success" onclick="window.reshuffleSchedule()" disabled style="opacity: 0.5; cursor: not-allowed;">🔄 Reshuffle Operations</button>
+            <span id="queueOrb" class="queue-orb orb-green" onclick="window.cycleQueueStatus()" title="Admin: Cycle Floor Queue Status" style="margin-right:10px; pointer-events: none;"></span>
+            <button class="btn btn-staff admin-only-btn" style="display: none;" onclick="window.copyStaffLink()">📱 Copy Staff Link</button>
+            <button class="btn admin-only-btn" style="display: none; background: rgba(56, 189, 248, 0.1); border-color: #38BDF8; color: #38BDF8;" onclick="window.openEmployeeManager()">⚙️ Manage Roster & Shifts</button>
+            <button id="reshuffleBtn" class="btn btn-success admin-only-btn" style="display: none;" onclick="window.reshuffleSchedule()">🔄 Reshuffle Operations</button>
             <button id="authBtn" class="btn" onclick="window.toggleAuth()">🔒 Unlock Controls</button>
         </div>
     </div>
@@ -633,11 +633,11 @@
         appId: "1:828847025710:web:72f00f90f45fe20f1f79bf"
     };
 
-    const FACTION_ID = "Phoenix_Team"; 
+    const FACTION_ID = "presto"; 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     
-    const SECRET_PIN = "2242";         
+    const SECRET_PIN = "2026presto"; // <-- 🔑 CHANGE THIS TO YOUR NEW PIN         
 
     let isUnlocked = false;
     let activeShiftFilter = 'all';
@@ -1275,6 +1275,7 @@
     });
 
     window.updateTicker = function() {
+        if (!isUnlocked) return;
         if (!requireAdmin()) return;
         let newMsg = prompt("Enter a new live dispatch announcement:");
         if (newMsg !== null && newMsg.trim() !== "") {
@@ -1733,9 +1734,13 @@
         tbody.innerHTML = '';
 
         const localAuthUser = sessionStorage.getItem('prestoStaffAuth');
+        const isEditingAllowed = !isStaffView && isUnlocked;
         const isDraggableList = !isStaffView && isUnlocked && activeShiftFilter === 'all' && document.getElementById('searchInput').value.trim() === '';
         const tzStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tripoli' });
         const nowTimeMs = new Date(tzStr).getTime();
+
+        const editableAttr = isEditingAllowed ? 'contenteditable="true"' : 'contenteditable="false"';
+        const selectDisabled = isEditingAllowed ? '' : 'disabled';
 
         currentEmployees.forEach((emp, index) => {
             const isOffToday = emp.dayOff !== 'None';
@@ -1762,7 +1767,7 @@
 
             let shiftBadgeHtml = isStaffView 
                 ? `<span class="status-badge ${shiftClass}">${emp.shift.split(' (')[0]}</span>`
-                : `<select class="dayoff-select" style="margin-bottom: 4px; font-size: 11px; padding: 4px; width: 100%;" onchange="window.updateShift(${index}, this.value)">
+                : `<select class="dayoff-select" style="margin-bottom: 4px; font-size: 11px; padding: 4px; width: 100%;" ${selectDisabled} onchange="window.updateShift(${index}, this.value)">
                      ${shiftSelectOptionsHtml}
                    </select>`;
 
@@ -1801,8 +1806,6 @@
                 tr.setAttribute('ondrop', `window.handleDrop(event, ${index})`);
             }
 
-            const editableAttr = isStaffView ? 'contenteditable="false"' : 'contenteditable="true"';
-            const selectDisabled = isStaffView ? 'disabled' : '';
             const breakDisabled = (isOffToday || isOffShift || !emp.clockInTime) ? 'disabled title="Employee is absent, off shift, or has not signed in"' : 'title="Request Break"';
 
             const presentBtnStyle = isOffToday ? 'color: #F87171; border-color: #F87171;' : 'color: #10B981; border-color: #10B981;';
@@ -1819,7 +1822,7 @@
             const q10Border = q10Maxed ? 'rgba(239, 68, 68, 0.3)' : 'rgba(56, 189, 248, 0.3)';
 
             let clockInHtml = emp.clockInTime 
-                ? `<div style="font-size: 10px; color: #10B981; font-weight: 700; margin-top: 6px; ${!isStaffView ? 'cursor:pointer;' : ''}" ${!isStaffView ? `onclick="window.voidClockIn(${index})"` : ''} title="${!isStaffView ? 'Admin: Click to VOID this sign-in' : ''}">▶ In: ${emp.clockInTime}</div>` 
+                ? `<div style="font-size: 10px; color: #10B981; font-weight: 700; margin-top: 6px; ${isEditingAllowed ? 'cursor:pointer;' : ''}" ${isEditingAllowed ? `onclick="window.voidClockIn(${index})"` : ''} title="${isEditingAllowed ? 'Admin: Click to VOID this sign-in' : ''}">▶ In: ${emp.clockInTime}</div>` 
                 : `<div style="font-size: 10px; color: var(--text-muted); font-weight: 600; margin-top: 6px;">No Sign-In</div>`;
 
             let canViewButtons = true;
@@ -1845,7 +1848,11 @@
             }
 
             if (!isStaffView) {
-                actionButtonsHtml += `<button class="btn-mini-break" style="${emp.isLocked ? 'border-color: #F59E0B; color: #F59E0B;' : 'opacity: 0.6;'}" onclick="window.toggleLock(${index})" title="Prevent from Reshuffling">${emp.isLocked ? '🔒 Locked' : '🔓 Unlock'}</button>`;
+                if (isEditingAllowed) {
+                    actionButtonsHtml += `<button class="btn-mini-break" style="${emp.isLocked ? 'border-color: #F59E0B; color: #F59E0B;' : 'opacity: 0.6;'}" onclick="window.toggleLock(${index})" title="Prevent from Reshuffling">${emp.isLocked ? '🔒 Locked' : '🔓 Unlock'}</button>`;
+                } else if (emp.isLocked) {
+                    actionButtonsHtml += '<span class="lock-badge">🔒 FIXED</span>';
+                }
             } else if (emp.isLocked && canViewButtons) {
                 actionButtonsHtml += '<span class="lock-badge">🔒 FIXED</span>';
             }
@@ -1871,10 +1878,10 @@
                 </td>
                 <td class="col-quotas">
                     <div style="display: flex; flex-direction: column; gap: 4px;">
-                        <span style="background: ${q30Bg}; color: ${q30Color}; border: 1px solid ${q30Border}; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; cursor: ${isStaffView ? 'default' : 'pointer'};" ${!isStaffView ? `onclick="window.resetQuota(${index}, '30')"` : ''} title="Official 30-Min Breaks">
+                        <span style="background: ${q30Bg}; color: ${q30Color}; border: 1px solid ${q30Border}; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; cursor: ${isEditingAllowed ? 'pointer' : 'default'};" ${isEditingAllowed ? `onclick="window.resetQuota(${index}, '30')"` : ''} title="Official 30-Min Breaks">
                             30 Min: ${emp.quota30} / 1
                         </span>
-                        <span style="background: ${q10Bg}; color: ${q10Color}; border: 1px solid ${q10Border}; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; cursor: ${isStaffView ? 'default' : 'pointer'};" ${!isStaffView ? `onclick="window.resetQuota(${index}, '10')"` : ''} title="Quick 10-Min Breaks">
+                        <span style="background: ${q10Bg}; color: ${q10Color}; border: 1px solid ${q10Border}; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; cursor: ${isEditingAllowed ? 'pointer' : 'default'};" ${isEditingAllowed ? `onclick="window.resetQuota(${index}, '10')"` : ''} title="Quick 10-Min Breaks">
                             10 Min: ${emp.quota10} / 3
                         </span>
                     </div>
@@ -1884,7 +1891,7 @@
                         <select class="dayoff-select" ${selectDisabled} onchange="window.updatePermanentDayOff(${index}, this.value)">
                             ${selectOptionsHtml}
                         </select>
-                        <button class="btn-mini-break" ${selectDisabled} style="text-align: center; ${presentBtnStyle}" onclick="window.toggleForceAbsent(${index})">
+                        <button class="btn-mini-break" ${selectDisabled} style="text-align: center; ${presentBtnStyle}" ${isEditingAllowed ? `onclick="window.toggleForceAbsent(${index})"` : ''}>
                             ${presentBtnText}
                         </button>
                     </div>
@@ -1952,11 +1959,15 @@
                 card.className = `break-card card-pending`;
                 let adminControls = '';
                 if (!isStaffView) {
-                    adminControls = `
-                    <div style="display: flex; gap: 8px;">
-                        <button class="btn btn-success" onclick="window.approveBreak('${key}')">Approve</button>
-                        <button class="btn btn-danger" onclick="window.denyBreak('${key}')">Deny</button>
-                    </div>`;
+                    if (isUnlocked) {
+                        adminControls = `
+                        <div style="display: flex; gap: 8px;">
+                            <button class="btn btn-success" onclick="window.approveBreak('${key}')">Approve</button>
+                            <button class="btn btn-danger" onclick="window.denyBreak('${key}')">Deny</button>
+                        </div>`;
+                    } else {
+                        adminControls = `<span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">🔒 Unlock to Manage</span>`;
+                    }
                 }
                 card.innerHTML = `
                     <div class="break-info">
@@ -1969,9 +1980,14 @@
             } 
             else if (b.status === 'return_pending') {
                 card.className = `break-card card-unofficial`; 
-                let adminControls = isStaffView ? 
-                    `<button class="btn btn-staff" disabled>Pending Admin Auth...</button>` : 
-                    `<button class="btn btn-success" onclick="window.approveReturn('${key}')">Approve Return</button>`;
+                let adminControls = '';
+                if (isStaffView) {
+                    adminControls = `<button class="btn btn-staff" disabled>Pending Admin Auth...</button>`;
+                } else if (isUnlocked) {
+                    adminControls = `<button class="btn btn-success" onclick="window.approveReturn('${key}')">Approve Return</button>`;
+                } else {
+                    adminControls = `<span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">🔒 Unlock to Approve</span>`;
+                }
                 
                 card.innerHTML = `
                     <div class="break-info">
@@ -2002,7 +2018,11 @@
                 if (canReturn) {
                     returnBtnHtml = `<button class="btn btn-primary" onclick="window.requestReturn('${key}')">Request Return</button>`;
                 } else if (!isStaffView) {
-                    returnBtnHtml = `<button class="btn btn-primary" style="background: #F59E0B; border-color: #F59E0B;" onclick="if(confirm('Admin Override: Force return for ${b.name}?')) window.requestReturn('${key}')" title="Admin Override">Force Return</button>`;
+                    if (isUnlocked) {
+                        returnBtnHtml = `<button class="btn btn-primary" style="background: #F59E0B; border-color: #F59E0B;" onclick="if(confirm('Admin Override: Force return for ${b.name}?')) window.requestReturn('${key}')" title="Admin Override">Force Return</button>`;
+                    } else {
+                        returnBtnHtml = `<span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">🔒 Locked</span>`;
+                    }
                 } else {
                     if (isStaffView && isMobile) {
                         returnBtnHtml = `<span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">📱 PC Sign-in Required</span>`;
@@ -2699,9 +2719,11 @@
                 document.getElementById('statusText').innerText = "Roster Controls: UNLOCKED (Drag & Drop to reorder breaks)";
                 document.getElementById('authBtn').innerText = "🔒 Lock Controls";
                 
-                const btn = document.getElementById('reshuffleBtn');
-                btn.disabled = false; btn.style.opacity = "1"; btn.style.cursor = "pointer";
+                document.querySelectorAll('.admin-only-btn').forEach(btn => btn.style.display = '');
+                document.getElementById('queueOrb').style.pointerEvents = 'auto';
+
                 renderTable(); 
+                renderActiveBreaks();
             }
         } else {
             isUnlocked = false;
@@ -2709,9 +2731,11 @@
             document.getElementById('statusText').innerText = "Roster Controls: Locked (PIN Protected)";
             document.getElementById('authBtn').innerText = "🔑 Unlock Controls";
             
-            const btn = document.getElementById('reshuffleBtn');
-            btn.disabled = true; btn.style.opacity = "0.5"; btn.style.cursor = "not-allowed";
+            document.querySelectorAll('.admin-only-btn').forEach(btn => btn.style.display = 'none');
+            document.getElementById('queueOrb').style.pointerEvents = 'none';
+
             renderTable();
+            renderActiveBreaks();
         }
     };
 
@@ -2994,6 +3018,13 @@
         }
         return false;
     };
+
+    // --- AUTO-UNLOCK FOR CURRENT SESSION ---
+    setTimeout(() => {
+        if (!isStaffView && sessionStorage.getItem('adminAuthed') === SECRET_PIN) {
+            if (!isUnlocked) window.toggleAuth(); // Auto unlock if authenticated
+        }
+    }, 500);
 
 </script>
 </body>
