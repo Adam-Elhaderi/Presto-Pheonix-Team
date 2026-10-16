@@ -302,7 +302,7 @@
     </div>
 </div>
 
-<!-- PRESTO DELIVERY RUSH GAME MODAL -->
+<!-- PRE পুনরায় DELIVERY RUSH GAME MODAL -->
 <div id="gameModal" class="modal-overlay">
     <div class="modal-card" style="max-width: 380px; text-align: center;">
         <div class="modal-header">
@@ -3006,12 +3006,27 @@
         }
 
         if (draggedItemIndex !== null && draggedItemIndex !== targetIndex) {
-            // Remove the dragged employee from the old index
+            // 1. Capture the fixed schedule layout (Time slots & Shifts) before moving anyone
+            const scheduleLayout = currentEmployees.map(emp => ({
+                shift: emp.shift,
+                timeStart: emp.timeStart,
+                timeEnd: emp.timeEnd,
+                overlap: emp.overlap
+            }));
+
+            // 2. Move the employee to the new position
             const draggedEmp = currentEmployees.splice(draggedItemIndex, 1)[0];
-            // Insert them at the new target index
             currentEmployees.splice(targetIndex, 0, draggedEmp);
             
-            // Save the newly ordered array to Firebase
+            // 3. Re-apply the fixed times back to the rows so chronological order is perfectly preserved
+            currentEmployees.forEach((emp, i) => {
+                emp.shift = scheduleLayout[i].shift;
+                emp.timeStart = scheduleLayout[i].timeStart;
+                emp.timeEnd = scheduleLayout[i].timeEnd;
+                emp.overlap = scheduleLayout[i].overlap;
+            });
+            
+            // Save the correctly ordered array to Firebase
             set(ref(db, `${FACTION_ID}/roster`), currentEmployees).catch(err => {
                 alert("Error saving reordered list: " + err.message);
             });
