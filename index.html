@@ -647,7 +647,6 @@
     const urlParams = new URLSearchParams(window.location.search);
     const staffViewRequested = urlParams.get('view') === 'staff';
 
-    // Keep staff mode for this tab, while removing ?view=staff from the address bar.
     if (staffViewRequested) {
         sessionStorage.setItem('prestoStaffViewMode', '1');
         urlParams.delete('view');
@@ -2937,6 +2936,63 @@
         document.body.appendChild(downloadLink);
         downloadLink.click();
         document.body.removeChild(downloadLink);
+    };
+
+    // --- DRAG AND DROP HANDLERS ---
+    let draggedItemIndex = null;
+
+    window.handleDragStart = function(event, index) {
+        draggedItemIndex = index;
+        event.dataTransfer.effectAllowed = 'move';
+        event.target.style.opacity = '0.5';
+    };
+
+    window.handleDragEnd = function(event) {
+        event.target.style.opacity = '1';
+        const rows = document.querySelectorAll('#scheduleTable tbody tr');
+        rows.forEach(row => row.classList.remove('drag-over'));
+        draggedItemIndex = null;
+    };
+
+    window.handleDragOver = function(event) {
+        event.preventDefault(); // Crucial: allows dropping
+        event.dataTransfer.dropEffect = 'move';
+        
+        let targetRow = event.target.closest('tr');
+        if (targetRow && !targetRow.classList.contains('drag-over')) {
+            targetRow.classList.add('drag-over');
+        }
+        return false;
+    };
+
+    window.handleDragLeave = function(event) {
+        let targetRow = event.target.closest('tr');
+        if (targetRow) {
+            targetRow.classList.remove('drag-over');
+        }
+    };
+
+    window.handleDrop = function(event, targetIndex) {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        let targetRow = event.target.closest('tr');
+        if (targetRow) {
+            targetRow.classList.remove('drag-over');
+        }
+
+        if (draggedItemIndex !== null && draggedItemIndex !== targetIndex) {
+            // Remove the dragged employee from the old index
+            const draggedEmp = currentEmployees.splice(draggedItemIndex, 1)[0];
+            // Insert them at the new target index
+            currentEmployees.splice(targetIndex, 0, draggedEmp);
+            
+            // Save the newly ordered array to Firebase
+            set(ref(db, `${FACTION_ID}/roster`), currentEmployees).catch(err => {
+                alert("Error saving reordered list: " + err.message);
+            });
+        }
+        return false;
     };
 
 </script>
